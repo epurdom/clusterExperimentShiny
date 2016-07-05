@@ -1,5 +1,10 @@
+library(shiny)
+
+
+
+
 shinyUI(fluidPage(
-  titlePanel( "ClusterMany function in clusterExperiment"),
+  titlePanel("ClusterMany function in clusterExperiment"),
   
   fluidRow (
     column (4,
@@ -104,7 +109,6 @@ shinyUI(fluidPage(
                             textOutput("removeSilCode")
                                      )
                             ),
-    # This is buggy, I'm not sure why
     column(3,
            conditionalPanel(condition = "input.removeSil",             
                             h3("Silhouette Cutoff"),
@@ -198,25 +202,22 @@ shinyUI(fluidPage(
     ),
   
     fluidRow(
-      column (3, 
-              h3("clusterDArgs"),
-              helpText("Help")
-              # *Input(),
-              # *Output("")
-      ), 
+      h2("Arguments for chosen Clustering Algorithm:"),
+      tabsetPanel(
+        tabPanel("Cluster Distance Matrix Arguments",
+                 column(3,
+                        h3("Number of Cores"),
+                        helpText("The number of threads"),
+                        numericInput("ncoresCD", label = NULL, value = 1, min = 1, step = 1)
+                        )
+                 ),
+
+
+        tabPanel("Cluster Subsample Arguments", helpText("Requisite subsampleClustering() args")),
+        tabPanel("Sequential Clustering Arguments", helpText("Requisite seqCluster() args"))
+      ),
+      textOutput("ncoresCDCode")
       
-      column (3, 
-              h3("subsampleArgs"),
-              helpText("Help")
-              # *Input(),
-              # *Output("")
-      ), 
-      column (3, 
-              h3("seqDArgs"),
-              helpText("Help")
-              # *Input(),
-              # *Output("")
-      )
     ),
     
     fluidRow(

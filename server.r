@@ -86,6 +86,9 @@ shinyServer(function(input, output) {
     paste("eraseOld = ", input$eraseOld)
   })
   
+  output$ncoresCDCode <- renderText({
+    paste("ncores = ", input$ncoresCD)
+  })
 })
 
 
