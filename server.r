@@ -5,7 +5,7 @@ shinyServer(function(input, output) {
   })
   
   output$dimReduceCode <- renderText({
-    paste("dimReduce = ", input$dimReduce)
+    paste("dimReduce = '", input$dimReduce,"'")
     })
   
   output$nVarDimsCode <- renderText({
@@ -28,6 +28,7 @@ shinyServer(function(input, output) {
     paste("clusterFunction = '", input$clusterFunction, "'")
   })
   
+  #trying to catch incorrect inputs
   output$alphasCode <- renderText({
     if( max(as.numeric(unlist(strsplit(input$alphas,",")))) < 1 && min(as.numeric(unlist(strsplit(input$alphas,",")))) > 0)
       paste("alphas = c(", input$alphas, ")")
@@ -86,9 +87,149 @@ shinyServer(function(input, output) {
     paste("eraseOld = ", input$eraseOld)
   })
   
-  output$ncoresCDCode <- renderText({
-    paste("ncores = ", input$ncoresCD)
+  output$clusterAlgCode <- renderText({
+    if (input$clusterAlg == "Sequential Cluster using Cluster Distance")
+      paste("seqArgs = list( subsample = ", input$subsampleSQC, ", top.can = ", input$top.canSQC, ", k0 = ", input$k0SQC, 
+            ", beta = ", input$betaSQC, ", remain.n = ", input$remain.nSQC, ", kmin = ", input$k.minSQC,
+            ", kmax = ", input$k.maxSQC, ", verbose = ", input$verbose, 
+            ", clusterDArgs = list( typeAlg = ", input$typeAlgCD, ", checkArgs = ", input$checkArgsCD, 
+            ", alpha = ", input$alphaCD, "))")
+    else if (input$clusterAlg == "Sequential Cluster using Cluster Subsample")
+      paste("seqArgs = list( subsample = ", input$subsampleSQC, ", top.can = ", input$top.canSQC, ", k0 = ", input$k0SQC, 
+            ", beta = ", input$betaSQC, ", remain.n = ", input$remain.nSQC, ", kmin = ", input$k.minSQC,
+            ", kmax = ", input$k.maxSQC, ", verbose = ", input$verbose, 
+            ", subsampleArgs = list( classifyMethods = ", input$classifyMethodSC, ", resamp.numSC  = ", input$resamp.numSC,
+            ", samp.p = ", input$samp.pSC, "), clusterArgs = list(", input$clusterArgsSC, "))")
+    else if(input$clusterAlg == "Cluster Distance")
+      paste(" clusterDArgs = list( typeAlg = ", input$typeAlgCD, ", checkArgs = ", input$checkArgsCD, 
+            ", alpha = ", input$alphaCD, ")")
+    else if (input$clusterAlg == "Cluster Subsample")
+      paste( "subsampleArgs = list( classifyMethods = ", input$classifyMethodSC, ", resamp.num  = ", input$resamp.numSC,
+             ", samp.p = ", input$samp.pSC, "), clusterArgs = list(", input$clusterArgsSC, "))")
+      
   })
+  
+  output$subsampleSQCCode <- renderText({
+    paste("subsample = ", input$subsampleSQC)
+  })
+  
+  output$top.canSQCCode <- renderText({
+    paste("top.can = ", input$top.canSQC)
+  })
+  
+  output$k0SQCCode <- renderText({
+    paste("k0 = ", input$k0SQC)
+  })
+  
+  output$betaSQCCode <- renderText({
+    paste("beta = ", input$betaSQC)
+  })
+  
+  output$remain.nSQCCode <- renderText({
+    paste("remain.n = ", input$remain.nSQC)
+  })
+  
+  output$k.minSQCCode <- renderText({
+    paste("k.min = ", input$k.minSQC)
+  })
+  
+  output$k.maxSQCCode <- renderText({
+    paste("k.max = ", input$k.maxSQC)
+  })
+  
+  output$verboseSQCCode <- renderText({
+    paste("verbose = ", input$verboseSQC)
+  })
+  
+  output$typeAlgCDCode <- renderText({
+    paste("typeAlg = ", input$typeAlgCD)
+  })
+  
+  output$checkArgsCDCode <- renderText({
+    paste("checkArgs = ", input$checkArgsCD)
+  })
+  
+  output$alphaCDCode <- renderText({
+    paste("alpha = ", input$alphaCD)
+  })
+  
+  output$classifyMethodSCCode <- renderText({
+    paste("classifyMethod = ", input$classifyMethodSC)
+  })
+  
+  output$clusterArgsSCCode <- renderText({
+    paste("clusterArgs = list(", input$clusterArgsSC, ")")
+  })
+  
+  output$resamp.numSCCode <- renderText({
+    paste("resamp.num = ", input$resamp.numSC)
+  })
+  
+  output$samp.pSCCode <- renderText({
+    paste("samp.p = ", input$samp.pSC)
+  })
+  
+  output$clusterFunctionSQCCode <- renderText({
+    paste("clusterFunction = ", input$clusterFunctionSQC)
+  })
+  
+  output$minSizeCDCode <- renderText({
+    paste("MinSize = ", input$minSizeCD)
+  })
+  
+  output$ClusterManyCode <- renderText({
+    
+    clusterManyCode <- paste("ce <- clusterMany(", input$dataFile[1], ", dimReduce = ", input$dimReduce)
+    
+    if(input$dimReduce == "PCA")
+      clusterManyCode <- paste(clusterManyCode, ", nPCADims = '", input$nPCADims, "'")
+    else if(input$dimReduce != "none")
+      clusterManyCode <- paste(clusterManyCode, ", nVarDims = ", input$nVarDims)
+    
+    clusterManyCode <- paste(clusterManyCode, ", ks = c(", min(input$ks), ": ", max(input$ks), ")", 
+                             ", clusterFunction = '", input$clusterFunction, "'")
+    
+    if(input$clusterFunction == "hierarchicalK")
+      clusterManyCode <- paste(clusterManyCode, ", findBestK = ", input$findBestK, ", removeSil = ", input$removeSil)
+    else if(input$clusterFunction != "pam")
+      clusterManyCode <- paste(clusterManyCode, ", alphas = c(", input$alphas, ")")
+    
+    clusterManyCode <- paste(clusterManyCode, ", sequential = ", input$sequential)
+    
+    if(input$sequential)
+      clusterManyCode <- paste(clusterManyCode, ", betas = ", input$betas )
+    
+    ##Need distFunction & transformFunction
+    
+    clusterManyCode <- paste(clusterManyCode, ", subsample = ", input$subsample, ", minSizes = ", input$minSizes, 
+                             ", ncores = ", input$ncores, ", random.seed = ", input$random.seed, 
+                             ", isCount = ", input$isCount, ", verbose = ", input$verbose, ", run = ", input$run, 
+                             ", eraseOld = ", input$eraseOld)
+    
+    if (input$clusterAlg == "Sequential Cluster using Cluster Distance")
+      clusterManyCode <- paste(clusterManyCode, ", seqArgs = list( subsample = ", input$subsampleSQC, ", top.can = ", input$top.canSQC, ", k0 = ", input$k0SQC, 
+            ", beta = ", input$betaSQC, ", remain.n = ", input$remain.nSQC, ", kmin = ", input$k.minSQC,
+            ", kmax = ", input$k.maxSQC, ", verbose = ", input$verbose, 
+            ", clusterDArgs = list( typeAlg = ", input$typeAlgCD, ", checkArgs = ", input$checkArgsCD, 
+            ", alpha = ", input$alphaCD, "))")
+    else if (input$clusterAlg == "Sequential Cluster using Cluster Subsample")
+      clusterManyCode <- paste(clusterManyCode, ", seqArgs = list( subsample = ", input$subsampleSQC, ", top.can = ", input$top.canSQC, ", k0 = ", input$k0SQC, 
+            ", beta = ", input$betaSQC, ", remain.n = ", input$remain.nSQC, ", kmin = ", input$k.minSQC,
+            ", kmax = ", input$k.maxSQC, ", verbose = ", input$verbose, 
+            ", subsampleArgs = list( classifyMethods = ", input$classifyMethodSC, ", resamp.numSC  = ", input$resamp.numSC,
+            ", samp.p = ", input$samp.pSC, "), clusterArgs = list(", input$clusterArgsSC, "))")
+    else if(input$clusterAlg == "Cluster Distance")
+      clusterManyCode <- paste(clusterManyCode, ", clusterDArgs = list( typeAlg = ", input$typeAlgCD, ", checkArgs = ", input$checkArgsCD, 
+            ", alpha = ", input$alphaCD, ")")
+    else if (input$clusterAlg == "Cluster Subsample")
+      clusterManyCode <- paste(clusterManyCode, ", subsampleArgs = list( classifyMethods = ", input$classifyMethodSC, ", resamp.numSC  = ", input$resamp.numSC,
+             ", samp.p = ", input$samp.pSC, "), clusterArgs = list(", input$clusterArgsSC, "))")
+    clusterManyCode <- paste(clusterManyCode, ")")
+    
+    clusterManyCode
+    
+  })
+  
 })
 
 
