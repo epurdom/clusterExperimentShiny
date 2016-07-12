@@ -1,12 +1,22 @@
 library(shiny)
 
 
-
+########################################################
+# clusterMany Function Shinny App
+########################################################
 
 shinyUI(fluidPage(
+  
   titlePanel("ClusterMany function in clusterExperiment"),
   
+  ########################################################
+  #  RRR     OOOO  W     W         11
+  #  RRR     O  O   W W W           1
+  #  R  R    OOOO    W W           111
+  ########################################################
+  
   fluidRow (
+    #Data Input Box and associated controls, not condiional
     column (4,
             h3("Choose a Data File to Upload:"),
             helpText("Upload the data on which to run the clustering. Can be: matrix (with genes in rows), 
@@ -39,6 +49,8 @@ shinyUI(fluidPage(
             tabPanel("dataFileCode", verbatimTextOutput("dataFileCode"))            
             
     ),
+    
+    #Dimension reduction algorithm, not conditional
     column (4, 
             h3("Dimension Reduction:"),
             helpText("Choose what type of dimensionality reduction to perform before clustering. "),
@@ -46,6 +58,9 @@ shinyUI(fluidPage(
             label = "Dimensionality Reduction Method:", selected = "none"),
             tabPanel("dimReduceCode", verbatimTextOutput("dimReduceCode"))            
     ),
+    
+    # number of dimensions to keep, conditional on var, cv, mad
+    
     column (4, 
             conditionalPanel(condition = "input.dimReduce != 'PCA' && input.dimReduce != 'none'",             
                              h3("How many variables the dimensionality reduction should keep :"),
@@ -57,6 +72,8 @@ shinyUI(fluidPage(
                                          value = 1),
                              tabPanel("nVarDimsCode", verbatimTextOutput("nVarDimsCode"))            
             ),
+            
+            # number of dimensions to keep, conditional on PCA
             
             conditionalPanel(condition = "input.dimReduce == 'PCA'",             
                              h3("Number of Principle Components to retain:"),
@@ -71,9 +88,15 @@ shinyUI(fluidPage(
     
   ),
   
+  ########################################################
+  #  RRR     OOOO  W     W       2222
+  #  RRR     O  O   W W W           2
+  #  R  R    OOOO    W W          22222
+  ########################################################
+  
   fluidRow(
     # I need some more technical knowhow to feel confident in my ks design
-    
+    # K vales, not conditional
     column(12, 
            h3("K Values"),
            helpText("The argument 'ks' is interpreted differently for different choices of the other parameters. 
@@ -92,8 +115,14 @@ shinyUI(fluidPage(
     )
         ),
   
+  ########################################################
+  #  RRR     OOOO  W     W       3333
+  #  RRR     O  O   W W W         333
+  #  R  R    OOOO    W W        33333
+  ########################################################
+  
   fluidRow(
-    
+    #cluster Function Box, not conditional
     column(3, 
             h3("Cluster Function:"),
             helpText("Function used for the clustering."),
@@ -102,6 +131,7 @@ shinyUI(fluidPage(
            tabPanel("clusterFunctionCode", verbatimTextOutput("clusterFunctionCode"))            
     ),
     
+    #input alpha, conditional on clusterFunction = "tight" or clusterFunction = "hierarchical01"
     column(3,
            conditionalPanel(condition = "input.clusterFunction == 'tight' || input.clusterFunction == 'hierarchical01'",             
                             h3("Alphas:"),
@@ -114,6 +144,8 @@ shinyUI(fluidPage(
                                          value = "0.25, 0.74"),
                             tabPanel("alphasCode", verbatimTextOutput("alphasCode"))            
            ),
+           #find best K logical, conditional on clusterFunction = "hierarchicalK"
+           
            conditionalPanel(condition = "input.clusterFunction == 'hierarchicalK'",             
                             h3("Find Best K?"),
                             helpText("Whether should find best K based on average silhouette width
@@ -121,8 +153,9 @@ shinyUI(fluidPage(
                             checkboxInput("findBestK", label = NULL, value = FALSE),
                             tabPanel("findBestKCode", verbatimTextOutput("findBestKCode"))            
            )
-           ),
+    ),
     
+    # remove SIl logical, conditional upon clusterFunction = "hierarchicalK"
     column(3,
            conditionalPanel(condition = "input.clusterFunction == 'hierarchicalK'",             
                             h3("Remove Silhouette?"),
@@ -131,7 +164,9 @@ shinyUI(fluidPage(
                             checkboxInput("removeSil", label = NULL, value = FALSE),
                             tabPanel("removeSilCode", verbatimTextOutput("removeSilCode"))            
            )
-                            ),
+    ),
+    
+    #Enter Sil cutoff, conditional upon removeSil == TRUE,  which is conditional upon clusterFunction = "hierarchicalK"
     column(3,
            conditionalPanel(condition = "input.removeSil",             
                             h3("Silhouette Cutoff"),
@@ -143,9 +178,15 @@ shinyUI(fluidPage(
     )
   ),
   
+  ########################################################
+  #  RRR     OOOO  W     W       4  4
+  #  RRR     O  O   W W W        4444
+  #  R  R    OOOO    W W            4
+  ########################################################
     
     fluidRow(
       # I need some more technical knowhow to feel confident in my Sequential design
+      # Logical Sequential, not conditional
       column(3,
              h3("Sequential"),
              helpText("logical whether to use the sequential strategy"),
@@ -153,7 +194,7 @@ shinyUI(fluidPage(
              tabPanel("sequentialCode", verbatimTextOutput("sequentialCode"))            
       ),
       
-      
+      #Enter Betas, conditional upon sequential == TRUE
       column(6,
              conditionalPanel(condition = "input.sequential",             
                               h3("Betas:"),
@@ -169,6 +210,12 @@ shinyUI(fluidPage(
       )
       
     ),
+  
+  ########################################################
+  #  RRR     OOOO  W     W       5555
+  #  RRR     O  O   W W W        555
+  #  R  R    OOOO    W W        5555
+  ########################################################
     
     fluidRow(
       
@@ -177,6 +224,7 @@ shinyUI(fluidPage(
              helpText("need clarity")
              ),
       
+      #Logical subsample, not conditional 
       column(3,
              h3("Subsample"),
              helpText("logical as to whether to subsample via subsampleClustering to get the distance matrix 
@@ -191,28 +239,35 @@ shinyUI(fluidPage(
               helpText("Help")
               # *Input(),
               # *Output("")
-      ), 
+      )#, 
       
-      #This might need to be down with clusterD by line 27X
-      
-      column(3,
-             h3("Minimum Cluster Sizes"),
-             helpText("the minimimum size required for a cluster (in clusterD). 
-                      Clusters smaller than this are not kept and samples are left unassigned.
-                      Minimum cluster Size is 2."),
-             numericInput("minSize", label = NULL, value = 5, min = 2, step = 1),
-             tabPanel("minSizeCode", verbatimTextOutput("minSizeCode"))            
-      )
+      # #This might need to be down with clusterD by line 27X
+      # #Enter Min clustr Sizes, not conditional
+      # column(3,
+      #        h3("Minimum Cluster Sizes"),
+      #        helpText("the minimimum size required for a cluster (in clusterD). 
+      #                 Clusters smaller than this are not kept and samples are left unassigned.
+      #                 Minimum cluster Size is 2."),
+      #        numericInput("minSizes", label = NULL, value = 5, min = 2, step = 1),
+      #        tabPanel("minSizesCode", verbatimTextOutput("minSizeCode"))            
+      # )
     ),
   
+  ########################################################
+  #  RRR     OOOO  W     W       6
+  #  RRR     O  O   W W W         
+  #  R  R    OOOO    W W          
+  ########################################################
     fluidRow(
-      
+      #Enter number of cores, not conditional
       column(3,
              h3("Number of Cores"),
              helpText("The number of threads"),
              numericInput("ncores", label = NULL, value = 1, min = 1, step = 1),
              tabPanel("ncoresCode", verbatimTextOutput("ncoresCode"))            
       ),
+      
+      #enter random seed, not conditional
       column(3,
              h3("Random Seed"),
              helpText("a value to set seed before each run of clusterSingle
@@ -226,9 +281,13 @@ shinyUI(fluidPage(
       
     ),
 
-    
+  ########################################################
+  #  RRR     OOOO  W     W       7
+  #  RRR     O  O   W W W         
+  #  R  R    OOOO    W W          
+  ########################################################
     fluidRow(
-      #I am throwing alot of isolated logical inputs here
+      #Many Isolated unconditional logical inputs
       column(3, 
              h3("Are Data in Counts?"),
              helpText("Whether the data are in counts, in which case the default transFun argument is set as log2(x+1). 
@@ -269,6 +328,14 @@ shinyUI(fluidPage(
   ####################
   #Lots of questions here:
   ####################
+  
+  ########################################################
+  #  RRR     OOOO  W     W       8
+  #  RRR     O  O   W W W         
+  #  R  R    OOOO    W W          
+  ########################################################
+  
+  #Choose clustering function, not conditional
   fluidRow(
     h2("Choose a Clustering Algorithm and input their arguments:"),
     column (12, 
@@ -281,12 +348,14 @@ shinyUI(fluidPage(
     )
     
   ),
+  #Input sequential clustering arguments, conditional upon sequential clustering choice
   conditionalPanel(condition = "input.clusterAlg == 'Sequential Cluster using Cluster Distance' || 
                                 input.clusterAlg == 'Sequential Cluster using Cluster Subsample'",
                    h3("Sequential Clustering Arguments"),
                    fluidRow(
                      
-                     #should I make this a select input kind of button?
+                     #I have some further questions about this
+                     #logical subsample, conditional on sequential
                      column(3,
                             h3("Subsample"),
                             helpText("whether to subsample via subsampleClustering to get the distance matrix at
@@ -295,6 +364,8 @@ shinyUI(fluidPage(
                             tabPanel("subsampleSQCCode", verbatimTextOutput("subsampleSQCCode"))            
                      ),
                      #need a better understanding of what top.can is & what default value is
+                     #enter top.can, conditional on sequential
+                     
                      column(6,
                             h3("top.can"),
                             helpText("only the top.can clusters from clusterD (ranked by 'orderBy' argument given to
@@ -309,6 +380,7 @@ shinyUI(fluidPage(
                    ),
                    
                    fluidRow(
+                     #enter k0, conditional on sequential
                      
                      column(4,
                             h3("K0"),
@@ -317,6 +389,8 @@ shinyUI(fluidPage(
                             tabPanel("k0SCQCode", verbatimTextOutput("k0SQCCode"))            
                      ),
                      ## assuming value between 0.0 - 1.0
+                     #enter Beta, conditional on sequential
+                     
                      column(4,
                             h3("Beta"),
                             helpText("value between 0 and 1 to decide how stable clustership membership has to be before 
@@ -326,6 +400,8 @@ shinyUI(fluidPage(
                      ),
                      
                      # need default value
+                     #Enter remain.n, conditional on sequential
+                     
                      column(4,
                             h3("remain.n"),
                             helpText("when only this number of samples are left (i.e. not yet clustered) 
@@ -338,6 +414,8 @@ shinyUI(fluidPage(
                    
                    fluidRow(
                      # need default value
+                     #Enter kmin, conditional on sequential
+
                      column(4,
                             h3("k.min"),
                             helpText("each iteration of sequential detection of clustering will decrease the beginning K 
@@ -346,12 +424,17 @@ shinyUI(fluidPage(
                             tabPanel("k.minCode", verbatimTextOutput("k.minCode"))            
                      ),
                      # need default value
+                     #enter k.max, conditional on sequential
+                     
                      column(4,
                             h3("k.max"),
                             helpText("algorithm will stop if K in iteration is increased beyond this point."), 
                             numericInput("k.maxSQC", min = 1, value = 666, label = NULL, step = 1),
                             tabPanel("k.maxCode", verbatimTextOutput("k.maxCode"))            
                      ),
+                     
+                     #logical verbose, conditional on sequential
+                     
                      column(4,
                             h3("Verbose"),
                             helpText("whether the algorithm should print out information as to its progress."),
@@ -369,6 +452,8 @@ shinyUI(fluidPage(
                             h3("Cluster Function"),
                             helpText("Unsure of how to allow user to input fuction")
                      ),
+                     #Choose type of algorithm, conditional on Distance
+                     
                      column(3, 
                             h3("Type of Algorithm"),
                             helpText("character value of either '01' or 'K' determining whether the function 
@@ -376,14 +461,16 @@ shinyUI(fluidPage(
                             selectInput("typeAlgCD", choices = c("NULL", "01", "K"), label = NULL),
                             tabPanel("typAlgCDCode", verbatimTextOutput("typeAlgCDCode"))            
                      ), 
+                     
                      column(3,
                             h3("Distance Function to be applied to matrix"),
                             helpText("Unsure of how to allow user to input fuction")
                      ),
                      column(3, 
                             h3("how to order the cluster"),
-                            helpText("UNFINISHED - How to order the cluster (either by size or by maximum alpha value)."))
-                    ),
+                            helpText("UNFINISHED - How to order the cluster (either by size or by maximum alpha value).")
+                     )
+                   ),
 
                    fluidRow(
                      column(3,
@@ -394,6 +481,8 @@ shinyUI(fluidPage(
                      
 
                      #Can warnings be shown in Shiny? should they?
+                     #Logical cheack arguments, conditional on Distance
+                     
                      column(3,
                             h3("Check Cluster Arguments?"),
                             helpText("Logical as to whether should give warning if arguments given that don't match
@@ -401,6 +490,8 @@ shinyUI(fluidPage(
                             checkboxInput("checkArgsCD", label = "Check Arguments?", value = FALSE),
                             tabPanel("checkArgsCDCode", verbatimTextOutput("checkArgsCDCode"))            
                      ),
+                     #Enter Alpha, conditional on DIstance
+                     
 
                      column(3,
                             h3("Alpha"),
@@ -409,6 +500,8 @@ shinyUI(fluidPage(
                             numericInput("alphaCD", label = "alpha", value = .01, step = .001),
                             tabPanel("alphaCDCode", verbatimTextOutput("alphaCDCode"))            
                      ),
+                     #Enter Min size, conditional on Distance
+                     
                      column(3,
                             h3("MinSize"),
                             helpText("the minimum number of samples in a cluster. Clusters found below this size will 
@@ -416,7 +509,7 @@ shinyUI(fluidPage(
                                      to indicate that they were not clustered."),
                             numericInput("minSizeCD", value = 2, label = NULL),
                             tabPanel("minSizeCDCode", verbatimTextOutput("minSizeCDCode"))            
-                            )
+                      )
                    )
   ),
   
@@ -426,13 +519,19 @@ shinyUI(fluidPage(
                    fluidRow(
                      column(3, 
                             h3("Cluster Function"),
-                            helpText("UNFINISHED - Unsure of how to allow user to input fuction")
+                            helpText("UNFINISHED - Unsure of how to allow user to input fuction. 
+                                     Only allowing choice of 'pam' and 'kmeans'"),
+                            selectInput("clusterFunctionSC", choices = c("kmeans", "pam"), label = NULL),
+                            tabPanel("clusterFunctionSCCode", verbatimTextOutput("clusterFunctionSCCode"))            
+                            
                      ),
                      column(3,
                             h3("cluster Arguments"),
                             helpText("UNFINISHED - Arguments to be passed directly to the clusterFunction,
                                      beyond the required input.")
                             ), 
+                     #Choose type of classifying method, conditional on Subsample
+                     
                      column(6,
                             h3("Classify Method"),
                             helpText("method for determining which samples should be used in the co-occurance matrix. 
@@ -455,6 +554,7 @@ shinyUI(fluidPage(
                                      will classify the new data points into a cluster.")
                      ),
                      #Need default value
+                     #CEnter number of resamples, conditional on Subsample
                      column(4,
                             h3("Number of resamples"),
                             helpText("The number of subsamples to draw." ),
@@ -462,6 +562,8 @@ shinyUI(fluidPage(
                             tabPanel("resamp.numSCCode", verbatimTextOutput("resamp.numSCCode"))            
                      ),
                      ## assuming value between 0.0 - 1.0
+                     #CEnter proportion of sampels, conditional on Subsample
+                     
                      column(4,
                             h3("Proportion of Samples"),
                             helpText("The number of subsamples to draw. Please enter a number between 0 and 1"),
@@ -469,25 +571,34 @@ shinyUI(fluidPage(
                             tabPanel("samp.pSCCode", verbatimTextOutput("samp.pSCCode"))            
                      )
                      
-                   ),
-                   fluidRow(
-                     #I am just winging this so I can run the code
-                     column(5,
-                            h3("Arguments to chosen Cluster Function that Subsample is calling"),
-                            helpText("manual input for now"),
-                            textInput("clusterArgsSC", label = NULL, value = "Enter text..."),
-                            tabPanel("clusterArgsSCCode", verbatimTextOutput("clusterArgsSCCode"))            
-                            
-                     )
                    )
-                   ),
+    ),
+  
+  fluidRow(
+    #I am just winging this so I can run the code
+    #Enter cluster args, conditional on Subsample
+    
+    column(5,
+           h3("Arguments to chosen Cluster Function that chosen cluster function is calling"),
+           helpText("manual input for now"),
+           textInput("clusterArgsSC", label = NULL, value = "Enter text..."),
+           tabPanel("clusterArgsSCCode", verbatimTextOutput("clusterArgsSCCode"))          
+           
+    )
+  ),
+  
+  ########################################################
+  #  RRR     OOOO  W     W       9
+  #  RRR     O  O   W W W         
+  #  R  R    OOOO    W W          
+  ########################################################
         
   fluidRow(
     column(12,
            h3("Code to be run in R:"),
            #tags$style(type='text/css', '#myoutput2 {background-color: rgba(0,0,255,0.10); color: blue;}'),
            
-           tabPanel("ClusterManyCode", verbatimTextOutput("ClusterManyCode"))            
+           textOutput("ClusterManyCode")          
            )
   )
   
