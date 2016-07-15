@@ -2,18 +2,11 @@ library(shiny)
 library(ggvis)
 source("global.R")
 shinyServer(function(input, output, session) {
-  datafile <- callModule(csvFile, "parameters",
+  datafile <- callModule(dataFile, "parameters",
                          stringsAsFactors = FALSE)
   
   output$table <- renderDataTable({
     datafile()
-  })
-  
-  dimReduce <- callModule(testing, "parameters",
-                          stringsAsFactors = FALSE)
-  
-  output$dimReduceCode <- renderText({
-    dimReduce()
   })
   
   clusterManyCode <- callModule(makeCode, "parameters",
@@ -22,6 +15,18 @@ shinyServer(function(input, output, session) {
   output$clusterManyCode <- renderText({
     clusterManyCode()
   })
+  
+  observeEvent(input$run, {
+    
+    session$sendCustomMessage(type = 'testmessage',
+                              message = 'Computing')  
+    renderCE(clusterManyCode())
+    
+    session$sendCustomMessage(type = 'testmessage',
+                              message = 'ClusterMany Computations Completed')  
+    })
+  
+  
   
 })
 

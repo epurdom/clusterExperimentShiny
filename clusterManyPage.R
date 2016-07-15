@@ -1,3 +1,7 @@
+#This file, clusterManyPage.R, contains the functions, inputs, and server-side computations of the clusterMany tab.
+
+library(stringr)
+
 #This userFile input is a very large function that recieves all of the inputs for clusterMany from the user
 
 userFileInput <- function(id, label = "CSV file") {
@@ -40,7 +44,6 @@ userFileInput <- function(id, label = "CSV file") {
               helpText("Choose what type of dimensionality reduction to perform before clustering. "),
               selectInput(ns("dimReduce"), choices = c("none","PCA", "var","cv", "mad"), 
                           label = "Dimensionality Reduction Method:", selected = "none")
-              # tabPanel("dimReduceCode", verbatimTextOutput("dimReduceCode"))            
       ),
       column (4, 
               
@@ -117,7 +120,7 @@ userFileInput <- function(id, label = "CSV file") {
                               )
       ),
       
-      # remove SIl logical, conditional upon clusterFunction = "hierarchicalK"
+      # remove Sil logical, conditional upon clusterFunction = "hierarchicalK"
       column(3,
              conditionalPanel(condition = paste0("input['", ns("clusterFunction"), "'] == 'hierarchicalK'"),             
                               h3("Remove Silhouette?"),
@@ -141,7 +144,8 @@ userFileInput <- function(id, label = "CSV file") {
       ),
     
     fluidRow(
-      # I need some more technical knowhow to feel confident in my Sequential design
+      # I need some more technical knowhow to feel confident in my Sequential design, 
+      #I think this may be reduntant visually, perhaps this should be handled internally
       # Logical Sequential, not conditional
       column(3,
              h3("Sequential"),
@@ -202,11 +206,6 @@ userFileInput <- function(id, label = "CSV file") {
       # )
       ),
     
-    ########################################################
-    #  RRR     OOOO  W     W       6
-    #  RRR     O  O   W W W         
-    #  R  R    OOOO    W W          
-    ########################################################
     fluidRow(
       #Enter number of cores, not conditional
       column(3,
@@ -228,11 +227,6 @@ userFileInput <- function(id, label = "CSV file") {
       
       ),
     
-    ########################################################
-    #  RRR     OOOO  W     W       7
-    #  RRR     O  O   W W W         
-    #  R  R    OOOO    W W          
-    ########################################################
     fluidRow(
       #Many Isolated unconditional logical inputs
       column(3, 
@@ -271,12 +265,6 @@ userFileInput <- function(id, label = "CSV file") {
     ####################
     #Lots of questions here:
     ####################
-    
-    ########################################################
-    #  RRR     OOOO  W     W       8
-    #  RRR     O  O   W W W         
-    #  R  R    OOOO    W W          
-    ########################################################
     
     #Choose clustering function, not conditional
     fluidRow(
@@ -477,7 +465,7 @@ userFileInput <- function(id, label = "CSV file") {
                                        will classify the new data points into a cluster.")
                               ),
                        #Need default value
-                       #CEnter number of resamples, conditional on Subsample
+                       #Enter number of resamples, conditional on Subsample
                        column(4,
                               h3("Number of resamples"),
                               helpText("The number of subsamples to draw." ),
@@ -490,14 +478,14 @@ userFileInput <- function(id, label = "CSV file") {
                               helpText("The number of subsamples to draw. Please enter a number between 0 and 1"),
                               numericInput(ns("samp.pSC"), label = NULL, value = .5, min = 0, max = 1)                       )
                        
-                       )
-                       )
+                    )
+    )
     
-                       )
+)
 }
 
 # Module server function
-csvFile <- function(input, output, session, stringsAsFactors) {
+dataFile <- function(input, output, session, stringsAsFactors) {
   # The selected file, if any
   userFile <- reactive({
     # If no file is selected, don't do anything
@@ -507,11 +495,27 @@ csvFile <- function(input, output, session, stringsAsFactors) {
   
   # The user's data, parsed into a data frame, we will need to expand beyond .csv
   dataframe <- reactive({
-    read.csv(userFile()$datapath,
-             header = input$header,
-             sep = input$sep,
-             quote = input$quote,
-             stringsAsFactors = stringsAsFactors)
+    
+    if(length(input$file[1]) > 0 && str_sub(input$file[1], start = -4) == ".csv") {
+      read.csv(userFile()$datapath,
+              header = input$header,
+              sep = input$sep,
+              quote = input$quote,
+              stringsAsFactors = stringsAsFactors)
+    }
+    # else if(length(input$file[1]) > 0 && str_sub(input$file[1], start = -4) == ".rda") {
+    #   holderObject <- load(userFile()$datapath)
+    #   if (class(holderObject)[1] == "SummarizedExperiment" || class(holderObject)[1] == "clusterExperiment")
+    #     return(holderObject)
+    # }
+    # 
+    # else if(length(input$file[1]) > 0) {
+    #   session$sendCustomMessage(type = 'helpMessage',
+    #                             message = 'incorrect File format, please upload a file of type 
+    #                             .csv or an .rda file of class "SummarizedExperiment" or "clusterExperiment"') 
+    # }
+    # return(NULL)
+      
   })
   
   # We can run observers in here if we want to
@@ -524,6 +528,8 @@ csvFile <- function(input, output, session, stringsAsFactors) {
   return(dataframe)
 }
 
+
+# Reactive function which builds the code being run by R:
 makeCode <- function(input, output, session, stringsAsFactors) {
   clusterManyCode <- reactive({
     clusterManyCode <- paste("ce <- clusterMany(", gsub('[.][A-z ]*', '', input$file[1]), 
@@ -587,3 +593,16 @@ makeCode <- function(input, output, session, stringsAsFactors) {
   })
   return(clusterManyCode)
 }
+
+clusterManyHelpText <- function() {
+  paste("Welcome to the initial page in the cluster Experiment Shiny app...
+        (Help Text continues)")
+}
+
+renderCE <- function(string) {
+  cE <<- eval(parse(text = string))
+}
+
+
+
+

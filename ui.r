@@ -5,16 +5,31 @@ shinyUI(navbarPage("Cluster Experiment",
                    tabPanel("Cluster Many",
                             sidebarLayout(
                               sidebarPanel(
-                                textOutput("clusterManyCode")
+                                h3("Cluster Many Function Inputs"),
+                                clusterManyHelpText(),
+                                textOutput("clusterManyCode"),
+                                actionButton("run", "Run This Code"),
+                                dataTableOutput("table")
                               ),
                               mainPanel(
-                                userFileInput("parameters", "User inputs")                              
+                                tabsetPanel(
+                                  tabPanel("Input Arguments for ClusterMany:",
+                                         userFileInput("parameters", "User inputs")  
+                                  ),
+                                  tabPanel("Graphical outputs for clusterMany",
+                                         h3("This is where the graphical outouts of clusterMany will go")
+                                  )
+                                )
                               )
                             )
-                   ),
-                   tabPanel("Component 2"),
-                   navbarMenu("More",
-                              tabPanel("Sub-Component A"),
-                              tabPanel("Sub-Component B"))
-))
+                  ),
+                  tabPanel("Combine Many"),
+                  tabPanel("Merge Clusters"),
+                  tabPanel("Make Dendrogram")
+                   # navbarMenu("More",
+                   #            tabPanel("Sub-Component A"),
+                   #            tabPanel("Sub-Component B")
+                   # )
+        )
+)
 
