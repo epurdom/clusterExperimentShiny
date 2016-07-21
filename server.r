@@ -1,10 +1,13 @@
 library(shiny)
 library(ggvis)
 source("global.R")
+options(shiny.maxRequestSize=30*1024^2)
+
 shinyServer(function(input, output, session) {
+  
   datafile <- callModule(dataFile, "parameters",
                          stringsAsFactors = FALSE)
-  
+  #testing
   output$table <- renderDataTable({
     datafile()
   })
@@ -16,15 +19,23 @@ shinyServer(function(input, output, session) {
     clusterManyCode()
   })
   
+  
   observeEvent(input$run, {
-    
-    session$sendCustomMessage(type = 'testmessage',
-                              message = 'Computing')  
-    renderCE(clusterManyCode())
-    
-    session$sendCustomMessage(type = 'testmessage',
-                              message = 'ClusterMany Computations Completed')  
+    output$strOfCE <- renderText({
+
+      
+      # session$sendCustomMessage(type = 'testmessage',
+      #                           message = 'Computing')  
+      cE <<- renderCE(clusterManyCode(), datafile())
+      
+      dim(cE)
+      
+      # session$sendCustomMessage(type = 'testmessage',
+      #                           message = 'ClusterMany Computations Completed')  
     })
+  })
+  
+
   
   
   

@@ -24,47 +24,71 @@ userFileInput <- function(id, label = "CSV file") {
                          '.csv',
                          '.tsv'
                        )
-             ),
-             tags$hr(),
-             checkboxInput(ns('header'), 'Header', TRUE),
+             )
+      ),
+      column(3,
              radioButtons(ns('sep'), 'Separator',
                           c(Comma=',',
                             Semicolon=';',
                             Tab='\t'),
-                          ','),
+                          ',')
+      ),
+      column(3,
              radioButtons(ns('quote'), 'Quote',
                           c(None='',
                             'Double Quote'='"',
                             'Single Quote'="'"),
-                          '"'),
-             tags$hr()
+                          '"')
              ),
+      column(2,
+             checkboxInput(ns('header'), 'Header')
+      )
+    ),
+    fluidRow(
       column (4, 
               h3("Dimension Reduction:"),
-              helpText("Choose what type of dimensionality reduction to perform before clustering. "),
-              selectInput(ns("dimReduce"), choices = c("none","PCA", "var","cv", "mad"), 
+              helpText("Choose what types of dimensionality reduction to perform before clustering. "),
+              checkboxGroupInput(ns("dimReduce"), choices = c("none","PCA", "var","cv", "mad"), 
                           label = "Dimensionality Reduction Method:", selected = "none")
       ),
       column (4, 
-              
-              conditionalPanel(condition = paste0("input['", ns("dimReduce"), "'] == 'PCA' "),
+              #horrible syntax and overkill, but what to do with the poor design of Shiny for this circumstance?
+              conditionalPanel(condition = paste0("input['", ns("dimReduce"), "'][0] == 'PCA'",
+                                                  "|| input['", ns("dimReduce"), "'][1] == 'PCA'",
+                                                  "|| input['", ns("dimReduce"), "'][2] == 'PCA'",
+                                                  "|| input['", ns("dimReduce"), "'][3] == 'PCA'",
+                                                  "|| input['", ns("dimReduce"), "'][4] == 'PCA'"),
                                h3("Number of Principle Components to retain:"),
-                               helpText("vector of the number of PCs to use (when 'PCA' is identified in dimReduce).
+                               helpText("please enter a list (separated by commas) of the number of PCs to use
+                                        (when 'PCA' is identified in dimReduce).
                                         If NA is included, then the full dataset will also be included."),
-                               numericInput(ns("nPCADims"),
+                               textInput(ns("nPCADims"),
                                             label = "Number of PCs to retain",
                                             value = 1)
-                               ),
-              conditionalPanel(condition = paste0("input['", ns("dimReduce"), "'] != 'none'", 
-                                                  " && input['", ns("dimReduce"), "'] != 'PCA' "),
+              )
+      ),
+      #horrible syntax and overkill, but what to do with the poor design of Shiny for this circumstance?
+      column(4,
+             conditionalPanel(condition = paste0("input['", ns("dimReduce"), "'][0] == 'mad'",
+                                                 "|| input['", ns("dimReduce"), "'][1] == 'mad'",
+                                                 "|| input['", ns("dimReduce"), "'][2] == 'mad'",
+                                                 "|| input['", ns("dimReduce"), "'][3] == 'mad'",
+                                                 "|| input['", ns("dimReduce"), "'][4] == 'mad'",
+                                                 "|| input['", ns("dimReduce"), "'][0] == 'var'",
+                                                 "|| input['", ns("dimReduce"), "'][1] == 'var'",
+                                                 "|| input['", ns("dimReduce"), "'][2] == 'var'",
+                                                 "|| input['", ns("dimReduce"), "'][0] == 'cv'",
+                                                 "|| input['", ns("dimReduce"), "'][1] == 'cv'",
+                                                 "|| input['", ns("dimReduce"), "'][2] == 'cv'",
+                                                 "|| input['", ns("dimReduce"), "'][3] == 'cv'"),
                                h3("How many variables the dimensionality reduction should keep :"),
-                               helpText("number of the most variable features to keep
-                                        (when 'var', 'cv', or 'mad' is identified in dimReduce).
+                               helpText("Please enter a list (separated by commas) of the number of the most variable
+                                        features to keep (when 'var', 'cv', or 'mad' is identified in dimReduce).
                                         If NA is included, then the full dataset will also be included."),
-                               numericInput(ns("nVarDims"),
+                               textInput(ns("nVarDims"),
                                             label = "Number of dimensions to retain",
                                             value = 1)
-                               )
+              )
     )
     ),
     fluidRow(
@@ -92,14 +116,21 @@ userFileInput <- function(id, label = "CSV file") {
       column(3, 
              h3("Cluster Function:"),
              helpText("Function used for the clustering."),
-             selectInput(ns("clusterFunction"), choices = c("tight", "hierarchical01","hierarchicalK", "pam"), 
+             checkboxGroupInput(ns("clusterFunction"), choices = c("tight", "hierarchical01","hierarchicalK", "pam"), 
                          label = "Function for Clustering:", selected = "tight")
       ),
       #input alpha, conditional on clusterFunction = "tight" or clusterFunction = "hierarchical01"
       #Danger!
-      column(3,
-             conditionalPanel(condition = paste0("input['", ns("clusterFunction"), "'] == 'tight'", 
-                                                 " || input['", ns("clusterFunction"), "'] == 'hierarchical01' "),             
+      #horrible syntax and overkill, but what to do with the poor design of Shiny for this circumstance?
+      column(6,
+             conditionalPanel(condition = paste0("input['", ns("clusterFunction"), "'][0] == 'tight'", 
+                                                 " || input['", ns("clusterFunction"), "'][0] == 'hierarchical01' ",
+                                                 " || input['", ns("clusterFunction"), "'][1] == 'tight' ",
+                                                 " || input['", ns("clusterFunction"), "'][1] == 'hierarchical01' ",
+                                                 " || input['", ns("clusterFunction"), "'][2] == 'tight' ",
+                                                 " || input['", ns("clusterFunction"), "'][2] == 'hierarchical01' ",
+                                                 " || input['", ns("clusterFunction"), "'][3] == 'tight' ",
+                                                 " || input['", ns("clusterFunction"), "'][3] == 'hierarchical01' "),             
                               h3("Alphas:"),
                               helpText("Values of alpha to be tried. 
                                        Determines tightness required in creating clusters from the dissimilarity matrix.
@@ -108,10 +139,16 @@ userFileInput <- function(id, label = "CSV file") {
                               textInput(ns("alphas"),
                                         label = "alpha vector",
                                         value = "0.25, 0.74")
-                              ),
+                              )
              #find best K logical, conditional on clusterFunction = "hierarchicalK"
-             
-             conditionalPanel(condition = paste0("input['", ns("clusterFunction"), "'] == 'hierarchicalK'"),             
+      )
+    ),
+    fluidRow(
+      column(3,
+             conditionalPanel(condition = paste0("input['", ns("clusterFunction"), "'][0] == 'hierarchicalK'",
+                                                 " || input['", ns("clusterFunction"), "'][1] == 'hierarchicalK'",
+                                                 " || input['", ns("clusterFunction"), "'][2] == 'hierarchicalK'",
+                                                 " || input['", ns("clusterFunction"), "'][3] == 'hierarchicalK'"),             
                               h3("Find Best K?"),
                               helpText("Whether should find best K based on average silhouette width
                                        (only used if clusterFunction of type 'K')"),
@@ -122,7 +159,10 @@ userFileInput <- function(id, label = "CSV file") {
       
       # remove Sil logical, conditional upon clusterFunction = "hierarchicalK"
       column(3,
-             conditionalPanel(condition = paste0("input['", ns("clusterFunction"), "'] == 'hierarchicalK'"),             
+             conditionalPanel(condition = paste0("input['", ns("clusterFunction"), "'][0] == 'hierarchicalK'",
+                                                 " || input['", ns("clusterFunction"), "'][1] == 'hierarchicalK'",
+                                                 " || input['", ns("clusterFunction"), "'][2] == 'hierarchicalK'",
+                                                 " || input['", ns("clusterFunction"), "'][3] == 'hierarchicalK'"),             
                               h3("Remove Silhouette?"),
                               helpText("logical as to whether remove when silhouette < silCutoff
                                        (only used if clusterFunction of type 'K'')"),
@@ -133,8 +173,11 @@ userFileInput <- function(id, label = "CSV file") {
       
       #Enter Sil cutoff, conditional upon removeSil == TRUE,  which is conditional upon clusterFunction = "hierarchicalK"
       column(3,
-             conditionalPanel(condition = paste0("input['", ns("removeSil"), "']", 
-                                                 " && input['", ns("clusterFunction"), "'] == 'hierarchicalK'"),             
+             conditionalPanel(condition = paste0("(input['", ns("clusterFunction"), "'][0] == 'hierarchicalK'",
+                                                 " || input['", ns("clusterFunction"), "'][1] == 'hierarchicalK'",
+                                                 " || input['", ns("clusterFunction"), "'][2] == 'hierarchicalK'",
+                                                 " || input['", ns("clusterFunction"), "'][3] == 'hierarchicalK')",
+                                                 " && input['", ns("removeSil"), "']"),             
                               h3("Silhouette Cutoff"),
                               helpText("Requirement on minimum silhouette width to be included in cluster 
                                        (only if removeSil=TRUE)."),
@@ -503,18 +546,18 @@ dataFile <- function(input, output, session, stringsAsFactors) {
               quote = input$quote,
               stringsAsFactors = stringsAsFactors)
     }
-    # else if(length(input$file[1]) > 0 && str_sub(input$file[1], start = -4) == ".rda") {
-    #   holderObject <- load(userFile()$datapath)
-    #   if (class(holderObject)[1] == "SummarizedExperiment" || class(holderObject)[1] == "clusterExperiment")
-    #     return(holderObject)
-    # }
-    # 
-    # else if(length(input$file[1]) > 0) {
-    #   session$sendCustomMessage(type = 'helpMessage',
-    #                             message = 'incorrect File format, please upload a file of type 
-    #                             .csv or an .rda file of class "SummarizedExperiment" or "clusterExperiment"') 
-    # }
-    # return(NULL)
+    else if(length(input$file[1]) > 0 && str_sub(input$file[1], start = -4) == ".rda") {
+      holderObject <- load(userFile()$datapath)
+      if (class(holderObject)[1] == "SummarizedExperiment" || class(holderObject)[1] == "clusterExperiment")
+        return(holderObject)
+    }
+
+    else if(length(input$file[1]) > 0) {
+      session$sendCustomMessage(type = 'helpMessage',
+                                message = 'incorrect File format, please upload a file of type
+                                .csv or an .rda file of class "SummarizedExperiment" or "clusterExperiment"')
+    }
+    return(NULL)
       
   })
   
@@ -533,20 +576,20 @@ dataFile <- function(input, output, session, stringsAsFactors) {
 makeCode <- function(input, output, session, stringsAsFactors) {
   clusterManyCode <- reactive({
     clusterManyCode <- paste("ce <- clusterMany(", gsub('[.][A-z ]*', '', input$file[1]), 
-                             ", dimReduce = '", input$dimReduce, "'", sep = "")
+                             ", dimReduce = c('", paste(input$dimReduce, collapse = "', '"), "')", sep = "")
     
-    if(input$dimReduce == "PCA")
-      clusterManyCode <- paste(clusterManyCode, ", nPCADims = ", input$nPCADims, sep = "")
-    else if(input$dimReduce != "none")
-      clusterManyCode <- paste(clusterManyCode, ", nVarDims = ", input$nVarDims, sep = "")
+    if("PCA" %in% input$dimReduce)
+      clusterManyCode <- paste(clusterManyCode, ", nPCADims = c(", input$nPCADims, ")", sep = "")
+    if("mad" %in% input$dimReduce || "cv" %in% input$dimReduce || "var" %in% input$dimReduce)
+      clusterManyCode <- paste(clusterManyCode, ", nVarDims = c(", input$nVarDims, ")", sep = "")
     
     clusterManyCode <- paste(clusterManyCode, ", ks = c(", min(input$ks), ": ", max(input$ks), ")", 
-                             ", clusterFunction = '", input$clusterFunction, "'", sep = "")
+                             ", clusterFunction = c('", paste(input$clusterFunction, collapse = "', '"), "'", sep = "")
     
-    if(input$clusterFunction == "hierarchicalK")
+    if("hierarchicalK" %in% input$clusterFunction)
       clusterManyCode <- paste(clusterManyCode, ", findBestK = ", input$findBestK,
                                ", removeSil = ", input$removeSil, ", silCutoff = ", input$silCutoff, sep = "")
-    else if(input$clusterFunction != "pam")
+    else if("tight" %in% input$clusterFunction || "hierarchical01" %in% input$clusterFunction)
       clusterManyCode <- paste(clusterManyCode, ", alphas = c(", input$alphas, ")", sep = "")
     
     clusterManyCode <- paste(clusterManyCode, ", sequential = ", input$sequential, sep = "")
@@ -599,8 +642,16 @@ clusterManyHelpText <- function() {
         (Help Text continues)")
 }
 
-renderCE <- function(string) {
-  cE <<- eval(parse(text = string))
+
+#Code that creates the actual global clusterExperiment Object
+renderCE <- function(codeToBeEvaluated, dataframe) {
+  #replacing the user's file string with the internal variable name
+  innerCode <- sub(strsplit(codeToBeEvaluated, ",")[[1]][1],  "clusterMany(dataframe", expression, fixed = TRUE)
+  
+  
+  eval(parse(text = innerCode))
+  #cE <- paste(sum(dataframe[ ,1]), " + ", codeToBeEvaluated)
+
 }
 
 

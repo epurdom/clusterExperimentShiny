@@ -6,14 +6,19 @@ shinyUI(navbarPage("Cluster Experiment",
                             sidebarLayout(
                               sidebarPanel(
                                 h3("Cluster Many Function Inputs"),
+                                #Displays basic help text for Shiny App and clusterMany
                                 clusterManyHelpText(),
+                                #textual output of code that is to be run
                                 textOutput("clusterManyCode"),
+                                #Action button that allows one to run above code
                                 actionButton("run", "Run This Code"),
-                                dataTableOutput("table")
+                                #Testing
+                                textOutput("strOfCE")
                               ),
                               mainPanel(
                                 tabsetPanel(
                                   tabPanel("Input Arguments for ClusterMany:",
+                                           #Allows user to enter all inputs
                                          userFileInput("parameters", "User inputs")  
                                   ),
                                   tabPanel("Graphical outputs for clusterMany",
