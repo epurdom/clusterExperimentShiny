@@ -571,6 +571,8 @@ dataFile <- function(input, output, session, stringsAsFactors) {
   return(dataframe)
 }
 
+#I may need to store vectors safely by assigning to variables and then inputting them
+
 
 # Reactive function which builds the code being run by R:
 makeCode <- function(input, output, session, stringsAsFactors) {
