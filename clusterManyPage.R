@@ -4,46 +4,12 @@ library(stringr)
 
 #This userFile input is a very large function that recieves all of the inputs for clusterMany from the user
 
-userFileInput <- function(id, label = "CSV file") {
+dimReduceInput <- function(id, label = "inputs") {
   # Create a namespace function using the provided id
   ns <- NS(id)
   
   tagList(
-    fluidRow(
-      column(4,
-             h3("Choose a Data File to Upload:"),
-             helpText("Upload the data on which to run the clustering. Can be: matrix (with genes in rows), 
-                      a list of datasets overwhich the clusterings should be run, a SummarizedExperiment object, 
-                      or a ClusterExperiment object."),
-             fileInput(ns("file"), label = NULL,
-                       accept = c(
-                         'text/csv',
-                         'text/comma-separated-values',
-                         'text/tab-separated-values',
-                         'text/plain',
-                         '.csv',
-                         '.tsv'
-                       )
-             )
-      ),
-      column(3,
-             radioButtons(ns('sep'), 'Separator',
-                          c(Comma=',',
-                            Semicolon=';',
-                            Tab='\t'),
-                          ',')
-      ),
-      column(3,
-             radioButtons(ns('quote'), 'Quote',
-                          c(None='',
-                            'Double Quote'='"',
-                            'Single Quote'="'"),
-                          '"')
-             ),
-      column(2,
-             checkboxInput(ns('header'), 'Header')
-      )
-    ),
+
     fluidRow(
       column (4, 
               h3("Dimension Reduction:"),
@@ -90,26 +56,15 @@ userFileInput <- function(id, label = "CSV file") {
                                             value = 1)
               )
     )
-    ),
-    fluidRow(
-      # I need some more technical knowhow to feel confident in my ks design
-      # K vales, not conditional
-      column(12, 
-             h3("K Values"),
-             helpText("The argument 'ks' is interpreted differently for different choices of the other parameters. 
-                      When/if sequential=TRUE, ks defines the argument k0 of seqCluster. 
-                      Otherwise, 'ks' values are set in both subsampleArgs[['k']] and clusterDArgs[['k']]
-                      that are passed to clusterD and subsampleClustering. 
-                      This passing of these arguments via subsampleArgs[['k']] will only have an effect if 'subsample=TRUE'.
-                      Similarly, the passing of clusterDArgs[['k']] will only have an effect when the clusterFunction 
-                      argument includes a clustering algorithm of type 'K'. When/if 'findBestK=TRUE',
-                      ks also defines the kRange argument of clusterD unless kRange is specified by the user via the 
-                      clusterDArgs; note this means that the default option of setting kRange that depends on the input k 
-                      (see clusterD) is not available in clusterMany."),
-             sliderInput(ns("ks"), label = "Range of K Values:", min = 1, max = 100, value = c(3,6),
-                         step = 1, ticks = TRUE, round = TRUE)
-             )
-    ),
+    )
+  )
+}
+
+clusterFunctionInputs <- function(id, label = "inputs") {
+  
+  ns <- NS(id)
+  
+  tagList(
     
     fluidRow(
       #cluster Function Box, not conditional
@@ -148,13 +103,17 @@ userFileInput <- function(id, label = "CSV file") {
              conditionalPanel(condition = paste0("input['", ns("clusterFunction"), "'][0] == 'hierarchicalK'",
                                                  " || input['", ns("clusterFunction"), "'][1] == 'hierarchicalK'",
                                                  " || input['", ns("clusterFunction"), "'][2] == 'hierarchicalK'",
-                                                 " || input['", ns("clusterFunction"), "'][3] == 'hierarchicalK'"),             
+                                                 " || input['", ns("clusterFunction"), "'][3] == 'hierarchicalK'",
+                                                 " || input['", ns("clusterFunction"), "'][0] == 'pam'",
+                                                 " || input['", ns("clusterFunction"), "'][1] == 'pam'",
+                                                 " || input['", ns("clusterFunction"), "'][2] == 'pam'",                                              
+                                                 " || input['", ns("clusterFunction"), "'][3] == 'pam'"),             
                               h3("Find Best K?"),
                               helpText("Whether should find best K based on average silhouette width
                                        (only used if clusterFunction of type 'K')"),
-                              checkboxInput(ns("findBestK"), label = NULL, value = FALSE),
-                              tabPanel("findBestKCode", verbatimTextOutput("findBestKCode"))            
-                              )
+                              checkboxGroupInput(ns("findBestK"), label = NULL, choices = c("TRUE", "FALSE"),
+                                                 selected = "FALSE")
+            )
       ),
       
       # remove Sil logical, conditional upon clusterFunction = "hierarchicalK"
@@ -162,29 +121,95 @@ userFileInput <- function(id, label = "CSV file") {
              conditionalPanel(condition = paste0("input['", ns("clusterFunction"), "'][0] == 'hierarchicalK'",
                                                  " || input['", ns("clusterFunction"), "'][1] == 'hierarchicalK'",
                                                  " || input['", ns("clusterFunction"), "'][2] == 'hierarchicalK'",
-                                                 " || input['", ns("clusterFunction"), "'][3] == 'hierarchicalK'"),             
+                                                 " || input['", ns("clusterFunction"), "'][3] == 'hierarchicalK'",
+                                                 " || input['", ns("clusterFunction"), "'][0] == 'pam'",
+                                                 " || input['", ns("clusterFunction"), "'][1] == 'pam'",
+                                                 " || input['", ns("clusterFunction"), "'][2] == 'pam'",                                              
+                                                 " || input['", ns("clusterFunction"), "'][3] == 'pam'"),           
                               h3("Remove Silhouette?"),
                               helpText("logical as to whether remove when silhouette < silCutoff
                                        (only used if clusterFunction of type 'K'')"),
-                              checkboxInput(ns("removeSil"), label = NULL, value = FALSE),
-                              tabPanel("removeSilCode", verbatimTextOutput("removeSilCode"))            
-                                       )
-                              ),
+                              checkboxGroupInput(ns("removeSil"), label = NULL, choices = c("TRUE", "FALSE"),
+                                                 selected = "FALSE")                                       
+              )
+      ),
       
       #Enter Sil cutoff, conditional upon removeSil == TRUE,  which is conditional upon clusterFunction = "hierarchicalK"
       column(3,
              conditionalPanel(condition = paste0("(input['", ns("clusterFunction"), "'][0] == 'hierarchicalK'",
                                                  " || input['", ns("clusterFunction"), "'][1] == 'hierarchicalK'",
                                                  " || input['", ns("clusterFunction"), "'][2] == 'hierarchicalK'",
-                                                 " || input['", ns("clusterFunction"), "'][3] == 'hierarchicalK')",
-                                                 " && input['", ns("removeSil"), "']"),             
+                                                 " || input['", ns("clusterFunction"), "'][3] == 'hierarchicalK'",
+                                                 " || input['", ns("clusterFunction"), "'][0] == 'pam'",
+                                                 " || input['", ns("clusterFunction"), "'][1] == 'pam'",
+                                                 " || input['", ns("clusterFunction"), "'][2] == 'pam'",                                              
+                                                 " || input['", ns("clusterFunction"), "'][3] == 'pam')",
+                                                 " && input['", ns("removeSil"), "'][0] == 'TRUE'"),             
                               h3("Silhouette Cutoff"),
                               helpText("Requirement on minimum silhouette width to be included in cluster 
-                                       (only if removeSil=TRUE)."),
-                              numericInput(ns("silCutoff"), label = NULL, value = 0)
-                              )
-      )
+                                       (only if removeSil=TRUE). 
+                                       Please enter a list (separated by commas) of the number of the"),
+                              textInput(ns("silCutoff"), label = NULL)
+              )
+      
+    )
+),
+    
+    
+    fluidRow(
+      # I need some more technical knowhow to feel confident in my ks design
+      # K values, not conditional
+      column(12, 
+             h3("K Values"),
+             helpText("The argument 'ks' is interpreted differently for different choices of the other parameters. 
+                      When/if sequential=TRUE, ks defines the argument k0 of seqCluster. 
+                      Otherwise, 'ks' values are set in both subsampleArgs[['k']] and clusterDArgs[['k']]
+                      that are passed to clusterD and subsampleClustering. 
+                      This passing of these arguments via subsampleArgs[['k']] will only have an effect if 'subsample=TRUE'.
+                      Similarly, the passing of clusterDArgs[['k']] will only have an effect when the clusterFunction 
+                      argument includes a clustering algorithm of type 'K'. When/if 'findBestK=TRUE',
+                      ks also defines the kRange argument of clusterD unless kRange is specified by the user via the 
+                      clusterDArgs; note this means that the default option of setting kRange that depends on the input k 
+                      (see clusterD) is not available in clusterMany."),
+             sliderInput(ns("ks"), label = "Range of K Values:", min = 1, max = 100, value = c(3,6),
+                         step = 1, ticks = TRUE, round = TRUE)
+             )
+    ),
+    
+    fluidRow(
+      
+      column(3,
+             h3("distFunction"),
+             helpText("need clarity")
       ),
+      
+      
+      column (3, 
+              h3("Transform Function:"),
+              helpText("Help")
+              # *Input(),
+              # *Output("")
+      ), 
+      
+      # #This might need to be down with clusterD by line 27X
+      # #Enter Min clustr Sizes, not conditional
+      column(3,
+             h3("Minimum Cluster Sizes"),
+             helpText("the minimimum size required for a cluster (in clusterD).
+                      Clusters smaller than this are not kept and samples are left unassigned.
+                      Minimum cluster Size is 2. Please enter numbers separeted by commas"),
+             textInput(ns("minSizes"), label = NULL, value = 5),
+             tabPanel("minSizesCode", verbatimTextOutput("minSizeCode"))
+      )
+      )
+  )
+}
+
+sSBInputs <- function(id, label = "SSB inputs") {
+  
+  ns <- NS(id)
+  
+  tagList(
     
     fluidRow(
       # I need some more technical knowhow to feel confident in my Sequential design, 
@@ -209,45 +234,17 @@ userFileInput <- function(id, label = "CSV file") {
                                         label = "beta vector",
                                         value = NULL)
                               )
-      )
-      
-    ),
-    
-    
-    fluidRow(
-      
-      column(3,
-             h3("distFunction"),
-             helpText("need clarity")
       ),
-      
       #Logical subsample, not conditional 
       column(3,
              h3("Subsample"),
              helpText("logical as to whether to subsample via subsampleClustering to get the distance matrix 
                       at each iteration; otherwise the distance function will be determined by argument 
                       distFunction passed in clusterDArgs."),
-             checkboxInput(ns("subsample"), label = NULL, value = FALSE)
-             ),
+             checkboxGroupInput(ns("subsample"), label = NULL, choices = c("TRUE", "FALSE"), selected = "FALSE")
+             )
       
-      column (3, 
-              h3("Transform Function:"),
-              helpText("Help")
-              # *Input(),
-              # *Output("")
-      )#, 
-      
-      # #This might need to be down with clusterD by line 27X
-      # #Enter Min clustr Sizes, not conditional
-      # column(3,
-      #        h3("Minimum Cluster Sizes"),
-      #        helpText("the minimimum size required for a cluster (in clusterD). 
-      #                 Clusters smaller than this are not kept and samples are left unassigned.
-      #                 Minimum cluster Size is 2."),
-      #        numericInput("minSizes", label = NULL, value = 5, min = 2, step = 1),
-      #        tabPanel("minSizesCode", verbatimTextOutput("minSizeCode"))            
-      # )
-      ),
+    ),
     
     fluidRow(
       #Enter number of cores, not conditional
@@ -272,12 +269,6 @@ userFileInput <- function(id, label = "CSV file") {
     
     fluidRow(
       #Many Isolated unconditional logical inputs
-      column(3, 
-             h3("Are Data in Counts?"),
-             helpText("Whether the data are in counts, in which case the default transFun argument is set as log2(x+1). 
-                      This is simply a convenience to the user."),
-             checkboxInput(ns("isCount"), label = NULL, value = FALSE)
-             ),
       
       column(3, 
              h3("Verbose?"),
@@ -291,7 +282,7 @@ userFileInput <- function(id, label = "CSV file") {
                       for the purpose of inspection by user (with rownames equal to the names of the resulting 
                       column names of clMat object that would be returned if run=TRUE). Even if run=FALSE, however, 
                       the function will create the dimensionality reductions of the data indicated by the user input."),
-             checkboxInput(ns("run"), label = NULL, value = FALSE)
+             checkboxInput(ns("run"), label = NULL, value = TRUE)
              ),
       
       column(3, 
@@ -302,9 +293,15 @@ userFileInput <- function(id, label = "CSV file") {
                       where i is one more than the largest such existing workflow clusterTypes."),
              checkboxInput(ns("eraseOld"), label = NULL, value = FALSE)
              )
-      ),
+      )
+  )
+}
     
-    
+specializedInputs <- function(id, label = " Specializedinputs") {
+  
+  ns <- NS(id)
+  
+  tagList(
     ####################
     #Lots of questions here:
     ####################
@@ -315,16 +312,15 @@ userFileInput <- function(id, label = "CSV file") {
       column (12, 
               h3("Clustering algorithm:"),
               helpText("Choose what type of clustering method to use. "),
-              selectInput(ns("clusterAlg"), choices = c("Cluster Distance","Cluster Subsample", 
-                                                        "Sequential Cluster using Cluster Distance", "Sequential Cluster using Cluster Subsample"), 
-                          label = NULL, selected = "Cluster Distance")
+              checkboxGroupInput(ns("clusterAlg"), choices = c("Sequential Cluster", "Cluster Distance",
+                                                               "Cluster Subsample"), 
+                          label = NULL, selected = NULL)
       )
     ),
     
     
     #Input sequential clustering arguments, conditional upon sequential clustering choice
-    conditionalPanel(condition = paste0("input['", ns("clusterAlg"), "'] == 'Sequential Cluster using Cluster Distance'",
-                                        "|| input['", ns("clusterAlg"), "'] == 'Sequential Cluster using Cluster Subsample'"),
+    conditionalPanel(condition = paste0("input['", ns("clusterAlg"), "'][0] == 'Sequential Cluster'"),
                      h3("Sequential Clustering Arguments"),
                      fluidRow(
                        
@@ -410,8 +406,8 @@ userFileInput <- function(id, label = "CSV file") {
                      ),
     
     
-    conditionalPanel(condition = paste0("input['", ns("clusterAlg"), "'] == 'Cluster Distance'",
-                                        "|| input['", ns("clusterAlg"), "'] == 'Sequential Cluster using Cluster Distance'"),
+    conditionalPanel(condition = paste0("input['", ns("clusterAlg"), "'][0] == 'Cluster Distance'",
+                                        "|| input['", ns("clusterAlg"), "'][1] == 'Cluster Distance'"),
                      h3("Cluster Distance Arguments"),
                      
                      fluidRow(
@@ -471,8 +467,9 @@ userFileInput <- function(id, label = "CSV file") {
                               numericInput(ns("minSizeCD"), value = 2, label = NULL)                              )
                        )
                        ),
-    conditionalPanel(condition = paste0("input['", ns("clusterAlg"), "'] == 'Cluster Subsample'",
-                                        "|| input['", ns("clusterAlg"), "'] == 'Sequential Cluster using Cluster Subsample'"),
+    conditionalPanel(condition = paste0("input['", ns("clusterAlg"), "'][0] == 'Cluster Subsample'",
+                                        "|| input['", ns("clusterAlg"), "'][1] == 'Cluster Subsample'",
+                                        "|| input['", ns("clusterAlg"), "'][2] == 'Cluster Subsample'"),
                      h3("Cluster Subsample Arguments"),
                      fluidRow(
                        column(3, 
@@ -527,49 +524,6 @@ userFileInput <- function(id, label = "CSV file") {
 )
 }
 
-# Module server function
-dataFile <- function(input, output, session, stringsAsFactors) {
-  # The selected file, if any
-  userFile <- reactive({
-    # If no file is selected, don't do anything
-    validate(need(input$file, message = FALSE))
-    input$file
-  })
-  
-  # The user's data, parsed into a data frame, we will need to expand beyond .csv
-  dataframe <- reactive({
-    
-    if(length(input$file[1]) > 0 && str_sub(input$file[1], start = -4) == ".csv") {
-      read.csv(userFile()$datapath,
-              header = input$header,
-              sep = input$sep,
-              quote = input$quote,
-              stringsAsFactors = stringsAsFactors)
-    }
-    else if(length(input$file[1]) > 0 && str_sub(input$file[1], start = -4) == ".rda") {
-      holderObject <- load(userFile()$datapath)
-      if (class(holderObject)[1] == "SummarizedExperiment" || class(holderObject)[1] == "clusterExperiment")
-        return(holderObject)
-    }
-
-    else if(length(input$file[1]) > 0) {
-      session$sendCustomMessage(type = 'helpMessage',
-                                message = 'incorrect File format, please upload a file of type
-                                .csv or an .rda file of class "SummarizedExperiment" or "clusterExperiment"')
-    }
-    return(NULL)
-      
-  })
-  
-  # We can run observers in here if we want to
-  observe({
-    msg <- sprintf("File %s was uploaded", userFile()$name)
-    cat(msg, "\n")
-  })
-  
-  # Return the reactive that yields the data frame
-  return(dataframe)
-}
 
 #I may need to store vectors safely by assigning to variables and then inputting them
 
@@ -577,62 +531,65 @@ dataFile <- function(input, output, session, stringsAsFactors) {
 # Reactive function which builds the code being run by R:
 makeCode <- function(input, output, session, stringsAsFactors) {
   clusterManyCode <- reactive({
-    clusterManyCode <- paste("ce <- clusterMany(", gsub('[.][A-z ]*', '', input$file[1]), 
-                             ", dimReduce = c('", paste(input$dimReduce, collapse = "', '"), "')", sep = "")
     
-    if("PCA" %in% input$dimReduce)
+    clusterManyCode <- paste(", dimReduce = c('", paste(input$dimReduce, collapse = "', '"), "')", sep = "")
+
+    
+    if("PCA" %in% input$dimReduce) {
       clusterManyCode <- paste(clusterManyCode, ", nPCADims = c(", input$nPCADims, ")", sep = "")
-    if("mad" %in% input$dimReduce || "cv" %in% input$dimReduce || "var" %in% input$dimReduce)
+    }
+    if("mad" %in% input$dimReduce || "cv" %in% input$dimReduce || "var" %in% input$dimReduce) {
       clusterManyCode <- paste(clusterManyCode, ", nVarDims = c(", input$nVarDims, ")", sep = "")
+    }
     
     clusterManyCode <- paste(clusterManyCode, ", ks = c(", min(input$ks), ": ", max(input$ks), ")", 
-                             ", clusterFunction = c('", paste(input$clusterFunction, collapse = "', '"), "'", sep = "")
+                             ", clusterFunction = c('", paste(input$clusterFunction, collapse = "', '"), "')", sep = "")
     
-    if("hierarchicalK" %in% input$clusterFunction)
-      clusterManyCode <- paste(clusterManyCode, ", findBestK = ", input$findBestK,
-                               ", removeSil = ", input$removeSil, ", silCutoff = ", input$silCutoff, sep = "")
-    else if("tight" %in% input$clusterFunction || "hierarchical01" %in% input$clusterFunction)
+    if("hierarchicalK" %in% input$clusterFunction || "pam" %in% input$clusterFunction) {
+      clusterManyCode <- paste(clusterManyCode, 
+                               ", findBestK = c(", paste(input$findBestK, collapse = ", "), ")",
+                               ", removeSil = c(", paste(input$removeSil, collapse = ", "), ")", sep = "")
+      if("TRUE" %in% input$removeSil) {
+        clusterManyCode <- paste(clusterManyCode, ", silCutoff = c(", input$silCutoff, ")", sep = "")
+      }
+    }
+    if("tight" %in% input$clusterFunction || "hierarchical01" %in% input$clusterFunction) {
       clusterManyCode <- paste(clusterManyCode, ", alphas = c(", input$alphas, ")", sep = "")
+    }
     
     clusterManyCode <- paste(clusterManyCode, ", sequential = ", input$sequential, sep = "")
     
-    if(input$sequential)
+    if(input$sequential) {
       clusterManyCode <- paste(clusterManyCode, ", betas = ", input$betas, sep = "")
+    }
     
-    clusterManyCode <- paste(clusterManyCode, ", subsample = ", input$subsample, # ", minSizes = ", input$minSizes, 
+    clusterManyCode <- paste(clusterManyCode, ", subsample = c(", paste(input$subsample, collapse = ", "), ")",
+                             ", minSizes = c(", input$minSizes, ")",
                              ", ncores = ", input$ncores, ", random.seed = ", input$random.seed, 
-                             ", isCount = ", input$isCount, ", verbose = ", input$verbose, ", run = ", input$run, 
+                             ", verbose = ", input$verbose, ", run = ", input$run, 
                              ", eraseOld = ", input$eraseOld, sep = "")
     
-    if (input$clusterAlg == "Sequential Cluster using Cluster Distance")
+    if ( "Sequential Cluster" %in% input$clusterAlg) {
       clusterManyCode <- paste(clusterManyCode, ", seqArgs = list( subsample = ", input$subsampleSQC, 
                                ", top.can = ", input$top.canSQC, ", k0 = ", input$k0SQC, 
                                ", beta = ", input$betaSQC, ", remain.n = ", input$remain.nSQC, ", kmin = ", input$k.minSQC,
-                               ", kmax = ", input$k.maxSQC, ", verbose = ", input$verboseSQC, 
-                               ", clusterDArgs = list( typeAlg = ", input$typeAlgCD, ", checkArgs = ", input$checkArgsCD, 
-                               ", alpha = ", input$alphaCD, ", minSize = ", input$minSizeCD,
-                               ", clusterArgs = list(", input$clusterArgsSC, ")))", sep = "")
+                               ", kmax = ", input$k.maxSQC, ", verbose = ", input$verboseSQC, ")", sep = "")
+    }
     
-    else if (input$clusterAlg == "Sequential Cluster using Cluster Subsample")
-      clusterManyCode <- paste(clusterManyCode, ", seqArgs = list( subsample = ", input$subsampleSQC, 
-                               ", top.can = ", input$top.canSQC, ", k0 = ", input$k0SQC, 
-                               ", beta = ", input$betaSQC, ", remain.n = ", input$remain.nSQC, ", kmin = ", input$k.minSQC,
-                               ", kmax = ", input$k.maxSQC, ", verbose = ", input$verbose, 
-                               ", subsampleArgs = list( classifyMethods = '", input$classifyMethodSC, 
-                               "', resamp.numSC  = ", input$resamp.numSC, ", clusterFunction = '", input$clusterFunctionSC, 
-                               "', samp.p = ", input$samp.pSC, ", clusterArgs = list(", input$clusterArgsSC, ")))", sep = "")
-    
-    else if(input$clusterAlg == "Cluster Distance")
+    if("Cluster Distance" %in% input$clusterAlg) {
       clusterManyCode <- paste(clusterManyCode, ", clusterDArgs = list( typeAlg = ", input$typeAlgCD, 
                                ", checkArgs = ", input$checkArgsCD, 
                                ", alpha = ", input$alphaCD, ", minSize = ", input$minSizeCD,
-                               ", clusterArgs = list(", input$clusterArgsSC, ")))", sep = "")
+                               ", clusterArgs = list(", input$clusterArgsSC, "))", sep = "")
+    }
     
-    else if (input$clusterAlg == "Cluster Subsample")
+    if ( "Cluster Subsample" %in% input$clusterAlg) {
       clusterManyCode <- paste(clusterManyCode, ", subsampleArgs = list( classifyMethods = '", input$classifyMethodSC, 
                                "', resamp.numSC  = ", input$resamp.numSC, ", clusterFunction = '", input$clusterFunctionSC, 
-                               "', samp.p = ", input$samp.pSC, ", clusterArgs = list(", input$clusterArgsSC, ")))", sep = "")
+                               "', samp.p = ", input$samp.pSC, ", clusterArgs = list(", input$clusterArgsSC, "))", sep = "")
+    }
     
+    clusterManyCode <- paste(clusterManyCode, ")", sep = "")
     
     clusterManyCode
   })

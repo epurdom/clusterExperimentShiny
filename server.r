@@ -1,37 +1,66 @@
-library(shiny)
-library(ggvis)
 source("global.R")
 options(shiny.maxRequestSize=30*1024^2)
 
 shinyServer(function(input, output, session) {
   
-  datafile <- callModule(dataFile, "parameters",
+  sE <- SummarizedExperiment()
+  
+  datafile <- callModule(dataFile, "fileInput",
                          stringsAsFactors = FALSE)
-  #testing
-  output$table <- renderDataTable({
-    datafile()
+  
+  colDataFile <- callModule(colDataFile, "fileInput",
+                            stringsAsFactors = FALSE)
+  
+  sE <- reactive({
+    SummarizedExperiment(data.matrix(datafile()))
   })
+  
+   # output$testText <- renderText({
+   #  text <- reactive({
+   #    paste("dim assay: ", dim(sE), ", dim colData: ")#, dim(colData(sE)))
+   #  })
+   #  text()
+   # })
+  
+  #testing
+  output$isAssay <- renderText({
+     if (is.null(datafile()))
+       return("No data uploaded yet")
+    sE <<- SummarizedExperiment(data.matrix(datafile()))
+    return(paste("Summarized experiment object successfully created, with dimensions of: ", dim(sE)[1], " by ", dim(sE)[2]))
+    
+  })
+  
+  
+  #inefficient, need insight
+  output$isColData <- renderText({
+     if (is.null(datafile()))
+       return("")
+    sE <<- SummarizedExperiment(data.matrix(datafile()), colData = data.matrix(colDataFile()))
+    return(paste("ColData successfully added, colData dimensions are ", dim(colData(sE))[1], " by ", dim(colData(sE))[2],
+                 "on an sE object with assay of dimensions ",  dim(sE)[1], " by ", dim(sE)[2]))
+    
+  })
+  
   
   clusterManyCode <- callModule(makeCode, "parameters",
                                 stringsAsFactors = FALSE)
   
+  clusterManyStartPageCode <- callModule(makeCECode, "fileInput",
+                                         stringsAsFactors = FALSE)
+  
   output$clusterManyCode <- renderText({
-    clusterManyCode()
+    paste(clusterManyStartPageCode(), clusterManyCode())
   })
   
   
   observeEvent(input$run, {
-    output$strOfCE <- renderText({
-
+    output$imgCE <- renderText({
+ 
+      cE <<- renderCE(paste(clusterManyStartPageCode(), clusterManyCode()), cE)
       
-      # session$sendCustomMessage(type = 'testmessage',
-      #                           message = 'Computing')  
-      cE <<- renderCE(clusterManyCode(), datafile())
-      
+      #plotClusters(cE)
       dim(cE)
-      
-      # session$sendCustomMessage(type = 'testmessage',
-      #                           message = 'ClusterMany Computations Completed')  
     })
   })
   

@@ -1,1 +1,6 @@
+library(shiny)
+library(ggvis)
+library(SummarizedExperiment)
+library(clusterExperiment)
+source("startPage.R")
 source("clusterManyPage.R")
