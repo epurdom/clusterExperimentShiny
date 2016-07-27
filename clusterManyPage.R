@@ -604,9 +604,9 @@ clusterManyHelpText <- function() {
 
 #Code that creates the actual global clusterExperiment Object
 renderCE <- function(codeToBeEvaluated, dataframe) {
-  #replacing the user's file string with the internal variable name
-  innerCode <- sub(strsplit(codeToBeEvaluated, ",")[[1]][1],  "clusterMany(dataframe", expression, fixed = TRUE)
   
+  #replacing the user's file string with the internal variable name
+  innerCode <- sub(strsplit(codeToBeEvaluated, ",")[[1]][1],  "clusterMany(dataframe", codeToBeEvaluated, fixed = TRUE)
   
   eval(parse(text = innerCode))
   #cE <- paste(sum(dataframe[ ,1]), " + ", codeToBeEvaluated)

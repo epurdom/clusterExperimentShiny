@@ -24,9 +24,18 @@ shinyServer(function(input, output, session) {
   
   #testing
   output$isAssay <- renderText({
-     if (is.null(datafile()))
-       return("No data uploaded yet")
-    sE <<- SummarizedExperiment(data.matrix(datafile()))
+    holder <- datafile()
+    
+    if (is.null(holder))
+      return("No data uploaded yet")
+    
+    else if(class(holder)[1] == "SummarizedExperiment" || class(holder)[1] == "clusterExperiment") {
+      sE <<- holder
+    }
+      
+    else {
+      sE <<- SummarizedExperiment(data.matrix(datafile()))
+    }
     return(paste("Summarized experiment object successfully created, with dimensions of: ", dim(sE)[1], " by ", dim(sE)[2]))
     
   })
@@ -34,7 +43,7 @@ shinyServer(function(input, output, session) {
   
   #inefficient, need insight
   output$isColData <- renderText({
-     if (is.null(datafile()))
+     if (is.null(colDataFile()))
        return("")
     sE <<- SummarizedExperiment(data.matrix(datafile()), colData = data.matrix(colDataFile()))
     return(paste("ColData successfully added, colData dimensions are ", dim(colData(sE))[1], " by ", dim(colData(sE))[2],
@@ -55,18 +64,16 @@ shinyServer(function(input, output, session) {
   
   
   observeEvent(input$run, {
-    output$imgCE <- renderText({
- 
-      cE <<- renderCE(paste(clusterManyStartPageCode(), clusterManyCode()), cE)
+      output$imgCE <- renderPlot({
       
-      #plotClusters(cE)
-      dim(cE)
+      cE <<- renderCE(paste(clusterManyStartPageCode(), clusterManyCode()), datafile())
+      defaultMar<-par("mar")
+      plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
+      par(mar=plotCMar)
+      plotClusters(cE)
+      #dim(cE)
     })
   })
-  
-
-  
-  
   
 })
 
