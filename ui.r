@@ -5,7 +5,9 @@ shinyUI(navbarPage("Cluster Experiment",
                    tabPanel("Start Page"),
                    tabPanel("File Upload",
                              navlistPanel(
-                               tabPanel("RDA file input"),
+                               tabPanel("RDA file input",
+                                        rdaFileInput("fileInput", "User rda file"),
+                                        textOutput("isRda")),
                                tabPanel("CSV format input",
                                   startPageBasics("fileInput", "User file"),
                                   h3("testing"),
@@ -18,7 +20,7 @@ shinyUI(navbarPage("Cluster Experiment",
                             )
                             
                     ),
-                   tabPanel("RSEC"),
+                    tabPanel("RSEC"),
                    navbarMenu("Cluster Many",
                               tabPanel("Cluster Many Inputs",
                                       #sidebarLayout(
@@ -34,14 +36,14 @@ shinyUI(navbarPage("Cluster Experiment",
                                           h3("Code to be run internally:"),
                                           textOutput("clusterManyCode"),
                                           #Action button that allows one to run above code
-                                          actionButton("run", "Run This Code")
+                                          actionButton("runCM", "Run This Code")
                                           )
                                       ),
                                           navlistPanel(
                                             tabPanel("Dimensional Reduction",
                                                      #Allows user to enter all inputs
                                                      h3("Inputs related to dimensional reduction"),
-                                                     dimReduceInput("parameters", "dim inputs")  
+                                                     dimReduceInput("parameters", "dim inputs")
                                             ),
                                             tabPanel("Cluster Function",
                                                    h3("Inputs related to cluster function"),
@@ -61,23 +63,37 @@ shinyUI(navbarPage("Cluster Experiment",
                               tabPanel("Plot Clusters",
                                        tabsetPanel(
                                          tabPanel("Default Plot",
+                                                  downloadButton("downloadDefaultPlotPCCM", label = "DownLoad this Plot"),
                                                   plotOutput("imgCE")
                                          ),
                                          tabPanel("Specialized Plotting Options",
-                                                  plotClustersHelpText("clusterManyPlotClusters", 
-                                                                       "inputs for plot Clusters, cM")),
-                                         tabPanel("Specialized Plotting Options Output")
+                                                  fluidRow(
+                                                    column(6,
+                                                      plotClustersHelpText("clusterManyPlotClusters",
+                                                                       "Help Text for plot Clusters, cM")
+                                                    ),
+                                                    column(6,
+                                                         h3("Code to be Run:"),
+                                                         textOutput("plotClustersCodeCM"),
+                                                         actionButton("runPCCM", "Run Plot Cluster Code")
+                                                    )
+                                                  ),
+                                                  plotClusterInput("clusterManyPlotClusters", 
+                                                                   "inputs for plot Clusters, cM")
+                                         ),
+                                         tabPanel("Specialized Plotting Options Output",
+                                                  downloadButton("downloadSpecializedPlotPCCM", label = "DownLoad this Plot"),
+                                                  plotOutput("imgPCCM")
+                                         )
                                        )
-                             
+
                     )
                    ),
-                   navbarMenu("Combine Many",
+                    navbarMenu("Combine Many",
                               tabPanel("Combine Many"),
                               tabPanel("Plot Clusters",
                                        tabsetPanel(
-                                         tabPanel("Default Plot",
-                                                  plotOutput("imgCE")
-                                         ),
+                                         tabPanel("Default Plot"),
                                          tabPanel("Specialized Plotting Options"),
                                          tabPanel("Specialized Plotting Options Output")
                                        )
@@ -106,27 +122,21 @@ shinyUI(navbarPage("Cluster Experiment",
                              tabPanel("Merge Clusters"),
                              tabPanel("Plot Clusters",
                                       tabsetPanel(
-                                        tabPanel("Default Plot",
-                                                 plotOutput("imgCE")
-                                        ),
+                                        tabPanel("Default Plot"),
                                         tabPanel("Specialized Plotting Options"),
                                         tabPanel("Specialized Plotting Options Output")
                                       )
                               ),
                              tabPanel("Plot Heatmap",
                                       tabsetPanel(
-                                        tabPanel("Default Plot",
-                                                 plotOutput("imgCE")
-                                        ),
+                                        tabPanel("Default Plot"),
                                         tabPanel("Specialized Plotting Options"),
                                         tabPanel("Specialized Plotting Options Output")
                                       )
                              ),
                              tabPanel("Plot Heatmap",
                                       tabsetPanel(
-                                        tabPanel("Default Plot",
-                                                 plotOutput("imgCE")
-                                        ),
+                                        tabPanel("Default Plot"),
                                         tabPanel("Specialized Plotting Options"),
                                         tabPanel("Specialized Plotting Options Output")
                                       )

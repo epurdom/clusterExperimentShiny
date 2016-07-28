@@ -1,4 +1,59 @@
-startPageBasics <- function( id, label = "upload file") {
+rdaFileInput <- function(id, label = "upload rda file") {
+  ns <- NS(id)
+  fluidRow(
+    column(12,
+      h3("Upload an object"),
+      helpText("Choose a SummarizedExperiment or clusterExperiment object (saved as an .rda file) to upload:"),
+      fileInput(ns("rdaFile"), label = NULL, accept = ".rda")
+    )
+  )
+}
+
+# Module server function
+rdaFile <- function(input, output, session, stringsAsFactors) {
+  # The selected file, if any
+  userFile <- reactive({
+    # If no file is selected, don't do anything
+    validate(need(input$rdaFile, message = FALSE))
+    input$rdaFile
+  })
+  print("inside rdaFile")
+  # The user's data, parsed into a data frame, we will need to expand beyond .csv
+  rda <- reactive({
+    if(length(input$rdaFile[1]) > 0 && str_sub(input$rdaFile[1], start = -4) == ".rda") {
+      holderObject <- readRDS(userFile()$datapath)
+      print("inside test .rda")
+      
+      if (class(holderObject)[1] == "SummarizedExperiment" || class(holderObject)[1] == "clusterExperiment") {
+        print("inside test if right Object")
+        
+        return(holderObject)
+      }
+    }
+    
+    else if(length(input$rdaFile[1]) > 0) {
+      session$sendCustomMessage(type = 'helpMessage',
+                                message = 'incorrect File format, please upload a file of type
+                                .csv or an .rda file of class "SummarizedExperiment" or "clusterExperiment"')
+    }
+    else
+      return(NULL)
+    
+    })
+  
+  # We can run observers in here if we want to
+  observe({
+    msg <- sprintf("File %s was uploaded", userFile()$name)
+    cat(msg, "\n")
+  })
+  
+  # Return the reactive that yields the data frame
+  return(rda)
+} #end of dataframe function
+
+
+
+startPageBasics <- function( id, label = "upload .csv file") {
   # Create a namespace function using the provided id
   ns <- NS(id)
   
@@ -16,7 +71,8 @@ startPageBasics <- function( id, label = "upload file") {
                          'text/tab-separated-values',
                          'text/plain',
                          '.csv',
-                         '.tsv'
+                         '.tsv',
+                         ".rda"
                        )
              )
              ),
