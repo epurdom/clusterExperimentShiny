@@ -5,7 +5,18 @@ shinyUI(navbarPage("Cluster Experiment",
                    tabPanel("Start Page",
                             startPageMessage("startMessage", "")),
                    tabPanel("File Upload",
-                             navlistPanel(
+                            fluidRow(
+                              column(3,
+                                     h3("Are Data in Counts?"),
+                                     helpText("Whether the data are in counts, in which case the default transFun argument is set as log2(x+1). 
+                                              This is simply a convenience to the user."),
+                                     checkboxInput("isCount", label = NULL, value = FALSE)
+                              ),
+                              column(3,
+                                     h3("transform function")
+                              )
+                            ),
+                             tabsetPanel(
                                tabPanel("RDA file input",
                                         rdaFileInput("fileInput", "User rda file"),
                                         textOutput("isRda")),

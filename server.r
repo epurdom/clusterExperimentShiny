@@ -93,7 +93,7 @@ shinyServer(function(input, output, session) {
                                          stringsAsFactors = FALSE)
   
   output$clusterManyCode <- renderText({
-    paste(clusterManyStartPageCode(), clusterManyCode())
+    paste("cE < clusterExperiment(sE, isCount = ", input$isCount, clusterManyCode())
   })
   
   
@@ -101,7 +101,7 @@ shinyServer(function(input, output, session) {
       output$imgCE <- renderPlot({
       # cE is the clusterExperiment object from the clusterMany function,
       # which will remain unaltered so long as clusterMany isn'r run again
-      cE <<- renderCE(paste(clusterManyStartPageCode(), clusterManyCode()), sE)
+      cE <<- renderCE(paste("cE < clusterExperiment(sE, isCount = ", input$isCount, clusterManyCode()), sE)
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)

@@ -85,16 +85,7 @@ csvFile <- function( id, label = "upload .csv file") {
                             'Single Quote'="'"),
                           '"'),
              checkboxInput(ns('header'), 'Header')
-      ),
-      column(3,
-             
-             h3("Are Data in Counts?"),
-             helpText("Whether the data are in counts, in which case the default transFun argument is set as log2(x+1). 
-                      This is simply a convenience to the user."),
-             checkboxInput(ns("isCount"), label = NULL, value = FALSE)
-             ),
-      column(3,
-             h3("transform function"))
+      )
     ),
     fluidRow(
       column(4,
@@ -295,9 +286,15 @@ rowDataFile <- function(input, output, session, stringsAsFactors) {
 
 makeCECode <- function(input, output, session, stringsAsFactors) {
   cECode <- reactive({
+    paste(input$rdaFile[1])
   
-    cECode <- paste("ce <- clusterMany(", gsub('[.][A-z ]*', '', input$file[1]), 
-                           ", isCount = ", input$isCount, sep = "")
+    if(length(input$file) == 0) {
+      cECode <- paste("ce <- clusterMany(", gsub('[.][A-z ]*', '', input$file[1]), 
+                      ", isCount = ", input$isCount, sep = "")
+    } else {
+      cECode <- paste("ce <- clusterMany(", gsub('[.][A-z ]*', '', input$rdaFile[1]), 
+                      ", isCount = ", input$isCount, sep = "")
+    }
     cECode
   })
 

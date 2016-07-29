@@ -444,9 +444,7 @@ makeCode <- function(input, output, session, stringsAsFactors) {
     
     clusterManyCode <- paste(clusterManyCode, ", subsample = c(", paste(input$subsample, collapse = ", "), ")",
                              ", minSizes = c(", input$minSizes, ")",
-                             ", ncores = ", input$ncores, ", random.seed = ", input$random.seed, 
-                             ", verbose = ", input$verbose, ", run = ", input$run, 
-                             ", eraseOld = ", input$eraseOld, sep = "")
+                             ", ncores = ", input$ncores, ", random.seed = ", input$random.seed, sep = "")
     
     if ( "Sequential Cluster" %in% input$clusterAlg) {
       clusterManyCode <- paste(clusterManyCode, ", seqArgs = list(", " top.can = ", input$top.canSQC, 
