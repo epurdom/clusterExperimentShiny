@@ -2,8 +2,11 @@ source("global.R")
 options(shiny.maxRequestSize=30*1024^2)
 
 shinyServer(function(input, output, session) {
-  #sE is the SUmmarized experiment initially loaded which will remain unaltered
+  #sE is the Summarized/Cluster Experiment initially loaded which will remain unaltered
   sE <- SummarizedExperiment()
+
+  
+  
   
   #####################################################
   # Begin read file outputs
@@ -17,9 +20,11 @@ shinyServer(function(input, output, session) {
   colDataFile <- callModule(colDataFile, "fileInput",
                             stringsAsFactors = FALSE)
   
-  sE <- reactive({
-    SummarizedExperiment(data.matrix(datafile()))
-  })
+  rowDataFile <- callModule(rowDataFile, "fileInput",
+                            stringsAsFactors = FALSE)  
+  # sE <- reactive({
+  #   SummarizedExperiment(data.matrix(datafile()))
+  # })
   
    # output$testText <- renderText({
    #  text <- reactive({
@@ -41,7 +46,6 @@ shinyServer(function(input, output, session) {
     return(paste("Summarized experiment object successfully created, with dimensions of: ", dim(sE)[1], " by ", dim(sE)[2]))
   })
   
-  #testing
   output$isAssay <- renderText({
     holder <- datafile()
     
@@ -59,9 +63,6 @@ shinyServer(function(input, output, session) {
     
   })
   
-  
-  
-  
   #inefficient, need insight
   output$isColData <- renderText({
      if (is.null(colDataFile()))
@@ -71,6 +72,13 @@ shinyServer(function(input, output, session) {
                  "on an sE object with assay of dimensions ",  dim(sE)[1], " by ", dim(sE)[2]))
     
   }) 
+  
+  # output$isRowData <- renderText({
+  #   if (is.null(rowDataFile()))
+  #     return("")  
+  #   sE <<- SummarizedExperiment(data.matrix(datafile()), colData = data.matrix(colDataFile()), rowData = data.a)
+  #   
+  #   })
   
   #---------------End read File inputs-----------------
   
@@ -93,7 +101,7 @@ shinyServer(function(input, output, session) {
       output$imgCE <- renderPlot({
       # cE is the clusterExperiment object from the clusterMany function,
       # which will remain unaltered so long as clusterMany isn'r run again
-      cE <<- renderCE(paste(clusterManyStartPageCode(), clusterManyCode()), datafile())
+      cE <<- renderCE(paste(clusterManyStartPageCode(), clusterManyCode()), sE)
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
@@ -110,7 +118,7 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$runPCCM, {
     output$imgPCCM <- renderPlot({
-      cE <<- renderCE(paste(clusterManyStartPageCode(), clusterManyCode()), datafile())
+      #cE <<- renderCE(paste(clusterManyStartPageCode(), clusterManyCode()), sE)
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)

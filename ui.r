@@ -2,19 +2,20 @@ library(shiny)
 library(ggvis)
 source("global.R")
 shinyUI(navbarPage("Cluster Experiment",
-                   tabPanel("Start Page"),
+                   tabPanel("Start Page",
+                            startPageMessage("startMessage", "")),
                    tabPanel("File Upload",
                              navlistPanel(
                                tabPanel("RDA file input",
                                         rdaFileInput("fileInput", "User rda file"),
                                         textOutput("isRda")),
                                tabPanel("CSV format input",
-                                  startPageBasics("fileInput", "User file"),
+                                  csvFile("fileInput", "User file"),
                                   h3("testing"),
                                   textOutput("isAssay"),
                                   h3("more testing..."),
                                   textOutput("isColData"),
-                                  textOutput("testText")
+                                  textOutput("isRowData")
                               )
                               
                             )
@@ -40,6 +41,10 @@ shinyUI(navbarPage("Cluster Experiment",
                                           )
                                       ),
                                           navlistPanel(
+                                            tabPanel("Subsample/Sequence/Betas",
+                                                     h3("Inputs related to Subsample/Sequence/Betas"),
+                                                     sSBInputs("parameters", "SSB inputs")
+                                            ),
                                             tabPanel("Dimensional Reduction",
                                                      #Allows user to enter all inputs
                                                      h3("Inputs related to dimensional reduction"),
@@ -48,10 +53,6 @@ shinyUI(navbarPage("Cluster Experiment",
                                             tabPanel("Cluster Function",
                                                    h3("Inputs related to cluster function"),
                                                    clusterFunctionInputs("parameters", "cluster function inputs")
-                                            ),
-                                            tabPanel("Subsample/Sequence/Betas",
-                                                     h3("Inputs related to Subsample/Sequence/Betas"),
-                                                     sSBInputs("parameters", "SSB inputs")
                                             ),
                                             tabPanel("Specialized Options",
                                                      specializedInputs("parameters", "specialized inputs")
@@ -98,7 +99,13 @@ shinyUI(navbarPage("Cluster Experiment",
                                          tabPanel("Specialized Plotting Options Output")
                                        )
                                ),
-                              tabPanel("PCA Plot")
+                              tabPanel("PCA Plot",
+                                       tabsetPanel(
+                                         tabPanel("Default Plot"),
+                                         tabPanel("Specialized Plotting Options"),
+                                         tabPanel("Specialized Plotting Options Output")
+                                       )
+                              )
                    ),
                   navbarMenu("Make Dendrogram",
                              tabPanel("Make Dendrogram"
@@ -134,7 +141,7 @@ shinyUI(navbarPage("Cluster Experiment",
                                         tabPanel("Specialized Plotting Options Output")
                                       )
                              ),
-                             tabPanel("Plot Heatmap",
+                             tabPanel("PCA Plot",
                                       tabsetPanel(
                                         tabPanel("Default Plot"),
                                         tabPanel("Specialized Plotting Options"),

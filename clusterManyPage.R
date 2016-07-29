@@ -184,13 +184,6 @@ clusterFunctionInputs <- function(id, label = "inputs") {
       ),
       
       
-      column (3, 
-              h3("Transform Function:"),
-              helpText("Help")
-              # *Input(),
-              # *Output("")
-      ), 
-      
       # #This might need to be down with clusterD by line 27X
       # #Enter Min clustr Sizes, not conditional
       column(3,
@@ -218,13 +211,14 @@ sSBInputs <- function(id, label = "SSB inputs") {
       column(3,
              h3("Sequential"),
              helpText("logical whether to use the sequential strategy"),
-             checkboxInput(ns("sequential"), label = NULL, value = FALSE)
+             checkboxGroupInput(ns("sequential"), label = NULL, choices = c("TRUE", "FALSE"), selected = FALSE)
       ),
       
       #Enter Betas, conditional upon sequential == TRUE
       #Danger!
-      column(6,
-             conditionalPanel(condition = paste0("input['", ns("sequential"), "']"),             
+      column(3,
+             conditionalPanel(condition = paste0("input['", ns("sequential"), "'][0] == 'TRUE'",
+                                                 "|| input['", ns("sequential"), "'][1] == 'TRUE'"),             
                               h3("Betas:"),
                               helpText("values of beta to be tried in sequential steps. 
                                        Only used for sequential=TRUE. 
@@ -242,7 +236,15 @@ sSBInputs <- function(id, label = "SSB inputs") {
                       at each iteration; otherwise the distance function will be determined by argument 
                       distFunction passed in clusterDArgs."),
              checkboxGroupInput(ns("subsample"), label = NULL, choices = c("TRUE", "FALSE"), selected = "FALSE")
-             )
+             ),
+      
+      conditionalPanel(condition = paste0("input['", ns("subsample"), "'][0] == 'FALSE'",
+                                          "|| input['", ns("subsample"), "'][1] == 'FALSE'"),
+                       column (3, 
+                               h3("Transform Function:"),
+                               helpText("Help")
+                       )
+      )
       
     ),
     
@@ -265,34 +267,6 @@ sSBInputs <- function(id, label = "SSB inputs") {
              numericInput(ns("random.seed"), label = NULL, value = 29, min = 1, step = 1)
              )
       
-      ),
-    
-    fluidRow(
-      #Many Isolated unconditional logical inputs
-      
-      column(3, 
-             h3("Verbose?"),
-             helpText("If TRUE it will print informative messages."),
-             checkboxInput(ns("verbose"), label = NULL, value = FALSE)
-      ),
-      
-      column(3, 
-             h3("Run?"),
-             helpText("If FALSE, doesn't run clustering, but just returns matrix of parameters that will be run,
-                      for the purpose of inspection by user (with rownames equal to the names of the resulting 
-                      column names of clMat object that would be returned if run=TRUE). Even if run=FALSE, however, 
-                      the function will create the dimensionality reductions of the data indicated by the user input."),
-             checkboxInput(ns("run"), label = NULL, value = TRUE)
-             ),
-      
-      column(3, 
-             h3("Erase Old?"),
-             helpText("Only relevant if input x is of class ClusterExperiment. 
-                      If TRUE, will erase existing workflow results (clusterMany as well as mergeClusters and combineMany).
-                      If FALSE, existing workflow results will have '_i' added to the clusterTypes value, 
-                      where i is one more than the largest such existing workflow clusterTypes."),
-             checkboxInput(ns("eraseOld"), label = NULL, value = FALSE)
-             )
       )
   )
 }
@@ -323,15 +297,6 @@ specializedInputs <- function(id, label = " Specializedinputs") {
     conditionalPanel(condition = paste0("input['", ns("clusterAlg"), "'][0] == 'Sequential Cluster'"),
                      h3("Sequential Clustering Arguments"),
                      fluidRow(
-                       
-                       #I have some further questions about this
-                       #logical subsample, conditional on sequential
-                       column(3,
-                              h3("Subsample"),
-                              helpText("whether to subsample via subsampleClustering to get the distance matrix at
-                                       each iteration; otherwise the distance matrix is set by arguments to clusterD."),
-                              checkboxInput(ns("subsampleSQC"), label = "Subsample?", value = FALSE)
-                              ),
                        #need a better understanding of what top.can is & what default value is
                        #enter top.can, conditional on sequential
                        
@@ -343,44 +308,21 @@ specializedInputs <- function(id, label = " Specializedinputs") {
                                        will be considered. This might result in smaller clusters being found. Current
                                        default is fairly large, so probably will have little effect."), 
                               numericInput(ns("top.canSQC"), min = 1, value = 666, label = NULL, step = 1)
-                       )
-                       
                        ),
-                     
-                     fluidRow(
-                       #enter k0, conditional on sequential
                        
-                       column(4,
-                              h3("K0"),
-                              helpText("The value of K at the first iteration of sequential algorithm" ),
-                              numericInput(ns("k0SQC"), label = NULL, value = 10, step = 1)
-                       ),
-                       ## assuming value between 0.0 - 1.0
-                       #enter Beta, conditional on sequential
-                       
-                       column(4,
-                              h3("Beta"),
-                              helpText("value between 0 and 1 to decide how stable clustership membership has to be before 
-                                       'finding' and removing the cluster."),
-                              numericInput(ns("betaSQC"), label = NULL, value = .5, min = 0, max = 1)                              ),
-                       
-                       # need default value
-                       #Enter remain.n, conditional on sequential
-                       
-                       column(4,
+                       column(6,
                               h3("remain.n"),
                               helpText("when only this number of samples are left (i.e. not yet clustered) 
                                        then algorithm will stop."), 
                               numericInput(ns("remain.nSQC"), min = 1, value = 666, label = NULL, step = 1)
                               )
-                       
-                       ),
+                     ),
                      
                      fluidRow(
                        # need default value
                        #Enter kmin, conditional on sequential
                        
-                       column(4,
+                       column(6,
                               h3("k.min"),
                               helpText("each iteration of sequential detection of clustering will decrease the beginning K 
                                        of subsampling, but not lower than k.min."), 
@@ -389,84 +331,27 @@ specializedInputs <- function(id, label = " Specializedinputs") {
                        # need default value
                        #enter k.max, conditional on sequential
                        
-                       column(4,
+                       column(6,
                               h3("k.max"),
                               helpText("algorithm will stop if K in iteration is increased beyond this point."), 
                               numericInput(ns("k.maxSQC"), min = 1, value = 666, label = NULL, step = 1)
-                       ),
-                       
-                       #logical verbose, conditional on sequential
-                       
-                       column(4,
-                              h3("Verbose"),
-                              helpText("whether the algorithm should print out information as to its progress."),
-                              checkboxInput(ns("verboseSQC"), label = NULL, value = FALSE)
                        )
                      )
-                     ),
+    ),
     
     
     conditionalPanel(condition = paste0("input['", ns("clusterAlg"), "'][0] == 'Cluster Distance'",
                                         "|| input['", ns("clusterAlg"), "'][1] == 'Cluster Distance'"),
-                     h3("Cluster Distance Arguments"),
+                     h3("Cluster Distance Argument"),
                      
                      fluidRow(
-                       column(3, 
-                              h3("Cluster Function"),
-                              helpText("Unsure of how to allow user to input fuction")
-                       ),
-                       #Choose type of algorithm, conditional on Distance
-                       
-                       column(3, 
-                              h3("Type of Algorithm"),
-                              helpText("character value of either '01' or 'K' determining whether the function 
-                                       given in clusterFunction should be called by clusterK or cluster01."),
-                              selectInput(ns("typeAlgCD"), choices = c("NULL", "01", "K"), label = NULL)                              ), 
-                       
-                       column(3,
-                              h3("Distance Function to be applied to matrix"),
-                              helpText("Unsure of how to allow user to input fuction")
-                       ),
-                       column(3, 
-                              h3("how to order the cluster"),
-                              helpText("UNFINISHED - How to order the cluster (either by size or by maximum alpha value).")
-                       )
-                       ),
-                     
-                     fluidRow(
-                       column(3,
+                       column(12,
                               h3("cluster Arguments"),
                               helpText("UNFINISHED - Arguments to be passed directly to the clusterFunction,
                                        beyond the required input.")
-                              ),
-                       
-                       
-                       #Can warnings be shown in Shiny? should they?
-                       #Logical cheack arguments, conditional on Distance
-                       
-                       column(3,
-                              h3("Check Cluster Arguments?"),
-                              helpText("Logical as to whether should give warning if arguments given that don't match
-                                       clustering choices given.Otherwise, inapplicable arguments will be ignored without warning."),
-                              checkboxInput(ns("checkArgsCD"), label = "Check Arguments?", value = FALSE)                              ),
-                       #Enter Alpha, conditional on DIstance
-                       
-                       
-                       column(3,
-                              h3("Alpha"),
-                              helpText("a cutoff value of how much similarity needed for drawing blocks
-                                       (lower values more strict)." ),
-                              numericInput(ns("alphaCD"), label = "alpha", value = .01, step = .001)                              ),
-                       #Enter Min size, conditional on Distance
-                       
-                       column(3,
-                              h3("MinSize"),
-                              helpText("the minimum number of samples in a cluster. Clusters found below this size will 
-                                       be discarded and samples in the cluster will be given a cluster assignment of '-1'
-                                       to indicate that they were not clustered."),
-                              numericInput(ns("minSizeCD"), value = 2, label = NULL)                              )
                        )
-                       ),
+                     )
+    ),
     conditionalPanel(condition = paste0("input['", ns("clusterAlg"), "'][0] == 'Cluster Subsample'",
                                         "|| input['", ns("clusterAlg"), "'][1] == 'Cluster Subsample'",
                                         "|| input['", ns("clusterAlg"), "'][2] == 'Cluster Subsample'"),
@@ -487,7 +372,7 @@ specializedInputs <- function(id, label = " Specializedinputs") {
                        
                        column(6,
                               h3("Classify Method"),
-                              helpText("method for determining which samples should be used in the co-occurance matrix. 
+                              helpText("WHAT SHOULD I DELETE SPECIFICALLY? method for determining which samples should be used in the co-occurance matrix. 
                                        'All'= all samples, 'OutOfSample'= those not subsampled, and 'InSample'=those in the subsample.
                                        'All' and 'OutOfSample' require that you provide classifyFunction to define how to classify
                                        those samples not in the subsample into a cluster. If 'All' is chosen,
@@ -498,12 +383,6 @@ specializedInputs <- function(id, label = " Specializedinputs") {
                        ),
                      
                      fluidRow(
-                       
-                       column(4,
-                              h3("Classify Function"),
-                              helpText("UNFINISHED - A function which, given the output of clusterFunction and new data points, 
-                                       will classify the new data points into a cluster.")
-                              ),
                        #Need default value
                        #Enter number of resamples, conditional on Subsample
                        column(4,
@@ -557,10 +436,10 @@ makeCode <- function(input, output, session, stringsAsFactors) {
       clusterManyCode <- paste(clusterManyCode, ", alphas = c(", input$alphas, ")", sep = "")
     }
     
-    clusterManyCode <- paste(clusterManyCode, ", sequential = ", input$sequential, sep = "")
+    clusterManyCode <- paste(clusterManyCode, ", sequential = c(", paste(input$sequential, collapse = ", "), ")", sep = "")
     
-    if(input$sequential) {
-      clusterManyCode <- paste(clusterManyCode, ", betas = ", input$betas, sep = "")
+    if("TRUE" %in% input$sequential) {
+      clusterManyCode <- paste(clusterManyCode, ", betas = c(", input$betas, ")", sep = "")
     }
     
     clusterManyCode <- paste(clusterManyCode, ", subsample = c(", paste(input$subsample, collapse = ", "), ")",
@@ -570,23 +449,19 @@ makeCode <- function(input, output, session, stringsAsFactors) {
                              ", eraseOld = ", input$eraseOld, sep = "")
     
     if ( "Sequential Cluster" %in% input$clusterAlg) {
-      clusterManyCode <- paste(clusterManyCode, ", seqArgs = list( subsample = ", input$subsampleSQC, 
-                               ", top.can = ", input$top.canSQC, ", k0 = ", input$k0SQC, 
-                               ", beta = ", input$betaSQC, ", remain.n = ", input$remain.nSQC, ", kmin = ", input$k.minSQC,
-                               ", kmax = ", input$k.maxSQC, ", verbose = ", input$verboseSQC, ")", sep = "")
+      clusterManyCode <- paste(clusterManyCode, ", seqArgs = list(", " top.can = ", input$top.canSQC, 
+                               ", remain.n = ", input$remain.nSQC, ", kmin = ", input$k.minSQC,
+                               ", kmax = ", input$k.maxSQC, ")", sep = "")
     }
     
     if("Cluster Distance" %in% input$clusterAlg) {
-      clusterManyCode <- paste(clusterManyCode, ", clusterDArgs = list( typeAlg = ", input$typeAlgCD, 
-                               ", checkArgs = ", input$checkArgsCD, 
-                               ", alpha = ", input$alphaCD, ", minSize = ", input$minSizeCD,
-                               ", clusterArgs = list(", input$clusterArgsSC, "))", sep = "")
+      clusterManyCode <- paste(clusterManyCode, ", clusterArgs = list(", input$clusterArgsSC, "))", sep = "")
     }
     
     if ( "Cluster Subsample" %in% input$clusterAlg) {
       clusterManyCode <- paste(clusterManyCode, ", subsampleArgs = list( classifyMethods = '", input$classifyMethodSC, 
-                               "', resamp.numSC  = ", input$resamp.numSC, ", clusterFunction = '", input$clusterFunctionSC, 
-                               "', samp.p = ", input$samp.pSC, ", clusterArgs = list(", input$clusterArgsSC, "))", sep = "")
+                               "', resamp.numSC  = ", input$resamp.numSC,"', samp.p = ", input$samp.pSC, 
+                               ", clusterArgs = list(", input$clusterArgsSC, "))", sep = "")
     }
     
     clusterManyCode <- paste(clusterManyCode, ")", sep = "")
