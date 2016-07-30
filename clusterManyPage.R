@@ -10,12 +10,11 @@ dimReduceInput <- function(id, label = "inputs") {
   
   tagList(
 
-    fluidRow(
-      column (4, 
-              h3("Dimension Reduction:"),
-              helpText("Choose what types of dimensionality reduction to perform before clustering. "),
-              checkboxGroupInput(ns("dimReduce"), choices = c("none","PCA", "var","cv", "mad"), 
-                          label = "Dimensionality Reduction Method:", selected = "none")
+      fluidRow(
+        column(2, h3("Dimension Reduction:")),
+        column(6, checkboxGroupInput(ns("dimReduce"), choices = c("none","PCA", "var","cv", "mad"), 
+                                     label = "Dimensionality Reduction Method:", selected = "none")),
+        column(12, helpText("Choose what types of dimensionality reduction to perform before clustering. "))
       ),
       column (4, 
               #horrible syntax and overkill, but what to do with the poor design of Shiny for this circumstance?
@@ -56,7 +55,7 @@ dimReduceInput <- function(id, label = "inputs") {
                                             value = 1)
               )
     )
-    )
+    
   )
 }
 
