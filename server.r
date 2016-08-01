@@ -169,6 +169,20 @@ shinyServer(function(input, output, session) {
       })
   })
   
+  output$downloadDefaultPlotPCCombineMany <- downloadHandler(
+    filename = function(){ paste("defaultPlotFromCombineMany.png")},
+    content = function(file){ 
+      #ggsave(fileName(), plot = plotClusters(cE), )
+      png(file)
+      defaultMar<-par("mar")
+      plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
+      par(mar=plotCMar)
+      #Need Help here!
+      plotClusters(cE)
+      dev.off()
+    }
+  )
+  
   # End Combine Many tab
   
   #####################################################
@@ -182,6 +196,24 @@ shinyServer(function(input, output, session) {
     makeDendrogramCode()
   })
 
+  observeEvent(input$runMakeDendrogram, {
+    output$imgPlotDendrogram <- renderPlot({
+      # cE is the clusterExperiment object 
+      eval(parse(text = makeDendrogramCode()))
+      defaultMar<-par("mar")
+      plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
+      par(mar=plotCMar)
+      makeDendrogram(cE)
+    })
+    output$imgPlotHeatmapMD <- renderPlot({
+      # cE is the clusterExperiment object 
+      defaultMar<-par("mar")
+      plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
+      par(mar=plotCMar)
+      plotHeatmap(cE)
+    })
+  })
+  
 })
 
 

@@ -108,7 +108,8 @@ shinyUI(navbarPage("Cluster Experiment",
                                            combineManyInput("cMInputs", "")
                                   ),
                                   tabPanel("Plot Clusters",
-                                           plotOutput("imgCombineManyPC")
+                                           plotOutput("imgCombineManyPC"),
+                                           downloadButton("downloadDefaultPlotPCCombineMany", label = "DownLoad this Plot")
                                    ),
                                   tabPanel("PCA Plot",
                                            plotOutput("imgCombineManyPCC")
@@ -124,18 +125,10 @@ shinyUI(navbarPage("Cluster Experiment",
                                       makeDendrogramInput("mDInputs", "")
                              ),
                              tabPanel("Plot Dendrogram",
-                                      tabsetPanel(
-                                        tabPanel("Default Plot"),
-                                        tabPanel("Specialized Plotting Options"),
-                                        tabPanel("Specialized Plotting Options Output")
-                                      )
+                                      plotOutput("imgPlotDendrogram")
                               ),
                              tabPanel("Plot HeatMap",
-                                      tabsetPanel(
-                                        tabPanel("Default Plot"),
-                                        tabPanel("Specialized Plotting Options"),
-                                        tabPanel("Specialized Plotting Options Output")
-                                      )
+                                      plotOutput("imgPlotHeatmapMD")
                               )
                            )
                   ),

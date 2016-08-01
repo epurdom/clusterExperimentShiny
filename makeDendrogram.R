@@ -25,11 +25,11 @@ makeDendrogramInput <- function(id, label = "cMInputs") {
     ),
     tags$hr(),
     fluidRow(
-      column(3, checkboxInput(ns("aNDims"), value = FALSE, label = "Add nDims?")),
-      conditionalPanel(condition = paste0("input['", ns("aNDims"), "']"),
-          column(3, numericInput(ns("nDims"), label = "nDims", value = 5)),
-          column(2, checkboxInput(ns("hNDims"), value = FALSE, label = "Help Text and Instructions")),
-          conditionalPanel(condition = paste0("input['", ns("hNDims"), "']"),
+      column(3, checkboxInput(ns("andims"), value = FALSE, label = "Add ndims?")),
+      conditionalPanel(condition = paste0("input['", ns("andims"), "']"),
+          column(3, numericInput(ns("ndims"), label = "ndims", value = 5)),
+          column(2, checkboxInput(ns("hndims"), value = FALSE, label = "Help Text and Instructions")),
+          conditionalPanel(condition = paste0("input['", ns("hndims"), "']"),
               column(4, helpText("integer An integer identifying how many dimensions to reduce
                                  to in the reduction specified by dimReduce")
               )
@@ -102,9 +102,9 @@ makeMakeDendrogramCode <- function(input, output, session, stringsAsFactors) {
   code <- reactive({
     code <- paste("cE <- makeDendrogram(cE ")
     if(input$aDimReduce)
-      code <- paste(code, ", dimReduce = ", input$dimReduce)
-    if(input$aNDims)
-      code <- paste(code, ", nDims = ", input$nDims)
+      code <- paste(code, ", dimReduce = '", input$dimReduce, "'", sep = "")
+    if(input$andims)
+      code <- paste(code, ", ndims = ", input$ndims)
     if(input$aIgnoreUnassignedVar)
       code <- paste(code, ", ignoreUnassignedVar = ", input$ignoreUnassignedVar)
     if(input$aClusterNames)
