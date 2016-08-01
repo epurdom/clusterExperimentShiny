@@ -22,27 +22,14 @@ shinyServer(function(input, output, session) {
   
   rowDataFile <- callModule(rowDataFile, "fileInput",
                             stringsAsFactors = FALSE)  
-  # sE <- reactive({
-  #   SummarizedExperiment(data.matrix(datafile()))
-  # })
-  
-   # output$testText <- renderText({
-   #  text <- reactive({
-   #    paste("dim assay: ", dim(sE), ", dim colData: ")#, dim(colData(sE)))
-   #  })
-   #  text()
-   # })
   
   
   output$isRda <- renderText({
     holder <- rdaFile()
-    
     if (is.null(holder))
       return("No data uploaded yet!")
-    
-    else if(class(holder)[1] == "SummarizedExperiment" || class(holder)[1] == "clusterExperiment") {
+    else 
       sE <<- holder
-    }
     return(paste("Summarized experiment object successfully created, with dimensions of: ", dim(sE)[1], " by ", dim(sE)[2]))
   })
   
@@ -99,8 +86,7 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$runCM, {
       output$imgCE <- renderPlot({
-      # cE is the clusterExperiment object from the clusterMany function,
-      # which will remain unaltered so long as clusterMany isn'r run again
+      # cE is the clusterExperiment object 
       cE <<- renderCE(paste("cE < clusterExperiment(sE, isCount = ", input$isCount, clusterManyCode()), sE)
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
@@ -118,14 +104,10 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$runPCCM, {
     output$imgPCCM <- renderPlot({
-      #cE <<- renderCE(paste(clusterManyStartPageCode(), clusterManyCode()), sE)
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
       eval(parse(text = plotClustersCMCode()))
-      #print("Reached A. B.")
-      #print("testing plot specs", plotClustersCMCode())
-      #paste("testing plot specs", plotClustersCMCode())
     })
  })
   
@@ -156,10 +138,50 @@ shinyServer(function(input, output, session) {
     }
   )
   
-  #####################################################
   # End Cluster Many tab
+  
+  #####################################################
+  # Start Combine Many Tab
   #####################################################
   
+  combineManyCode <- callModule(makeCombineManyCode, "cMInputs", 
+                                stringsAsFactors = FALSE)
+  
+  output$combineManyCode <- renderText({
+    combineManyCode()
+  })
+  
+  observeEvent(input$runCombineMany, {
+    output$imgCombineManyPC <- renderPlot({
+      # cE is the clusterExperiment object 
+      eval(parse(text = combineManyCode()))
+      defaultMar<-par("mar")
+      plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
+      par(mar=plotCMar)
+      plotClusters(cE)
+    })
+    output$imgCombineManyPCC <- renderPlot({
+      # cE is the clusterExperiment object 
+      defaultMar<-par("mar")
+      plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
+      par(mar=plotCMar)
+      plotCoClustering(cE)
+      })
+  })
+  
+  # End Combine Many tab
+  
+  #####################################################
+  # Start make Dendrogram Tab
+  #####################################################
+  
+  makeDendrogramCode <- callModule(makeMakeDendrogramCode, "mDInputs", 
+                                stringsAsFactors = FALSE)
+  
+  output$makeDendrogramCode <- renderText({
+    makeDendrogramCode()
+  })
+
 })
 
 

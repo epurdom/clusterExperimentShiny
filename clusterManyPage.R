@@ -11,49 +11,53 @@ dimReduceInput <- function(id, label = "inputs") {
   tagList(
 
       fluidRow(
-        column(2, h3("Dimension Reduction:")),
-        column(6, checkboxGroupInput(ns("dimReduce"), choices = c("none","PCA", "var","cv", "mad"), 
+        column(3, h3("Dimension Reduction:")),
+        column(3, checkboxGroupInput(ns("dimReduce"), choices = c("none","PCA", "var","cv", "mad"), 
                                      label = "Dimensionality Reduction Method:", selected = "none")),
-        column(12, helpText("Choose what types of dimensionality reduction to perform before clustering. "))
+        column(6, h5("Description"),
+               helpText("Choose what types of dimensionality reduction to perform before clustering. "))
       ),
-      column (4, 
-              #horrible syntax and overkill, but what to do with the poor design of Shiny for this circumstance?
-              conditionalPanel(condition = paste0("input['", ns("dimReduce"), "'][0] == 'PCA'",
-                                                  "|| input['", ns("dimReduce"), "'][1] == 'PCA'",
-                                                  "|| input['", ns("dimReduce"), "'][2] == 'PCA'",
-                                                  "|| input['", ns("dimReduce"), "'][3] == 'PCA'",
-                                                  "|| input['", ns("dimReduce"), "'][4] == 'PCA'"),
-                               h3("Number of Principle Components to retain:"),
-                               helpText("please enter a list (separated by commas) of the number of PCs to use
-                                        (when 'PCA' is identified in dimReduce).
-                                        If NA is included, then the full dataset will also be included."),
-                               textInput(ns("nPCADims"),
-                                            label = "Number of PCs to retain",
-                                            value = 1)
-              )
+      conditionalPanel(condition = paste0("input['", ns("dimReduce"), "'][0] == 'PCA'",
+                                          "|| input['", ns("dimReduce"), "'][1] == 'PCA'",
+                                          "|| input['", ns("dimReduce"), "'][2] == 'PCA'",
+                                          "|| input['", ns("dimReduce"), "'][3] == 'PCA'",
+                                          "|| input['", ns("dimReduce"), "'][4] == 'PCA'"),
+                        tags$hr(),
+                        fluidRow( 
+                              #horrible syntax and overkill, but what to do with the poor design of Shiny for this circumstance?
+                          column(3, h3("Number of Principle Components to retain:")),
+                          column(3, textInput(ns("nPCADims"), label = "Number of PCs to retain", value = 1)),
+                          column(6, h4("Description"), helpText("please enter a list (separated by commas) of the 
+                                                                number of PCs to use(when 'PCA' is identified in 
+                                                                dimReduce).If NA is included, then the full dataset 
+                                                                will also be included.")
+                          )
+                
+                        )
       ),
       #horrible syntax and overkill, but what to do with the poor design of Shiny for this circumstance?
-      column(4,
-             conditionalPanel(condition = paste0("input['", ns("dimReduce"), "'][0] == 'mad'",
-                                                 "|| input['", ns("dimReduce"), "'][1] == 'mad'",
-                                                 "|| input['", ns("dimReduce"), "'][2] == 'mad'",
-                                                 "|| input['", ns("dimReduce"), "'][3] == 'mad'",
-                                                 "|| input['", ns("dimReduce"), "'][4] == 'mad'",
-                                                 "|| input['", ns("dimReduce"), "'][0] == 'var'",
-                                                 "|| input['", ns("dimReduce"), "'][1] == 'var'",
-                                                 "|| input['", ns("dimReduce"), "'][2] == 'var'",
-                                                 "|| input['", ns("dimReduce"), "'][0] == 'cv'",
-                                                 "|| input['", ns("dimReduce"), "'][1] == 'cv'",
-                                                 "|| input['", ns("dimReduce"), "'][2] == 'cv'",
-                                                 "|| input['", ns("dimReduce"), "'][3] == 'cv'"),
-                               h3("How many variables the dimensionality reduction should keep :"),
-                               helpText("Please enter a list (separated by commas) of the number of the most variable
-                                        features to keep (when 'var', 'cv', or 'mad' is identified in dimReduce).
-                                        If NA is included, then the full dataset will also be included."),
-                               textInput(ns("nVarDims"),
-                                            label = "Number of dimensions to retain",
-                                            value = 1)
-              )
+      conditionalPanel(condition = paste0("input['", ns("dimReduce"), "'][0] == 'mad'",
+                                          "|| input['", ns("dimReduce"), "'][1] == 'mad'",
+                                          "|| input['", ns("dimReduce"), "'][2] == 'mad'",
+                                          "|| input['", ns("dimReduce"), "'][3] == 'mad'",
+                                          "|| input['", ns("dimReduce"), "'][4] == 'mad'",
+                                          "|| input['", ns("dimReduce"), "'][0] == 'var'",
+                                          "|| input['", ns("dimReduce"), "'][1] == 'var'",
+                                          "|| input['", ns("dimReduce"), "'][2] == 'var'",
+                                          "|| input['", ns("dimReduce"), "'][0] == 'cv'",
+                                          "|| input['", ns("dimReduce"), "'][1] == 'cv'",
+                                          "|| input['", ns("dimReduce"), "'][2] == 'cv'",
+                                          "|| input['", ns("dimReduce"), "'][3] == 'cv'"),
+                        tags$hr(),
+                        fluidRow(
+                
+                          column(3, h3("How many variables the dimensionality reduction should keep :")),
+                          column(3, textInput(ns("nVarDims"), label = "Number of dimensions to retain", value = 1)),
+                          column(6, h4("Description"), helpText("Please enter a list (separated by commas) of the number
+                                                        of the most variable features to keep (when 'var', 'cv', or 'mad' 
+                                                        is identified in dimReduce). If NA is included, then the full
+                                                        dataset will also be included."))
+                       )
     )
     
   )
@@ -207,65 +211,67 @@ sSBInputs <- function(id, label = "SSB inputs") {
       # I need some more technical knowhow to feel confident in my Sequential design, 
       #I think this may be reduntant visually, perhaps this should be handled internally
       # Logical Sequential, not conditional
-      column(3,
-             h3("Sequential"),
-             helpText("logical whether to use the sequential strategy"),
-             checkboxGroupInput(ns("sequential"), label = NULL, choices = c("TRUE", "FALSE"), selected = FALSE)
-      ),
+      column(3, h3("Sequential")),
+      column(3, checkboxGroupInput(ns("sequential"), label = NULL, choices = c("TRUE", "FALSE"), selected = FALSE)),
+      column(6, h4("Description"), helpText("logical whether to use the sequential strategy"))
+    ),
       
       #Enter Betas, conditional upon sequential == TRUE
-      #Danger!
-      column(3,
-             conditionalPanel(condition = paste0("input['", ns("sequential"), "'][0] == 'TRUE'",
-                                                 "|| input['", ns("sequential"), "'][1] == 'TRUE'"),             
-                              h3("Betas:"),
-                              helpText("values of beta to be tried in sequential steps. 
+      #Danger! 
+    conditionalPanel(condition = paste0("input['", ns("sequential"), "'][0] == 'TRUE'",
+                                        "|| input['", ns("sequential"), "'][1] == 'TRUE'"),
+                     tags$hr(),
+                     fluidRow(
+                       column(3, h3("Betas:")),
+                       column(3, textInput(ns("betas"),
+                                           label = "beta vector",
+                                           value = NULL)
+                       ),
+                       column(6, h4("Description"), helpText("values of beta to be tried in sequential steps. 
                                        Only used for sequential=TRUE. 
                                        Determines the similarity between two clusters required in order to deem 
-                                       the cluster stable. Takes on values in [0,1]." ),
-                              textInput(ns("betas"),
-                                        label = "beta vector",
-                                        value = NULL)
-                              )
+                                       the cluster stable. Takes on values in [0,1]." )
+                       )
       ),
       #Logical subsample, not conditional 
-      column(3,
-             h3("Subsample"),
-             helpText("logical as to whether to subsample via subsampleClustering to get the distance matrix 
-                      at each iteration; otherwise the distance function will be determined by argument 
-                      distFunction passed in clusterDArgs."),
-             checkboxGroupInput(ns("subsample"), label = NULL, choices = c("TRUE", "FALSE"), selected = "FALSE")
-             ),
+      tags$hr(),
+      fluidRow(
+             column(3, h3("Subsample")),
+             column(3, checkboxGroupInput(ns("subsample"), label = NULL, choices = c("TRUE", "FALSE"), selected = "FALSE")),
+             column(6, h3("Description"), helpText("logical as to whether to subsample via subsampleClustering to get 
+                                                    the distance matrix at each iteration; otherwise the distance 
+                                                    function will be determined by argument distFunction passed in 
+                                                    clusterDArgs."))
+       ),
       
       conditionalPanel(condition = paste0("input['", ns("subsample"), "'][0] == 'FALSE'",
                                           "|| input['", ns("subsample"), "'][1] == 'FALSE'"),
-                       column (3, 
+                       tags$hr(),
+                       fluidRow( 
                                h3("Transform Function:"),
                                helpText("Help")
                        )
       )
       
     ),
-    
+    tags$hr(),
     fluidRow(
       #Enter number of cores, not conditional
-      column(3,
-             h3("Number of Cores"),
-             helpText("The number of threads"),
-             numericInput(ns("ncores"), label = NULL, value = 1, min = 1, step = 1)
+      column(3, h3("Number of Cores")),
+      column(3, numericInput(ns("ncores"), label = NULL, value = 1, min = 1, step = 1)),
+      column(6, h4("Description"), helpText("The number of threads"))
       ),
       
       #enter random seed, not conditional
-      column(3,
-             h3("Random Seed"),
-             helpText("a value to set seed before each run of clusterSingle
+    tags$hr(),
+    fluidRow(             
+      column(3,h3("Random Seed")),
+      column(3, numericInput(ns("random.seed"), label = NULL, value = 29, min = 1, step = 1)),
+      column(6, h4("Description"), helpText("a value to set seed before each run of clusterSingle
                       (so that all of the runs are run on the same subsample of the data). 
                       Note, if 'random.seed' is set, argument 'ncores' should NOT be passed via subsampleArgs; 
                       instead set the argument 'ncores' of clusterMany directly 
-                      (which is preferred for improving speed anyway)."),
-             numericInput(ns("random.seed"), label = NULL, value = 29, min = 1, step = 1)
-             )
-      
+                      (which is preferred for improving speed anyway)."))
       )
   )
 }
@@ -280,63 +286,67 @@ specializedInputs <- function(id, label = " Specializedinputs") {
     ####################
     
     #Choose clustering function, not conditional
+    h2("Choose a Clustering Algorithm and input their arguments:"),
     fluidRow(
-      h2("Choose a Clustering Algorithm and input their arguments:"),
-      column (12, 
-              h3("Clustering algorithm:"),
-              helpText("Choose what type of clustering method to use. "),
-              checkboxGroupInput(ns("clusterAlg"), choices = c("Sequential Cluster", "Cluster Distance",
-                                                               "Cluster Subsample"), 
-                          label = NULL, selected = NULL)
-      )
+      column(3, h3("Clustering algorithm:")),
+      column(3, checkboxGroupInput(ns("clusterAlg"), choices = c("Sequential Cluster", "Cluster Distance",
+                                                                 "Cluster Subsample"), 
+                                   label = NULL, selected = NULL)),
+      column(6, h4("Description"), helpText("Choose what type of clustering method to use. "))
     ),
     
     
     #Input sequential clustering arguments, conditional upon sequential clustering choice
     conditionalPanel(condition = paste0("input['", ns("clusterAlg"), "'][0] == 'Sequential Cluster'"),
+                     tags$hr(),
                      h3("Sequential Clustering Arguments"),
                      fluidRow(
                        #need a better understanding of what top.can is & what default value is
                        #enter top.can, conditional on sequential
                        
-                       column(6,
-                              h3("top.can"),
+                       column(3, h3("top.can")),
+                       column(3,numericInput(ns("top.canSQC"), min = 1, value = 666, label = NULL, step = 1)),
+                       column(6, h4("Description"),
                               helpText("only the top.can clusters from clusterD (ranked by 'orderBy' argument given to
-                                       clusterD) will be compared pairwise for stability. Making this very big will 
-                                       effectively remove this parameter and all pairwise comparisons of all clusters found 
-                                       will be considered. This might result in smaller clusters being found. Current
-                                       default is fairly large, so probably will have little effect."), 
-                              numericInput(ns("top.canSQC"), min = 1, value = 666, label = NULL, step = 1)
-                       ),
-                       
-                       column(6,
-                              h3("remain.n"),
-                              helpText("when only this number of samples are left (i.e. not yet clustered) 
-                                       then algorithm will stop."), 
-                              numericInput(ns("remain.nSQC"), min = 1, value = 666, label = NULL, step = 1)
-                              )
+                              clusterD) will be compared pairwise for stability. Making this very big will 
+                              effectively remove this parameter and all pairwise comparisons of all clusters found 
+                              will be considered. This might result in smaller clusters being found. Current
+                              default is fairly large, so probably will have little effect.")
+                        )
                      ),
-                     
+                     tags$hr(),
+                     fluidRow(
+                       column(3, h3("remain.n")),
+                       column(3, numericInput(ns("remain.nSQC"), min = 1, value = 666, label = NULL, step = 1)),
+                       column(6, h4("Description"),
+                              helpText("when only this number of samples are left (i.e. not yet clustered) 
+                                       then algorithm will stop.")
+                       )
+                     ),
+                     tags$hr(),
                      fluidRow(
                        # need default value
                        #Enter kmin, conditional on sequential
                        
-                       column(6,
-                              h3("k.min"),
+                       column(3, h3("k.min")),
+                       column(3, numericInput(ns("k.minSQC"), min = 1, value = 666, label = NULL, step = 1)),
+                       column(6, h4("Description"), 
                               helpText("each iteration of sequential detection of clustering will decrease the beginning K 
-                                       of subsampling, but not lower than k.min."), 
-                              numericInput(ns("k.minSQC"), min = 1, value = 666, label = NULL, step = 1)
-                              ),
+                                       of subsampling, but not lower than k.min.")
+                       )
+                     ),
                        # need default value
                        #enter k.max, conditional on sequential
-                       
-                       column(6,
-                              h3("k.max"),
-                              helpText("algorithm will stop if K in iteration is increased beyond this point."), 
-                              numericInput(ns("k.maxSQC"), min = 1, value = 666, label = NULL, step = 1)
-                       )
+                     tags$hr(),
+                     fluidRow(
+                        column(3, h3("k.max")),
+                        column(3, numericInput(ns("k.maxSQC"), min = 1, value = 666, label = NULL, step = 1)),
+                        column(6, h4("Description"), 
+                               helpText("algorithm will stop if K in iteration is increased beyond this point.")
+                        )
                      )
     ),
+    
     
     
     conditionalPanel(condition = paste0("input['", ns("clusterAlg"), "'][0] == 'Cluster Distance'",
@@ -344,9 +354,8 @@ specializedInputs <- function(id, label = " Specializedinputs") {
                      h3("Cluster Distance Argument"),
                      
                      fluidRow(
-                       column(12,
-                              h3("cluster Arguments"),
-                              helpText("UNFINISHED - Arguments to be passed directly to the clusterFunction,
+                       column(3, h3("cluster Arguments")),
+                       column(3, h4("Decription"), helpText("UNFINISHED - Arguments to be passed directly to the clusterFunction,
                                        beyond the required input.")
                        )
                      )
@@ -356,51 +365,58 @@ specializedInputs <- function(id, label = " Specializedinputs") {
                                         "|| input['", ns("clusterAlg"), "'][2] == 'Cluster Subsample'"),
                      h3("Cluster Subsample Arguments"),
                      fluidRow(
-                       column(3, 
-                              h3("Cluster Function"),
-                              helpText("UNFINISHED - Unsure of how to allow user to input fuction. 
-                                       Only allowing choice of 'pam' and 'kmeans'"),
-                              selectInput(ns("clusterFunctionSC"), choices = c("kmeans", "pam"), label = NULL)
-                              ),
-                       column(3,
-                              h3("cluster Arguments"),
-                              helpText("UNFINISHED - Arguments to be passed directly to the clusterFunction,
-                                       beyond the required input.")
-                              ), 
+                       column(3, h3("Cluster Function")),
+                       column(3, selectInput(ns("clusterFunctionSC"), choices = c("kmeans", "pam"), label = NULL)),
+                       column(6, h4("Description"), helpText("UNFINISHED - Unsure of how to allow user to input fuction. 
+                                       Only allowing choice of 'pam' and 'kmeans'")
+                       )
+                     ),
+                     tags$hr(),
+                     fluidRow(
+                       column(3, h3("cluster Arguments")),
+                       column(6, h4("Description"), helpText("UNFINISHED - Arguments to be passed directly 
+                                                             to the clusterFunction, beyond the required input.")
+                       )
+                      ), 
                        #Choose type of classifying method, conditional on Subsample
-                       
-                       column(6,
-                              h3("Classify Method"),
-                              helpText("WHAT SHOULD I DELETE SPECIFICALLY? method for determining which samples should be used in the co-occurance matrix. 
-                                       'All'= all samples, 'OutOfSample'= those not subsampled, and 'InSample'=those in the subsample.
-                                       'All' and 'OutOfSample' require that you provide classifyFunction to define how to classify
-                                       those samples not in the subsample into a cluster. If 'All' is chosen,
-                                       all samples will be classified into clusters via the classifyFunctions, 
-                                       not just those that are out-of-sample. Note if 'All' isn't chosen it is possible to get NAs in 
-                                       resulting D matrix (particularly if not enough subsamples taken)."),
-                              selectInput(ns("classifyMethodSC"), choices = c("All", "OutOfSample", "InSample"), label = NULL)                              )
+                     tags$hr(),
+                     fluidRow(
+                       column(3, h3("Classify Method")),
+                       column(3, selectInput(ns("classifyMethodSC"), choices = c("All", "OutOfSample", "InSample"), 
+                                             label = NULL)                              
                        ),
-                     
+                       column(6, helpText("WHAT SHOULD I DELETE SPECIFICALLY? method for determining which samples should
+                                          be used in the co-occurance matrix. 'All'= all samples, 'OutOfSample'= those 
+                                          not subsampled, and 'InSample'=those in the subsample. 'All' and 'OutOfSample'
+                                          require that you provide classifyFunction to define how to classify
+                                          those samples not in the subsample into a cluster. If 'All' is chosen,
+                                          all samples will be classified into clusters via the classifyFunctions, 
+                                          not just those that are out-of-sample. Note if 'All' isn't chosen it is possible to get NAs in 
+                                          resulting D matrix (particularly if not enough subsamples taken).")
+                       )
+                     ),
+                     tags$hr(),
                      fluidRow(
                        #Need default value
                        #Enter number of resamples, conditional on Subsample
-                       column(4,
-                              h3("Number of resamples"),
-                              helpText("The number of subsamples to draw." ),
-                              numericInput(ns("resamp.numSC"), label = NULL, value = 10, step = 1)                       ),
+                       column(3, h3("Number of resamples")),
+                       column(3, numericInput(ns("resamp.numSC"), label = NULL, value = 10, step = 1)),
+                       column(6, h3("Description"), helpText("The number of subsamples to draw." ))
+                     ),
                        ## assuming value between 0.0 - 1.0
                        #CEnter proportion of sampels, conditional on Subsample
-                       
-                       column(4,
-                              h3("Proportion of Samples"),
-                              helpText("The number of subsamples to draw. Please enter a number between 0 and 1"),
-                              numericInput(ns("samp.pSC"), label = NULL, value = .5, min = 0, max = 1)                       )
-                       
+                     tags$hr(),
+                     fluidRow(
+                       column(3, h3("Proportion of Samples")),
+                       column(3, numericInput(ns("samp.pSC"), label = NULL, value = .5, min = 0, max = 1)),                    
+                       column(6, h4("Description"), helpText("The number of subsamples to draw. Please enter a number
+                                                             between 0 and 1")
+                       )
+
                     )
     )
     
-)
-}
+)}
 
 
 #I may need to store vectors safely by assigning to variables and then inputting them

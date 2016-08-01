@@ -102,27 +102,26 @@ shinyUI(navbarPage("Cluster Experiment",
                     tabPanel("Combine Many",
                                 fluidRow(),
                                 navlistPanel(
-                                  tabPanel("Combine Many Inputs"),
+                                  tabPanel("Combine Many Inputs",
+                                           textOutput("combineManyCode"),
+                                           actionButton("runCombineMany", "Run This Code"),
+                                           combineManyInput("cMInputs", "")
+                                  ),
                                   tabPanel("Plot Clusters",
-                                           tabsetPanel(
-                                             tabPanel("Default Plot"),
-                                             tabPanel("Specialized Plotting Options"),
-                                             tabPanel("Specialized Plotting Options Output")
-                                           )
+                                           plotOutput("imgCombineManyPC")
                                    ),
                                   tabPanel("PCA Plot",
-                                           tabsetPanel(
-                                             tabPanel("Default Plot"),
-                                             tabPanel("Specialized Plotting Options"),
-                                             tabPanel("Specialized Plotting Options Output")
-                                           )
+                                           plotOutput("imgCombineManyPCC")
                                   )
                                 )
                    ),
                   tabPanel("Make Dendrogram",
                            fluidRow(),
                            navlistPanel(
-                             tabPanel("Make Dendrogram"
+                             tabPanel("Make Dendrogram",
+                                      textOutput("makeDendrogramCode"),
+                                      actionButton("runMakeDendrogram", "Run This Code"),
+                                      makeDendrogramInput("mDInputs", "")
                              ),
                              tabPanel("Plot Dendrogram",
                                       tabsetPanel(
