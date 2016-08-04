@@ -87,7 +87,8 @@ shinyServer(function(input, output, session) {
   observeEvent(input$runCM, {
       output$imgCE <- renderPlot({
       # cE is the clusterExperiment object 
-      cE <<- renderCE(paste("cE < clusterMany(sE, isCount = ", input$isCount, clusterManyCode()), sE)
+      cE <<- renderCE(paste("cE < clusterMany(sE, isCount = ", input$isCount, clusterManyCode()), sE,
+                      sep = "")
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
