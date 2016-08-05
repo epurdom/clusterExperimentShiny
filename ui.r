@@ -112,7 +112,7 @@ shinyUI(navbarPage("Cluster Experiment",
                                            plotOutput("imgCombineManyPC"),
                                            downloadButton("downloadDefaultPlotPCCombineMany", label = "DownLoad this Plot")
                                    ),
-                                  tabPanel("PCA Plot",
+                                  tabPanel("Plot CoClusters",
                                            plotOutput("imgCombineManyPCC")
                                   )
                                 )
@@ -136,7 +136,11 @@ shinyUI(navbarPage("Cluster Experiment",
                   tabPanel("Merge Clusters",
                            fluidRow(),
                            navlistPanel(
-                             tabPanel("Merge Clusters"),
+                             
+                             tabPanel("Merge Clusters",
+                                      textOutput("mergeClustersCode"),
+                                      mergeClustersInput("mergeCInputs", "")
+                                      ),
                              tabPanel("Plot Clusters",
                                       tabsetPanel(
                                         tabPanel("Default Plot"),

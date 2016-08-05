@@ -24,17 +24,6 @@ combineManyInput <- function(id, label = "cMInputs") {
     ),
     tags$hr(),
     fluidRow(
-      column(3, checkboxInput(ns("aClusterFunction"), value = FALSE, label = "Add Cluster Function?")),
-      conditionalPanel(condition = paste0("input['", ns("aClusterFunction"), "']"),
-          column(3),
-          column(2, checkboxInput(ns("hClusterFunction"), value = FALSE, label = "Help Text and Instructions")),
-          conditionalPanel(condition = paste0("input['", ns("hClusterFunction"), "']"),
-                column(4, helpText("the clustering to use (passed to clusterD); currently must be of type '01'"))
-          )
-      )
-    ),
-    tags$hr(),
-    fluidRow(
       column(3, checkboxInput(ns("aPropUnassigned"), value = FALSE, label = "Add Proportion Unassigned?")),
       conditionalPanel(condition = paste0("input['", ns("aPropUnassigned"), "']"),
           column(3, numericInput(ns("propUnassigned"), value = .5, min = 0, max = 1, step = .001, label = "Proportion Unassigned")),
@@ -60,22 +49,7 @@ combineManyInput <- function(id, label = "cMInputs") {
         )
       ),
     tags$hr(),
-    fluidRow(
-      column(3, checkboxInput(ns("aEraseOld"), value = FALSE, label = "Add Erase Old?")),
-      conditionalPanel(condition = paste0("input['", ns("aEraseOld"), "']"),
-          column(3, checkboxInput(ns("eraseOld"), value = FALSE, label = "Erase Old")),
-          column(2, checkboxInput(ns("hEraseOld"), value = FALSE, label = "Help Text and Instructions")),
-          conditionalPanel(condition = paste0("input['", ns("hEraseOld"), "']"),
-              column(4, helpText("logical. Only relevant if input x is of class ClusterExperiment. If TRUE, will erase
-                                 existing workflow results (clusterMany as well as mergeClusters and combineMany). If 
-                                 FALSE, existing workflow results will have '_i' added to the clusterTypes value, where
-                                 i is one more than the largest such existing workflow clusterTypes.")
-              )
-          )
-      )
-    ),
-    tags$hr(),
-    fluidRow(h4("clusterLabel?"), helpText("Implement this?"))
+    fluidRow(h4("clusterLabel"), helpText("Need more info"))
     
   )
 }
@@ -90,8 +64,6 @@ makeCombineManyCode <- function(input, output, session, stringsAsFactors) {
       code <- paste(code, ", propUnassigned = ", input$propUnassigned)
     if(input$aMinSize)
       code <- paste(code, ", minSize = ", input$minSize)
-    if(input$aEraseOld)
-      code <- paste(code, ", eraseOld = ", input$eraseOld)
     
     code <- paste(code, ")")
   })

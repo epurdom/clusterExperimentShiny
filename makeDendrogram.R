@@ -56,44 +56,21 @@ makeDendrogramInput <- function(id, label = "cMInputs") {
       column(3, h4("UNassignedSamples"),
              helpText("UNFINISHED")
       )
-    ),
-    tags$hr(),
-    fluidRow(
-      column(3, h4("Cluster"),
-             helpText("UNFINISHED")
-      )
-    ),
-    tags$hr(),
-    fluidRow(
-      column(3, h4("Leaves"),
-             helpText("UNFINISHED")
-      )
-    ),
-    tags$hr(),
-    fluidRow(
-      column(3, checkboxInput(ns("aClusterNames"), value = FALSE, label = "Add clusterNames?")),
-      conditionalPanel(condition = paste0("input['", ns("aClusterNames"), "']"),
-          column(3, checkboxInput(ns("clusterNames"), label = "clusterNames", value = FALSE)),
-          column(2, checkboxInput(ns("hClusterNames"), value = FALSE, label = "Help Text and Instructions")),
-          conditionalPanel(condition = paste0("input['", ns("hClusterNames"), "']"),
-                column(4, helpText("logical. If leaves='clusters', then clusters will be identified with their 'name' 
-                                   value in legend; otherwise the 'clusterIds' value will be used.")
-                )
-          )
-      )
-    ),
-    tags$hr(),
-    fluidRow(
-      column(3, h4("main"),
-             helpText("UNFINISHED")
-      )
-    ),
-    tags$hr(),
-    fluidRow(
-      column(3, h4("sub"),
-             helpText("UNFINISHED")
-      )
     )
+    #reuse this:
+    # tags$hr(),
+    # fluidRow(
+    #   column(3, checkboxInput(ns("aClusterNames"), value = FALSE, label = "Add clusterNames?")),
+    #   conditionalPanel(condition = paste0("input['", ns("aClusterNames"), "']"),
+    #       column(3, checkboxInput(ns("clusterNames"), label = "clusterNames", value = FALSE)),
+    #       column(2, checkboxInput(ns("hClusterNames"), value = FALSE, label = "Help Text and Instructions")),
+    #       conditionalPanel(condition = paste0("input['", ns("hClusterNames"), "']"),
+    #             column(4, helpText("logical. If leaves='clusters', then clusters will be identified with their 'name' 
+    #                                value in legend; otherwise the 'clusterIds' value will be used.")
+    #             )
+    #       )
+    #   )
+    # )
   )
 }
 
@@ -104,13 +81,14 @@ makeMakeDendrogramCode <- function(input, output, session, stringsAsFactors) {
     if(input$aDimReduce)
       code <- paste(code, ", dimReduce = '", input$dimReduce, "'", sep = "")
     if(input$andims)
-      code <- paste(code, ", ndims = ", input$ndims)
+      code <- paste(code, ", ndims = ", input$ndims, sep = "")
     if(input$aIgnoreUnassignedVar)
-      code <- paste(code, ", ignoreUnassignedVar = ", input$ignoreUnassignedVar)
-    if(input$aClusterNames)
-      code <- paste(code, ", clusterNames = ", input$clusterNames)
+      code <- paste(code, ", ignoreUnassignedVar = ", input$ignoreUnassignedVar, sep = "")
+    #reuse this
+    # if(input$aClusterNames)
+    #   code <- paste(code, ", clusterNames = ", input$clusterNames)
     
-    code <- paste(code, ")")
+    code <- paste(code, ")", sep = "")
   })
   
   return(code)

@@ -80,7 +80,7 @@ shinyServer(function(input, output, session) {
                                          stringsAsFactors = FALSE)
   
   output$clusterManyCode <- renderText({
-    paste("cE < clusterMany(sE, isCount = ", input$isCount, clusterManyCode())
+    paste("cE <- clusterMany(sE, isCount = ", input$isCount, clusterManyCode())
   })
   
   getIterations <- function(){
@@ -109,26 +109,10 @@ shinyServer(function(input, output, session) {
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
-      #I would like to know if this works.
+      #I would like to know if this works as intentioned.
       plotClusters(cE, whichClusters = "clusterMany")
     }, height = (40/3) * getIterations())
   })
-  
-  plotClustersCMCode <- callModule(makePlotClustersCode, "clusterManyPlotClusters",
-                                stringsAsFactors = FALSE)
-  
-  output$plotClustersCodeCM <- renderText({
-    plotClustersCMCode()
-  })
-  
-  observeEvent(input$runPCCM, {
-    output$imgPCCM <- renderPlot({
-      defaultMar<-par("mar")
-      plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-      par(mar=plotCMar)
-      eval(parse(text = plotClustersCMCode()))
-    })
- })
   
   #This function could certainly be refined
   output$downloadDefaultPlotPCCM <- downloadHandler(
@@ -142,19 +126,6 @@ shinyServer(function(input, output, session) {
       plotClusters(cE, whichClusters = "clusterMany")
       dev.off()
       }
-  )
-  
-  output$downloadSpecializedPlotPCCM <- downloadHandler(
-    filename = function(){ paste("specializedPlotFromClusterMany.png")},
-    content = function(file){ 
-      #ggsave(fileName(), plot = plotClusters(cE, whichClusters = "clusterMany"), )
-      png(file)
-      # defaultMar<-par("mar")
-      # plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-      # par(mar=plotCMar)
-      eval(parse(text = plotClustersCMCode()))
-      dev.off()
-    }
   )
   
   # End Cluster Many tab
@@ -179,6 +150,9 @@ shinyServer(function(input, output, session) {
       par(mar=plotCMar)
       plotClusters(cE, whichClusters = "clusterMany")
     })
+  })
+  
+  observeEvent(input$runCombineMany, {
     output$imgCombineManyPCC <- renderPlot({
       # cE is the clusterExperiment object 
       defaultMar<-par("mar")
@@ -222,8 +196,11 @@ shinyServer(function(input, output, session) {
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
-      makeDendrogram(cE)
+      plotDendrogram(cE)
     })
+  })
+  
+  observeEvent(input$runMakeDendrogram, {
     output$imgPlotHeatmapMD <- renderPlot({
       # cE is the clusterExperiment object 
       defaultMar<-par("mar")
@@ -233,7 +210,55 @@ shinyServer(function(input, output, session) {
     })
   })
   
+  # Endmake dendrogram tab
+  
+  #####################################################
+  # Start mergeClusters
+  #####################################################
+  
+  mergeClustersCode <- callModule(makeMergeClustersCode, "mergeCInputs", 
+                                   stringsAsFactors = FALSE)
+  
+  output$mergeClustersCode <- renderText({
+    mergeClustersCode()
+  })
+
+  #####################################################
+  # Start Personalized plots
+  #####################################################
+  
+  
+  plotClustersCMCode <- callModule(makePlotClustersCode, "clusterManyPlotClusters",
+                                   stringsAsFactors = FALSE)
+  
+  output$plotClustersCodeCM <- renderText({
+    plotClustersCMCode()
+  })
+  
+  observeEvent(input$runPCCM, {
+    output$imgPCCM <- renderPlot({
+      defaultMar<-par("mar")
+      plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
+      par(mar=plotCMar)
+      eval(parse(text = plotClustersCMCode()))
+    })
+  })
+  
+  output$downloadSpecializedPlotPCCM <- downloadHandler(
+    filename = function(){ paste("specializedPlotFromClusterMany.png")},
+    content = function(file){ 
+      #ggsave(fileName(), plot = plotClusters(cE, whichClusters = "clusterMany"), )
+      png(file)
+      # defaultMar<-par("mar")
+      # plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
+      # par(mar=plotCMar)
+      eval(parse(text = plotClustersCMCode()))
+      dev.off()
+    }
+  )
+  
 })
+
 
 
 
