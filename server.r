@@ -83,16 +83,35 @@ shinyServer(function(input, output, session) {
     paste("cE < clusterMany(sE, isCount = ", input$isCount, clusterManyCode())
   })
   
+  getIterations <- function(){
+    codeToBeEvaluated <- paste("clusterMany(sE, run = FALSE, isCount = ", input$isCount, 
+                               clusterManyCode(), sep = "")
+    return(nrow(eval(parse(text = codeToBeEvaluated))$paramMatrix))
+  }
+  
+  output$numClusterIterations <- renderText({
+    codeToBeEvaluated <- paste("clusterMany(sE, run = FALSE, isCount = ", input$isCount, 
+                               clusterManyCode(), sep = "")
+    paste(getIterations(), " cluster iterations given these choices.")
+  })
+  
   
   observeEvent(input$runCM, {
       output$imgCE <- renderPlot({
       # cE is the clusterExperiment object 
-      cE <<- renderCE(paste("cE < clusterMany(sE, isCount = ", input$isCount, clusterManyCode(), sep = ""), sE)
+      codeToBeEvaluated <- paste("clusterMany(sE, isCount = ", input$isCount, clusterManyCode(),
+                                 sep = "")
+      # innerCode <- sub(strsplit(codeToBeEvaluated, ",")[[1]][1],  "clusterMany(sE", 
+      #                  codeToBeEvaluated, fixed = TRUE)
+      
+      cE <<- eval(parse(text = codeToBeEvaluated))
+      
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
-      plotClusters(cE)
-    })
+      #I would like to know if this works.
+      plotClusters(cE, whichClusters = "clusterMany")
+    }, height = (40/3) * getIterations())
   })
   
   plotClustersCMCode <- callModule(makePlotClustersCode, "clusterManyPlotClusters",
@@ -115,12 +134,12 @@ shinyServer(function(input, output, session) {
   output$downloadDefaultPlotPCCM <- downloadHandler(
     filename = function(){ paste("DefaultPlotFromClusterMany.png")},
     content = function(file){ 
-      #ggsave(fileName(), plot = plotClusters(cE), )
-      png(file)
+      #ggsave(fileName(), plot = plotClusters(cE, whichClusters = "clusterMany"), )
+      png(file, height = (40/3) * getIterations(), width = 2*480)
       defaultMar<-par("mar")
-      plotCMar<-c(1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
+      plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
-      plotClusters(cE)
+      plotClusters(cE, whichClusters = "clusterMany")
       dev.off()
       }
   )
@@ -128,7 +147,7 @@ shinyServer(function(input, output, session) {
   output$downloadSpecializedPlotPCCM <- downloadHandler(
     filename = function(){ paste("specializedPlotFromClusterMany.png")},
     content = function(file){ 
-      #ggsave(fileName(), plot = plotClusters(cE), )
+      #ggsave(fileName(), plot = plotClusters(cE, whichClusters = "clusterMany"), )
       png(file)
       # defaultMar<-par("mar")
       # plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
@@ -158,7 +177,7 @@ shinyServer(function(input, output, session) {
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
-      plotClusters(cE)
+      plotClusters(cE, whichClusters = "clusterMany")
     })
     output$imgCombineManyPCC <- renderPlot({
       # cE is the clusterExperiment object 
@@ -172,13 +191,13 @@ shinyServer(function(input, output, session) {
   output$downloadDefaultPlotPCCombineMany <- downloadHandler(
     filename = function(){ paste("defaultPlotFromCombineMany.png")},
     content = function(file){ 
-      #ggsave(fileName(), plot = plotClusters(cE), )
+      #ggsave(fileName(), plot = plotClusters(cE, whichClusters = "clusterMany"), )
       png(file)
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
       #Need Help here!
-      plotClusters(cE)
+      plotClusters(cE, whichClusters = "clusterMany")
       dev.off()
     }
   )

@@ -47,7 +47,8 @@ shinyUI(navbarPage("Cluster Experiment",
                                           h3("Code to be run internally:"),
                                           textOutput("clusterManyCode"),
                                           #Action button that allows one to run above code
-                                          actionButton("runCM", "Run This Code")
+                                          actionButton("runCM", "Run This Code"),
+                                          textOutput("numClusterIterations")
                                           )
                                       ),
                                       navlistPanel(
