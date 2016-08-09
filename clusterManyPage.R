@@ -28,19 +28,7 @@ dimReduceInput <- function(id, label = "inputs") {
                                           "|| input['", ns("dimReduce"), "'][3] == 'PCA'",
                                           "|| input['", ns("dimReduce"), "'][4] == 'PCA'"),
           tags$hr(),
-          fluidRow( 
-              #horrible syntax and overkill, but what to do with the poor design of Shiny for this circumstance?
-              column(3, checkboxInput(ns("aNPCADims"), value = FALSE, label = "# PCA dims (nPCADims)")),
-              conditionalPanel(condition = paste0("input['", ns("aNPCADims"), "']"),
-                    column(3, textInput(ns("nPCADims"), value = "3, 5, 7", label = "e.g. 5,25,50")),
-                    column(2, checkboxInput(ns("hNPCADims"), value = FALSE, label = "Help Text and Instructions")),
-                    conditionalPanel(condition = paste0("input['", ns("hNPCADims"), "']"),
-                        column(4, helpText("Please enter a list (separated by commas) of the number of PCA dimensions to keep. Used when 'PCA' is identified as choice in dimensionality reduction. If NA is included, then the full dataset will also be included.")
-                        )
-                    )
-              )
-                
-         )
+		  vectorInput(id,"# PCA dims\n(nPCADims)", "e.g. 5,25,50",val="nPCADims",aVal="aNPCADims", hVal="hNPCADims", defaultValue=NULL, help="Please enter a list (separated by commas) of the number of PCA dimensions to keep. Used when 'PCA' is identified as choice in dimensionality reduction. If NA is included, then the full dataset will also be included.",required=FALSE)
       ),
       #horrible syntax and overkill, but what to do with the poor design of Shiny for this circumstance?
       conditionalPanel(condition = paste0("input['", ns("dimReduce"), "'][0] == 'mad'",
@@ -56,18 +44,8 @@ dimReduceInput <- function(id, label = "inputs") {
                                           "|| input['", ns("dimReduce"), "'][2] == 'cv'",
                                           "|| input['", ns("dimReduce"), "'][3] == 'cv'"),
           tags$hr(),
-          fluidRow(
-            #horrible syntax and overkill, but what to do with the poor design of Shiny for this circumstance?
-            column(3, checkboxInput(ns("aNVarDims"), value = FALSE, label = "# variable dimensions:")),
-            conditionalPanel(condition = paste0("input['", ns("aNVarDims"), "']"),
-                column(3, textInput(ns("nVarDims"), value = "300, 500, 700", label = "e.g. 100,500,1000")),
-                column(2, checkboxInput(ns("hVarDims"), value = FALSE, label = "Help Text and Instructions")),
-                conditionalPanel(condition = paste0("input['", ns("hVarDims"), "']"),
-                    column(4, helpText("Please enter a list (separated by commas) of the number of the most variable features to keep. Used when any of 'var', 'cv', or 'mad' is identified as a choice in dimensionality reduction (the same set of values is used for all). If NA is included, then the full dataset will also be included.")
-                    )
-                )
-            )
-        )
+		  vectorInput(id,"# variable dimensions:\n(nVarDims)", "e.g. 100,500,1000",val="nVarDims",aVal="aNVarDims", hVal="hNVarDims", defaultValue=NULL, help="A list (separated by commas) of the number of the most variable features to keep. Used when any of 'var', 'cv', or 'mad' is identified as a choice in dimensionality reduction (the same set of values is used for all). If NA is included, then the full dataset will also be included.",required=FALSE)
+          
     )
     
   )
@@ -81,7 +59,7 @@ clusterFunctionInputs <- function(id, label = "inputs") {
     
     fluidRow(
       #horrible syntax and overkill, but what to do with the poor design of Shiny for this circumstance?
-      column(3, checkboxInput(ns("aClusterFunction"), value = FALSE, label = "Add Cluster Function?")),
+      column(3, checkboxInput(ns("aClusterFunction"), value = FALSE, label = "Choose Cluster Function")),
       conditionalPanel(condition = paste0("input['", ns("aClusterFunction"), "']"),
           column(3, checkboxGroupInput(ns("clusterFunction"),  label = "Cluster Function",
                                        choices = c("tight", "hierarchical01","hierarchicalK", "pam"))
