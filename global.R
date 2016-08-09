@@ -4,7 +4,7 @@ library(SummarizedExperiment)
 library(clusterExperiment)
 library(shinyjs)
 options(getClass.msg=FALSE) 
-
+source("utilityFunctions.R")
 source("startPage.R")
 source("clusterManyPage.R")
 source("plotClusterModule.R")

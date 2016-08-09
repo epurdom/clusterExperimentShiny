@@ -1,6 +1,6 @@
 #This file, clusterManyPage.R, contains the functions, inputs, and server-side computations of the clusterMany tab.
 
-library(stringr)
+require(stringr) #shouldn't need once make package.
 
 #This userFile input is a very large function that recieves all of the inputs for clusterMany from the user
 
@@ -12,7 +12,7 @@ dimReduceInput <- function(id, label = "inputs") {
 
     tags$hr(),
     fluidRow(
-      column(3, checkboxInput(ns("aDimReduce"), value = FALSE, label = "Add Dimensionailty Reduction?")),
+      column(3, checkboxInput(ns("aDimReduce"), value = FALSE, label = "Choose Dimensionality Reduction?")),
       conditionalPanel(condition = paste0("input['", ns("aDimReduce"), "']"),
          column(3, checkboxGroupInput(ns("dimReduce"), choices = c("none","PCA", "var","cv", "mad"), label = "dimReduce")),
          column(2, checkboxInput(ns("hDimReduce"), value = FALSE, label = "Help Text and Instructions")),
@@ -30,13 +30,12 @@ dimReduceInput <- function(id, label = "inputs") {
           tags$hr(),
           fluidRow( 
               #horrible syntax and overkill, but what to do with the poor design of Shiny for this circumstance?
-              column(3, checkboxInput(ns("aNPCADims"), value = FALSE, label = "Add nPCADims?")),
+              column(3, checkboxInput(ns("aNPCADims"), value = FALSE, label = "# PCA dims (nPCADims)")),
               conditionalPanel(condition = paste0("input['", ns("aNPCADims"), "']"),
-                    column(3, textInput(ns("nPCADims"), value = "3, 5, 7", label = "nPCADims")),
+                    column(3, textInput(ns("nPCADims"), value = "3, 5, 7", label = "e.g. 5,25,50")),
                     column(2, checkboxInput(ns("hNPCADims"), value = FALSE, label = "Help Text and Instructions")),
                     conditionalPanel(condition = paste0("input['", ns("hNPCADims"), "']"),
-                        column(4, helpText("what type of dimensionality reduction to perform before 
-                                           clustering.")
+                        column(4, helpText("Please enter a list (separated by commas) of the number of PCA dimensions to keep. Used when 'PCA' is identified as choice in dimensionality reduction. If NA is included, then the full dataset will also be included.")
                         )
                     )
               )
@@ -59,15 +58,12 @@ dimReduceInput <- function(id, label = "inputs") {
           tags$hr(),
           fluidRow(
             #horrible syntax and overkill, but what to do with the poor design of Shiny for this circumstance?
-            column(3, checkboxInput(ns("aNVarDims"), value = FALSE, label = "Add nVarDims?")),
+            column(3, checkboxInput(ns("aNVarDims"), value = FALSE, label = "# variable dimensions:")),
             conditionalPanel(condition = paste0("input['", ns("aNVarDims"), "']"),
-                column(3, textInput(ns("nVarDims"), value = "300, 500, 700", label = "nPCADims")),
+                column(3, textInput(ns("nVarDims"), value = "300, 500, 700", label = "e.g. 100,500,1000")),
                 column(2, checkboxInput(ns("hVarDims"), value = FALSE, label = "Help Text and Instructions")),
                 conditionalPanel(condition = paste0("input['", ns("hVarDims"), "']"),
-                    column(4, helpText("Please enter a list (separated by commas) of the number
-                                       of the most variable features to keep (when 'var', 'cv', or 'mad' 
-                                       is identified in dimReduce). If NA is included, then the full
-                                       dataset will also be included.")
+                    column(4, helpText("Please enter a list (separated by commas) of the number of the most variable features to keep. Used when any of 'var', 'cv', or 'mad' is identified as a choice in dimensionality reduction (the same set of values is used for all). If NA is included, then the full dataset will also be included.")
                     )
                 )
             )
@@ -103,8 +99,7 @@ clusterFunctionInputs <- function(id, label = "inputs") {
       #input alpha, conditional on clusterFunction = "tight" or clusterFunction = "hierarchical01"
       #Danger!
       #horrible syntax and overkill, but what to do with the poor design of Shiny for this circumstance?
-    conditionalPanel(condition = paste0("input['", ns("clusterFunction"), "'][0] == 'tight'", 
-                                        " || input['", ns("clusterFunction"), "'][0] == 'hierarchical01' ",
+    conditionalPanel(condition = paste0("input['", ns("clusterFunction"), "'][0] == 'tight'"," || input['", ns("clusterFunction"), "'][0] == 'hierarchical01' ",
                                         " || input['", ns("clusterFunction"), "'][1] == 'tight' ",
                                         " || input['", ns("clusterFunction"), "'][1] == 'hierarchical01' ",
                                         " || input['", ns("clusterFunction"), "'][2] == 'tight' ",
@@ -112,22 +107,7 @@ clusterFunctionInputs <- function(id, label = "inputs") {
                                         " || input['", ns("clusterFunction"), "'][3] == 'tight' ",
                                         " || input['", ns("clusterFunction"), "'][3] == 'hierarchical01' "),
         tags$hr(),
-        fluidRow(
-          column(3, checkboxInput(ns("aAlphas"), value = FALSE, label = "Add Alphas?")),
-          conditionalPanel(condition = paste0("input['", ns("aAlphas"), "']"),
-              column(3, textInput(ns("alphas"),  label = "Alphas", value = ".3, .5, .7")
-              ),
-              column(2, checkboxInput(ns("hAlphas"), value = FALSE, 
-                                      label = "Help Text and Instructions")
-              ),
-              conditionalPanel(condition = paste0("input['", ns("hAlphas"), "']"),
-                  column(4, helpText("Values of alpha to be tried.Determines tightness required in 
-                                      creating clusters from the dissimilarity matrix. In this box you
-                                      are simply choosing the number of alphas to be tried. 
-                                      Please enter numbers between 0.0 and 1.0, comma delimited."))
-              )
-          )
-      )
+			vectorInput(id,"Set alpha", "e.g. 0.1,0.2,0.3",val="alphas",aVal="aAlphas", hVal="hAlphas", defaultValue=NULL, help="List of comma-separated values between 0 and 1 giving values of alpha to be used by 0-1 clustering functions. Determines tightness required in creating clusters from the dissimilarity matrix.",required=FALSE)
     ),
              #find best K logical, conditional on clusterFunction = "hierarchicalK"
     conditionalPanel(condition = paste0("input['", ns("clusterFunction"), "'][0] == 'hierarchicalK'",
@@ -139,84 +119,24 @@ clusterFunctionInputs <- function(id, label = "inputs") {
                                         " || input['", ns("clusterFunction"), "'][2] == 'pam'",                                              
                                         " || input['", ns("clusterFunction"), "'][3] == 'pam'"),
         tags$hr(),
-        fluidRow(
-          column(3, checkboxInput(ns("aFindBestK"), value = FALSE, label = "Add findBestK?")),
-          conditionalPanel(condition = paste0("input['", ns("aFindBestK"), "']"),
-              column(3, checkboxGroupInput(ns("findBestK"), label = NULL, choices = c("TRUE", "FALSE")))
-          ),
-          column(2, checkboxInput(ns("hFindBestK"), value = FALSE, 
-                                      label = "Help Text and Instructions")
-          ),
-          conditionalPanel(condition = paste0("input['", ns("hFindBestK"), "']"),
-                column(4, helpText("Whether should find best K based on average silhouette width (only
-                                    used if clusterFunction of type 'K')"))
-          )
-        ),
+		logicalInput(id,sidelabel="Find Best K Automatically?", val="findBestK",aVal="aFindBestK", hVal="hFindBestK", help="Whether should find best K based on average silhouette width (only used if clusterFunction of type 'K')",required=FALSE),
+ 
         tags$hr(),
-        fluidRow(
-          column(3, checkboxInput(ns("aRemoveSil"), value = FALSE, label = "Add removeSil?")),
-          conditionalPanel(condition = paste0("input['", ns("aRemoveSil"), "']"),
-              column(3, checkboxGroupInput(ns("removeSil"), label = NULL, choices = c("TRUE", "FALSE")))
-          ),
-          column(2, checkboxInput(ns("hRemoveSil"), value = FALSE, 
-              label = "Help Text and Instructions")
-          ),
-          conditionalPanel(condition = paste0("input['", ns("hRemoveSil"), "']"),
-                           column(4, helpText("logical as to whether remove when silhouette < silCutoff
-                                              (only used if clusterFunction of type 'K')"))
-          )
-        ),
+        logicalInput(id,sidelabel="Remove samples with low silhouette?", val="removeSil",aVal="aRemoveSil", hVal="hRemoveSil", help="logical as to whether remove when silhouette less than 'silCutoff' parameter (only used if clusterFunction of type 'K')",required=FALSE),
+
         conditionalPanel(condition = paste0("input['", ns("removeSil"), "'][0] == 'TRUE'",
-                                            " && input['", ns("aRemoveSil"), "']"),             
+                                            " && input['", ns("aRemoveSil"), "']"),            
             tags$hr(),
             #Enter Sil cutoff, conditional upon removeSil == TRUE,  
             #which is conditional upon clusterFunction = "hierarchicalK"
-            fluidRow(
-              column(3, checkboxInput(ns("aSilCutoff"), value = FALSE, label = "Add silCutoff?")),
-              conditionalPanel(condition = paste0("input['", ns("aSilCutoff"), "']"),
-                  column(3, textInput(ns("silCutoff"), label = NULL, value = "3, 5, 7"))
-              ),
-              column(2, checkboxInput(ns("hSilCutoff"), value = FALSE, 
-                                      label = "Help Text and Instructions")
-              ),
-              conditionalPanel(condition = paste0("input['", ns("hSilCutoff"), "']"),
-                  column(4, helpText("Requirement on minimum silhouette width to be included in cluster 
-                                       (only if removeSil=TRUE). sequence (separated by commas)")
-                  )
-              )
-            )
+				vectorInput(id,"Silhouette Cutoff", "e.g. 0,.1,3",val="silCutoff",aVal="aSilCutoff", hVal="hSilCutoff", defaultValue=NULL, help="Real-valued numbers in comma separated list giving requirement on minimum silhouette width for sample to be included in cluster (only when removeSil=TRUE).",required=FALSE)
+            
         )
     ),
     
     tags$hr(),
-    fluidRow(
-      # I need some more technical knowhow to feel confident in my ks design
-      # K values, not conditional
-      column(3, checkboxInput(ns("aKs"), value = FALSE, label = "Add ks?")),
-      conditionalPanel(condition = paste0("input['", ns("aKs"), "']"),
-          column(3, textInput(ns("ks"), label = "Range of K Values:", value = "3, 5, 7"))
-      ),
-      column(2, checkboxInput(ns("hKs"), value = FALSE, 
-                              label = "Help Text and Instructions")
-      ),
-      conditionalPanel(condition = paste0("input['", ns("hKs"), "']"),
-            column(4, helpText("The argument 'ks' is interpreted differently for different 
-                                choices of the other parameters. When/if sequential=TRUE, ks 
-                                defines the argument k0 of seqCluster. Otherwise, 'ks' values 
-                                are set in both subsampleArgs[['k']] and clusterDArgs[['k']] 
-                                that are passed to clusterD and subsampleClustering. This passing
-                                of these arguments via subsampleArgs[['k']] will only have an 
-                                effect if 'subsample=TRUE'. Similarly, the passing of 
-                                clusterDArgs[['k']] will only have an effect when the 
-                                clusterFunction argument includes a clustering algorithm of type 
-                                'K'. When/if 'findBestK=TRUE', ks also defines the kRange argument
-                                of clusterD unless kRange is specified by the user via the
-                                clusterDArgs; note this means that the default option of setting
-                                kRange that depends on the input k (see clusterD) is not available
-                                in clusterMany.")
-                  )
-             )
-    ),
+	vectorInput(id,"Choose k/k0", "e.g. 3,5:7",val="ks",aVal="aKs", hVal="hKs", defaultValue=NULL, help="When clustering the samples, this argument is interpreted differently depending on other choices for that cluster run. If sequential=TRUE in a clustering, this argument defines the argument k0 of seqCluster. Otherwise, this argument sets the 'k' in the clustering (when using a clustering function that needs 'k'). This argument also sets 'k' for subsampling, if 'subsample=TRUE'. For clusterings where 'findBestK=TRUE', this argument also defines the range of k values to search over.",required=TRUE),
+	
     tags$hr(),
     fluidRow(
       
@@ -224,26 +144,14 @@ clusterFunctionInputs <- function(id, label = "inputs") {
              h3("distFunction"),
              helpText("need clarity")
       )
+	  
     ),
       
     tags$hr(),
     # #This might need to be down with clusterD by line 27X
     # #Enter Min clustr Sizes, not conditional
-    fluidRow(
-      column(3, checkboxInput(ns("aMinSizes"), value = FALSE, label = "Add minSizes?")),
-      conditionalPanel(condition = paste0("input['", ns("aMinSizes"), "']"),
-                       column(3, textInput(ns("minSizes"), label = NULL, value = "3, 5, 7"))
-      ),
-      column(2, checkboxInput(ns("hMinSizes"), value = FALSE, 
-                              label = "Help Text and Instructions")
-      ),
-      conditionalPanel(condition = paste0("input['", ns("hMinSizes"), "']"),
-          column(4, helpText("the minimimum size required for a cluster (in clusterD). Clusters smaller
-                              than this are not kept and samples are left unassigned.
-                              Minimum cluster Size is 2. Please enter numbers separeted by commas")
-          )
-      )
-    )
+	vectorInput(id,"Change minSizes?", "e.g. 3,5,7",val="minSizes",aVal="aMinSizes", hVal="hMinSizes", defaultValue=NULL, help="List of comma separated integers defining the minimimum size required for a cluster. Clusters smaller than this are not kept and samples are left unassigned. If sequential chosen, minSize is used for each sequential selection of clusters.",required=FALSE)
+
   )
 }
 

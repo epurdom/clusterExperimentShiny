@@ -1,0 +1,29 @@
+Package: clusterExperimentShinyApp
+Title: Shiny App to accompany clusterExperiment
+Version: 0.0.1
+Description: This package is a shiny app that implements the functions in clusterExperiment.
+Authors@R: c(person("Elizabeth", "Purdom", email = "epurdom@stat.berkeley.edu",
+            role = c("aut", "cre", "cph")),
+	     person("Liam","Purvis", role = "aut",email = "purvis.liam@berkeley.edu")
+	     )
+Author: Liam Purvis [aut, cre, cph], Liam Purvis [aut]
+Maintainer: Elizabeth Purdom <epurdom@stat.berkeley.edu>
+BugReports: https://github.com/epurdom/clusterExpShinyApp/issues
+License: Artistic-2.0
+Depends:
+    R (>= 3.3),
+    clusterExperiment,
+    SummarizedExperiment,
+    shiny
+Imports:
+    ggvis,
+	shinyjs,
+	stringr
+Suggests:
+    BiocStyle,
+    knitr,
+    testthat
+VignetteBuilder: knitr
+LazyData: true
+RoxygenNote: 5.0.1
+biocViews: Clustering, RNASeq, Sequencing, Software
