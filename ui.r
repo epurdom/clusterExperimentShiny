@@ -71,32 +71,12 @@ shinyUI(navbarPage("Cluster Experiment",
                                         tabPanel("Plot Clusters",
                                                  tabsetPanel(
                                                      tabPanel("Default Plot",
-                                                               downloadButton("downloadDefaultPlotPCCM", label = "DownLoad this Plot"),
-                                                               plotOutput("imgCE")
-                                                       ),
-                                                     tabPanel("Specialized Plotting Options",
-                                                              fluidRow(
-                                                                column(6,
-                                                                       plotClustersHelpText("clusterManyPlotClusters",
-                                                                                            "Help Text for plot Clusters, cM")
-                                                                ),
-                                                                column(6,
-                                                                       h3("Code to be Run:"),
-                                                                       textOutput("plotClustersCodeCM"),
-                                                                       actionButton("runPCCM", "Run Plot Cluster Code")
-                                                                )
-                                                              ),
-                                                              plotClusterInput("clusterManyPlotClusters", 
-                                                                               "inputs for plot Clusters, cM")
-                                                       ),
-                                                       tabPanel("Specialized Plotting Options Output",
-                                                                downloadButton("downloadSpecializedPlotPCCM", label = "DownLoad this Plot"),
-                                                                plotOutput("imgPCCM")
-                                                       )
+                                                              plotOutput("imgCE"),
+                                                              downloadButton("downloadDefaultPlotPCCM", label = "DownLoad this Plot")                                                       
                                                      )
-                                                     
+                                                 )
                                             )
-                                          )
+                                      )
                               #)
                             #)
                               ),
@@ -113,6 +93,7 @@ shinyUI(navbarPage("Cluster Experiment",
                                            downloadButton("downloadDefaultPlotPCCombineMany", label = "DownLoad this Plot")
                                    ),
                                   tabPanel("Plot CoClusters",
+                                           downloadButton("downloadDefaultPlotCoClustersCombineMany", label = "DownLoad this Plot"),
                                            plotOutput("imgCombineManyPCC")
                                   )
                                 )
@@ -126,11 +107,13 @@ shinyUI(navbarPage("Cluster Experiment",
                                       makeDendrogramInput("mDInputs", "")
                              ),
                              tabPanel("Plot Dendrogram",
-                                      plotOutput("imgPlotDendrogram")
+                                      plotOutput("imgPlotDendrogram"),
+                                      downloadButton("downloadDefaultPlotPDMD", label = "DownLoad this Plot")
                               ),
                              tabPanel("Plot HeatMap",
+                                      downloadButton("downloadDefaultPlotPHMD", label = "DownLoad this Plot"),
                                       plotOutput("imgPlotHeatmapMD")
-                              )
+                                      )
                            )
                   ),
                   tabPanel("Merge Clusters",
@@ -139,39 +122,71 @@ shinyUI(navbarPage("Cluster Experiment",
                              
                              tabPanel("Merge Clusters",
                                       textOutput("mergeClustersCode"),
+                                      actionButton("runMergeClusters", "Run This Code"),
                                       mergeClustersInput("mergeCInputs", "")
                                       ),
                              tabPanel("Plot Clusters",
-                                      tabsetPanel(
-                                        tabPanel("Default Plot"),
-                                        tabPanel("Specialized Plotting Options"),
-                                        tabPanel("Specialized Plotting Options Output")
-                                      )
+                                      downloadButton("downloadDefaultPlotClustersMergeClusters", label = "DownLoad this Plot"),
+                                      plotOutput("imgPlotClustersMergeClusters")
                               ),
                              tabPanel("Plot Heatmap",
-                                      tabsetPanel(
-                                        tabPanel("Default Plot"),
-                                        tabPanel("Specialized Plotting Options"),
-                                        tabPanel("Specialized Plotting Options Output")
-                                      )
+                                      downloadButton("downloadDefaultPlotHeatmapMergeClusters", label = "DownLoad this Plot"),
+                                      plotOutput("imgPlotHeatMapMergeClusters")
                              ),
-                             tabPanel("PCA Plot",
-                                      tabsetPanel(
-                                        tabPanel("Default Plot"),
-                                        tabPanel("Specialized Plotting Options"),
-                                        tabPanel("Specialized Plotting Options Output")
-                                      )
+                             tabPanel("PCA Plot"
+                                      
                               )
                            )
                   ),
-                  tabPanel("Personalized Plots",
-                           fluidRow(),
-                           navlistPanel(
-                             tabPanel("Plot Clusters"),
-                             tabPanel("PCA Plot"),
-                             tabPanel("Plot Dendrogram"),
-                             tabPanel("Plot Heatmap")
-                           )
+                  navbarMenu("Personalized Plots",
+                             tabPanel("Plot Clusters",
+                                      fluidRow(
+                                        column(6,
+                                               plotClustersHelpText("clusterManyPlotClusters",
+                                                                    "Help Text for plot Clusters, cM")
+                                        ),
+                                        column(6,
+                                               h3("Code to be Run:"),
+                                               textOutput("plotClustersCodeCM"),
+                                               actionButton("runPCCM", "Run Plot Cluster Code")
+                                        )
+                                      ),
+                                      navlistPanel("Plot Clusters",
+                                                   tabPanel("Specialized Inputs",
+                                                            plotClusterInput("clusterManyPlotClusters", 
+                                                                             "inputs for plot Clusters, cM")
+                                                   ),
+                                                   tabPanel("Output Plot",
+                                                            downloadButton("downloadSpecializedPlotPCCM", label = "DownLoad this Plot"),
+                                                            plotOutput("imgPCCM")
+                                                   )
+                                      )
+                             ),
+                             tabPanel("plot CoClustering",
+                                      navlistPanel(
+                                        tabPanel("Specialized Inputs"),
+                                        tabPanel("Output Plot")
+                                      )
+                             ),
+                             tabPanel("PCA Plot",
+                                      navlistPanel(
+                                        tabPanel("Specialized Inputs"),
+                                        tabPanel("Output Plot")
+                                      )
+                             ),
+                             tabPanel("Plot Dendrogram",
+                                      navlistPanel(
+                                        tabPanel("Specialized Inputs"),
+                                        tabPanel("Output Plot")
+                                      )
+                             ),
+                             tabPanel("Plot Heatmap",
+                                      navlistPanel(
+                                        tabPanel("Specialized Inputs"),
+                                        tabPanel("Output Plot")
+                                      )
+                             )
+                           
                   )
 
         )

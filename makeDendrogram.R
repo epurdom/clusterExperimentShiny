@@ -77,7 +77,7 @@ makeDendrogramInput <- function(id, label = "cMInputs") {
 
 makeMakeDendrogramCode <- function(input, output, session, stringsAsFactors) {
   code <- reactive({
-    code <- paste("cE <- makeDendrogram(cE ")
+    code <- paste("cE <<- makeDendrogram(cE ")
     if(input$aDimReduce)
       code <- paste(code, ", dimReduce = '", input$dimReduce, "'", sep = "")
     if(input$andims)

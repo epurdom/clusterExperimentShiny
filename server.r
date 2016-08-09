@@ -83,8 +83,14 @@ shinyServer(function(input, output, session) {
     paste("cE <- clusterMany(sE, isCount = ", input$isCount, clusterManyCode())
   })
   
-  getIterations <- function(){
+  getSEIterations <- function(){
     codeToBeEvaluated <- paste("clusterMany(sE, run = FALSE, isCount = ", input$isCount, 
+                               clusterManyCode(), sep = "")
+    return(nrow(eval(parse(text = codeToBeEvaluated))$paramMatrix))
+  }
+  
+  getCEIterations <- function(){
+    codeToBeEvaluated <- paste("clusterMany(cE, run = FALSE, isCount = ", input$isCount, 
                                clusterManyCode(), sep = "")
     return(nrow(eval(parse(text = codeToBeEvaluated))$paramMatrix))
   }
@@ -92,7 +98,7 @@ shinyServer(function(input, output, session) {
   output$numClusterIterations <- renderText({
     codeToBeEvaluated <- paste("clusterMany(sE, run = FALSE, isCount = ", input$isCount, 
                                clusterManyCode(), sep = "")
-    paste(getIterations(), " cluster iterations given these choices.")
+    paste(getSEIterations(), " cluster iterations given these choices.")
   })
   
   
@@ -111,7 +117,7 @@ shinyServer(function(input, output, session) {
       par(mar=plotCMar)
       #I would like to know if this works as intentioned.
       plotClusters(cE, whichClusters = "clusterMany")
-    }, height = (40/3) * getIterations())
+    }, height = (40/3) * getSEIterations())
   })
   
   #This function could certainly be refined
@@ -119,7 +125,7 @@ shinyServer(function(input, output, session) {
     filename = function(){ paste("DefaultPlotFromClusterMany.png")},
     content = function(file){ 
       #ggsave(fileName(), plot = plotClusters(cE, whichClusters = "clusterMany"), )
-      png(file, height = (40/3) * getIterations(), width = 2*480)
+      png(file, height = (40/3) * getSEIterations(), width = 2*480)
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
@@ -142,31 +148,32 @@ shinyServer(function(input, output, session) {
   })
   
   observeEvent(input$runCombineMany, {
+    
+    eval(parse(text = combineManyCode()))
+    
     output$imgCombineManyPC <- renderPlot({
       # cE is the clusterExperiment object 
-      eval(parse(text = combineManyCode()))
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
       plotClusters(cE, whichClusters = "clusterMany")
-    })
-  })
-  
-  observeEvent(input$runCombineMany, {
+    }, height = (40/3) * getSEIterations())
+    
     output$imgCombineManyPCC <- renderPlot({
       # cE is the clusterExperiment object 
+      #eval(parse(text = combineManyCode()))
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
       plotCoClustering(cE)
-      })
+    })
   })
   
   output$downloadDefaultPlotPCCombineMany <- downloadHandler(
     filename = function(){ paste("defaultPlotFromCombineMany.png")},
     content = function(file){ 
       #ggsave(fileName(), plot = plotClusters(cE, whichClusters = "clusterMany"), )
-      png(file)
+      png(file, height = (40/3) * getSEIterations(), width = 2*480)
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
@@ -175,6 +182,22 @@ shinyServer(function(input, output, session) {
       dev.off()
     }
   )
+  
+  output$downloadDefaultPlotCoClustersCombineMany <- downloadHandler(
+    filename = function(){ paste("DefaultPlotCoClustersCombineMany.png")},
+    content = function(file){ 
+      #ggsave(fileName(), plot = plotClusters(cE, whichClusters = "clusterMany"), )
+      png(file, height = (40/3) * getSEIterations(), width = 2*480)
+      defaultMar<-par("mar")
+      plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
+      par(mar=plotCMar)
+      #Need Help here!
+      plotClusters(cE, whichClusters = "clusterMany")
+      dev.off()
+    }
+  )
+
+  
   
   # End Combine Many tab
   
@@ -190,17 +213,17 @@ shinyServer(function(input, output, session) {
   })
 
   observeEvent(input$runMakeDendrogram, {
+    
+    eval(parse(text = makeDendrogramCode()))
+    
     output$imgPlotDendrogram <- renderPlot({
       # cE is the clusterExperiment object 
-      eval(parse(text = makeDendrogramCode()))
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
       plotDendrogram(cE)
     })
-  })
-  
-  observeEvent(input$runMakeDendrogram, {
+    
     output$imgPlotHeatmapMD <- renderPlot({
       # cE is the clusterExperiment object 
       defaultMar<-par("mar")
@@ -208,9 +231,38 @@ shinyServer(function(input, output, session) {
       par(mar=plotCMar)
       plotHeatmap(cE)
     })
+    
   })
   
-  # Endmake dendrogram tab
+  output$downloadDefaultPlotPDMD <- downloadHandler(
+    filename = function(){ paste("DefaultPlotDendrogramFromMakeDendrogram.png")},
+    content = function(file){ 
+      #ggsave(fileName(), plot = plotClusters(cE, whichClusters = "clusterMany"), )
+      png(file, height = 480, width = 2*480)
+      defaultMar<-par("mar")
+      plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
+      par(mar=plotCMar)
+      eval(parse(text = makeDendrogramCode()))
+      plotDendrogram(cE)
+      dev.off()
+    }
+  )
+
+  
+  output$downloadDefaultPlotPHMD <- downloadHandler(
+    filename = function(){ paste("DefaultPlotHeatmapFromMakeDendrogram.png")},
+    content = function(file){ 
+      #ggsave(fileName(), plot = plotClusters(cE, whichClusters = "clusterMany"), )
+      png(file, height = 480, width = 2*480)
+      defaultMar<-par("mar")
+      plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
+      par(mar=plotCMar)
+      plotHeatmap(cE)
+      dev.off()
+    }
+  )
+  
+  # End make dendrogram tab
   
   #####################################################
   # Start mergeClusters
@@ -222,6 +274,53 @@ shinyServer(function(input, output, session) {
   output$mergeClustersCode <- renderText({
     mergeClustersCode()
   })
+  
+  observeEvent(input$runMergeClusters, {
+    
+    eval(parse(text = mergeClustersCode()))
+    
+    output$imgPlotClustersMergeClusters <- renderPlot({
+      # cE is the clusterExperiment object 
+      defaultMar<-par("mar")
+      plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
+      par(mar=plotCMar)
+      plotClusters(cE)
+    }, height = (40/3) * getCEIterations())
+    
+    # output$imgPlotHeatmapMergeClusters <- renderPlot({
+    #   # cE is the clusterExperiment object 
+    #   defaultMar<-par("mar")
+    #   plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
+    #   par(mar=plotCMar)
+    #   plotHeatmap(cE)
+    # })
+  })
+  
+  output$downloadDefaultPlotClustersMergeClusters <- downloadHandler(
+    filename = function(){ paste("DefaultPlotClustersMergeClusters.png")},
+    content = function(file){ 
+      #ggsave(fileName(), plot = plotClusters(cE, whichClusters = "clusterMany"), )
+      png(file, height = (40/3) * getCEIterations(), width = 2*480)
+      defaultMar<-par("mar")
+      plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
+      par(mar=plotCMar)
+      plotClusters(cE)
+      dev.off()
+    }
+  )
+  
+  output$downloadDefaultPlotHeatmapMergeClusters <- downloadHandler(
+    filename = function(){ paste("DefaultPlotHeatmapMergeClusters.png")},
+    content = function(file){ 
+      #ggsave(fileName(), plot = plotClusters(cE, whichClusters = "clusterMany"), )
+      png(file, height = (40/3) * getCEIterations(), width = 2*480)
+      defaultMar<-par("mar")
+      plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
+      par(mar=plotCMar)
+      plotHeatmap(cE)
+      dev.off()
+    }
+  )
 
   #####################################################
   # Start Personalized plots

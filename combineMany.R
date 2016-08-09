@@ -57,7 +57,7 @@ combineManyInput <- function(id, label = "cMInputs") {
 
 makeCombineManyCode <- function(input, output, session, stringsAsFactors) {
   code <- reactive({
-    code <- paste("cE <- combineMany(cE")#, whichClusters = 'clusterMany' ")
+    code <- paste("cE <<- combineMany(cE")#, whichClusters = 'clusterMany' ")
     if(input$aProportion)
       code <- paste(code, ", proportion = ", input$proportion)
     if(input$aPropUnassigned)
