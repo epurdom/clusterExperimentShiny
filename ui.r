@@ -175,10 +175,29 @@ shinyUI(navbarPage("Cluster Experiment",
                                       )
                              ),
                              tabPanel("Plot Dendrogram",
-                                      navlistPanel(
-                                        tabPanel("Specialized Inputs"),
-                                        tabPanel("Output Plot")
+                                      fluidRow(
+                                        column(6,
+                                               plotDendrogramHelpText("plotDendrogram",
+                                                                    "Help Text for plotDendrogram")
+                                        ),
+                                        column(6,
+                                               h3("Code to be Run:"),
+                                               textOutput("plotDendrogramCode"),
+                                               actionButton("runPlotDendrogram", "Run Plot Dendrogram Code")
+                                        )
+                                      ),
+                                      navlistPanel("Plot Dendrogram",
+                                                   tabPanel("Specialized Inputs",
+                                                            plotDendrogramInput("plotDendrogram", 
+                                                                                "inputs for plotDendrogram")
+                                                   ),
+                                                   tabPanel("Output Plot",
+                                                            downloadButton("downloadSpecializedPlotDendrogram",
+                                                                           label = "DownLoad this Plot"),
+                                                            plotOutput("imgSpecializedPlotDendrogram")
+                                                   )
                                       )
+                                      
                              ),
                              tabPanel("Plot Heatmap",
                                       navlistPanel(
