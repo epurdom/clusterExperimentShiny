@@ -18,7 +18,7 @@ vectorInput<-function(id,sidelabel, aboveLabel,val,aVal, hVal, defaultValue=NULL
 
 }
 
-logicalInput<-function(id,sidelabel, aboveLabel,val,aVal, hVal, defaultValue=NULL, help="No help yet available",required=FALSE){
+logicalInput<-function(id,sidelabel, val,aVal, hVal, help="No help yet available",required=FALSE){
 	ns<-NS(id)
     fluidRow(
       column(3, checkboxInput(ns(aVal), value = FALSE, label = sidelabel)),
@@ -32,4 +32,23 @@ logicalInput<-function(id,sidelabel, aboveLabel,val,aVal, hVal, defaultValue=NUL
             column(4, helpText(help))
       )
     )
+}
+
+checkboxInput<-function(id, sidelabel,options,val,aVal, hVal, help="No help yet available",required=FALSE){
+	ns<-NS(id)
+    fluidRow(
+      column(3, checkboxInput(ns(aVal), value = FALSE, label = sidelabel)),
+      conditionalPanel(condition = paste0("input['", ns(aVal), "']"),
+         column(3, checkboxGroupInput(ns(val), choices = options, label = "Choose all of interest")),
+         column(2, checkboxInput(ns(hval), value = FALSE, label = "Help Text and Instructions")),
+         conditionalPanel(condition = paste0("input['", ns(hval), "']"),
+             column(4, helpText(help))
+         )
+      )
+    )
+}
+
+#based on suggestion in ???
+myConditionalPanel<-function(){
+	
 }

@@ -7,10 +7,12 @@ require(stringr) #shouldn't need once make package.
 dimReduceInput <- function(id, label = "inputs") {
   # Create a namespace function using the provided id
   ns <- NS(id)
-  
+  browser()
   tagList(
 
     tags$hr(),
+	# checkboxInput(id,sidelabel="Select Dimensionality Reduction?", options=c("none","PCA", "var","cv", "mad"),val="dimReduce",aVal="aDimReduce", hVal="hDimReduce", help="What method(s) of dimensionality reduction to perform before clustering.",required=FALSE),
+
     fluidRow(
       column(3, checkboxInput(ns("aDimReduce"), value = FALSE, label = "Choose Dimensionality Reduction?")),
       conditionalPanel(condition = paste0("input['", ns("aDimReduce"), "']"),
@@ -45,18 +47,20 @@ dimReduceInput <- function(id, label = "inputs") {
                                           "|| input['", ns("dimReduce"), "'][3] == 'cv'"),
           tags$hr(),
 		  vectorInput(id,"# variable dimensions:\n(nVarDims)", "e.g. 100,500,1000",val="nVarDims",aVal="aNVarDims", hVal="hNVarDims", defaultValue=NULL, help="A list (separated by commas) of the number of the most variable features to keep. Used when any of 'var', 'cv', or 'mad' is identified as a choice in dimensionality reduction (the same set of values is used for all). If NA is included, then the full dataset will also be included.",required=FALSE)
-          
+
     )
-    
+
   )
 }
 
+
+
 clusterFunctionInputs <- function(id, label = "inputs") {
-  
+
   ns <- NS(id)
-  
+
   tagList(
-    
+
     fluidRow(
       #horrible syntax and overkill, but what to do with the poor design of Shiny for this circumstance?
       column(3, checkboxInput(ns("aClusterFunction"), value = FALSE, label = "Choose Cluster Function")),
@@ -64,7 +68,7 @@ clusterFunctionInputs <- function(id, label = "inputs") {
           column(3, checkboxGroupInput(ns("clusterFunction"),  label = "Cluster Function",
                                        choices = c("tight", "hierarchical01","hierarchicalK", "pam"))
           ),
-          column(2, checkboxInput(ns("hClusterFunction"), value = FALSE, 
+          column(2, checkboxInput(ns("hClusterFunction"), value = FALSE,
                                   label = "Help Text and Instructions")
           ),
           conditionalPanel(condition = paste0("input['", ns("hClusterFunction"), "']"),
@@ -73,7 +77,7 @@ clusterFunctionInputs <- function(id, label = "inputs") {
           )
       )
     ),
-    
+
       #input alpha, conditional on clusterFunction = "tight" or clusterFunction = "hierarchical01"
       #Danger!
       #horrible syntax and overkill, but what to do with the poor design of Shiny for this circumstance?
@@ -94,37 +98,37 @@ clusterFunctionInputs <- function(id, label = "inputs") {
                                         " || input['", ns("clusterFunction"), "'][3] == 'hierarchicalK'",
                                         " || input['", ns("clusterFunction"), "'][0] == 'pam'",
                                         " || input['", ns("clusterFunction"), "'][1] == 'pam'",
-                                        " || input['", ns("clusterFunction"), "'][2] == 'pam'",                                              
+                                        " || input['", ns("clusterFunction"), "'][2] == 'pam'",
                                         " || input['", ns("clusterFunction"), "'][3] == 'pam'"),
         tags$hr(),
 		logicalInput(id,sidelabel="Find Best K Automatically?", val="findBestK",aVal="aFindBestK", hVal="hFindBestK", help="Whether should find best K based on average silhouette width (only used if clusterFunction of type 'K')",required=FALSE),
- 
+
         tags$hr(),
         logicalInput(id,sidelabel="Remove samples with low silhouette?", val="removeSil",aVal="aRemoveSil", hVal="hRemoveSil", help="logical as to whether remove when silhouette less than 'silCutoff' parameter (only used if clusterFunction of type 'K')",required=FALSE),
 
         conditionalPanel(condition = paste0("input['", ns("removeSil"), "'][0] == 'TRUE'",
-                                            " && input['", ns("aRemoveSil"), "']"),            
+                                            " && input['", ns("aRemoveSil"), "']"),
             tags$hr(),
-            #Enter Sil cutoff, conditional upon removeSil == TRUE,  
+            #Enter Sil cutoff, conditional upon removeSil == TRUE,
             #which is conditional upon clusterFunction = "hierarchicalK"
 				vectorInput(id,"Silhouette Cutoff", "e.g. 0,.1,3",val="silCutoff",aVal="aSilCutoff", hVal="hSilCutoff", defaultValue=NULL, help="Real-valued numbers in comma separated list giving requirement on minimum silhouette width for sample to be included in cluster (only when removeSil=TRUE).",required=FALSE)
-            
+
         )
     ),
-    
+
     tags$hr(),
 	vectorInput(id,"Choose k/k0", "e.g. 3,5:7",val="ks",aVal="aKs", hVal="hKs", defaultValue=NULL, help="When clustering the samples, this argument is interpreted differently depending on other choices for that cluster run. If sequential=TRUE in a clustering, this argument defines the argument k0 of seqCluster. Otherwise, this argument sets the 'k' in the clustering (when using a clustering function that needs 'k'). This argument also sets 'k' for subsampling, if 'subsample=TRUE'. For clusterings where 'findBestK=TRUE', this argument also defines the range of k values to search over.",required=TRUE),
-	
+
     tags$hr(),
     fluidRow(
-      
+
       column(3,
              h3("distFunction"),
              helpText("need clarity")
       )
-	  
+
     ),
-      
+
     tags$hr(),
     # #This might need to be down with clusterD by line 27X
     # #Enter Min clustr Sizes, not conditional
