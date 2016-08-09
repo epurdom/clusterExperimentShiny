@@ -5,7 +5,9 @@ shinyServer(function(input, output, session) {
   #sE is the Summarized/Cluster Experiment initially loaded which will remain unaltered
   sE <- SummarizedExperiment()
 
-  
+  avaliableWhichClusters <- function() {
+    return(unique(clusterTypes(cE)))
+  }
   
   
   #####################################################
@@ -166,6 +168,9 @@ shinyServer(function(input, output, session) {
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
       plotCoClustering(cE)
+      # library(NMF)
+      # mat = matrix(rnorm(1000), ncol = 10, nrow = 100)
+      # aheatmap(mat) # Should throw error... but doesnt
     })
   })
   
@@ -323,7 +328,7 @@ shinyServer(function(input, output, session) {
   )
 
   #####################################################
-  # Start Personalized plots
+  # Start Personalized plots: plotClusters
   #####################################################
   
   
@@ -355,6 +360,25 @@ shinyServer(function(input, output, session) {
       dev.off()
     }
   )
+  
+  #####################################################
+  # Start Personalized plots: plotDendrogram
+  #####################################################
+  plotDendrogramCode <- callModule(makePlotDendrogramCode, "plotDendrogram",
+                                   stringsAsFactors = FALSE)
+  
+  output$plotDendrogramCode <- renderText({
+    plotDendrogramCode()
+  })
+  
+  observeEvent(input$runPlotDendrogram, {
+    output$imgSpecializedPlotDendrogram <- renderPlot({
+      defaultMar<-par("mar")
+      plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
+      par(mar=plotCMar)
+      eval(parse(text = plotDendrogramCode()))
+    })
+  })
   
 })
 

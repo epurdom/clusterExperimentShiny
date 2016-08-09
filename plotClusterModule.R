@@ -164,37 +164,34 @@ plotClusterInput <- function(id, label = "plotCluster inputs") {
     
     tags$hr(),
     fluidRow(
-      column(3, checkboxInput(ns("aXlab"), value = FALSE, label = "Add xlab?")),
-      conditionalPanel(condition = paste0("input['", ns("aXlab"), "']"),
+      column(3, checkboxInput(ns("aAxisLine"), value = FALSE, label = "Add axisLine?")),
+      conditionalPanel(condition = paste0("input['", ns("aAxisLine"), "']"),
           column(3, numericInput(ns("axisLine"), value = 1, label = NULL))
       ),
-      column(2, checkboxInput(ns("hXlab"), value = FALSE, label = "Help Text and Instructions")),
-      conditionalPanel(condition = paste0("input['", ns("hXlab"), "']"),
-                       column(4, helpText("Character string for the label of x-axis."))
+      column(2, checkboxInput(ns("hAxisLine"), value = FALSE, label = "Help Text and Instructions")),
+      conditionalPanel(condition = paste0("input['", ns("hAxisLine"), "']"),
+          column(4, helpText("The number of lines in the axis labels on y-axis should be (passed to
+                             line = ... in the axis call)"))
       )
     ),
     
+    tags$hr(),
     fluidRow(
-      column(4, 
-             h3("Axis Line"),
-             helpText("The number of lines in the axis labels on y-axis should be (passed to line = ... in the axis call)"),
-             numericInput(ns("axisLine"), value = 1, label = NULL)
-             
+      column(3, checkboxInput(ns("aBox"), value = FALSE, label = "Add box?")),
+      conditionalPanel(condition = paste0("input['", ns("aBox"), "']"),
+          column(3, checkboxInput(ns("box"), value = FALSE, label = "TRUE"))
       ),
-      column(2,
-             h3("Box"),
-             helpText("Logical, whether to draw a box arouns the plot"),
-             checkboxInput(ns("box"), label = NULL, value = FALSE)
+      column(2, checkboxInput(ns("hBox"), value = FALSE, label = "Help Text and Instructions")),
+      conditionalPanel(condition = paste0("input['", ns("hBox"), "']"),
+          column(4, helpText("Logical, whether to draw a box arouns the plot"))
       )
     )
-    
-    
   )
 }
 
 makePlotClustersCode <- function(input, output, session, stringsAsFactors) {
   code <- reactive({
-    code <- paste("plotClusters( cE" )
+    code <- paste("plotClusters(cE" )
     if(input$aSampleData) {
       if(input$sampleData != 'NULL') {
         code <- paste(code, ", sampleData = c(", input$sampleData, ")", sep = "")
@@ -216,7 +213,7 @@ makePlotClustersCode <- function(input, output, session, stringsAsFactors) {
     }
     
     if(input$aMissingColor) {
-      code <- paste(code, "', missingColor = '", input$missingColor, "'", sep = "")
+      code <- paste(code, ", missingColor = '", input$missingColor, "'", sep = "")
     }
     
     if(input$aMinRequireColor) {
@@ -241,9 +238,15 @@ makePlotClustersCode <- function(input, output, session, stringsAsFactors) {
       code <- paste(code, ", xlab = '", input$xlab, "'", sep = "")
     }
     
-    code <- paste(code, "', axisLine = ", input$axisLine, ", box = ", input$box)
+    if(input$aAxisLine) {
+      code <- paste(code, ", axisLine = ", input$axisLine, sep = "")
+    }
     
-    code <- paste(code, ")")
+    if(input$aBox) {
+      code <- paste(code, ", box = ", input$box, sep = "")
+    }
+    
+    code <- paste(code, ")", sep = "")
   })
   
   return(code)

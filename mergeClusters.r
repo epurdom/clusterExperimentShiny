@@ -4,11 +4,6 @@ mergeClustersInput <- function(id, label = "cMInputs") {
   
   tagList(
     h2("Inputs for Merge Clusters"),
-    fluidRow(
-      column(3, h4("Which Clusters"),
-             helpText("UNFINISHED - Let's talk about this")
-      )
-    ), 
     tags$hr(),
     fluidRow(
       column(3, checkboxInput(ns("aMergeMethod"), value = FALSE, label = "Add mergeMethod?")),
@@ -33,12 +28,6 @@ mergeClustersInput <- function(id, label = "cMInputs") {
                                is not 'none')."))
                        )
       ),
-    tags$hr(),
-    fluidRow(
-      column(3, h4("Plot Type"),
-             helpText("Discuss")
-      )
-    ),
     
     tags$hr(),
     fluidRow(
@@ -53,12 +42,6 @@ mergeClustersInput <- function(id, label = "cMInputs") {
                              with the proportion of DE below cutoff will be merged. Must be a value 
                              between 0, 1, where lower values will make it harder to merge clusters.")
           )
-      )
-    ),
-    tags$hr(),
-    fluidRow(
-      column(3, h4("Do plot"),
-             helpText("Discuss")
       )
     ),
     tags$hr(),
@@ -84,8 +67,17 @@ mergeClustersInput <- function(id, label = "cMInputs") {
     ),
     tags$hr(),
     fluidRow(
-      column(3, h4("Cluster Label"),
-             helpText("Unfinished, need to know what kinds of strings can be offered")
+      column(3, checkboxInput(ns("aClusterLabel"), value = FALSE, label = "Add clusterLabel?")),
+      conditionalPanel(condition = paste0("input['", ns("aClusterLabel"), "']"),
+          column(3, textInput(ns("clusterLabel"), label = NULL, value = "Enter label"))
+      ),
+      column(2, checkboxInput(ns("hClusterLabel"), value = FALSE, label = "Help Text and Instructions")
+      ),
+      conditionalPanel(condition = paste0("input['", ns("hClusterLabel"), "']"),
+          column(4, helpText("a string used to describe the type of clustering. By default it is 
+                             equal to 'mergeClusters', to indicate that this clustering is the result 
+                             of a call to mergeClusters.")
+          )
       )
     )
   )
@@ -99,7 +91,9 @@ makeMergeClustersCode <- function(input, output, session, stringsAsFactors) {
     if(input$aCutoff)
       code <- paste(code, ", cutoff = ", input$cutoff, sep = "")
     if(input$aIsCount)
-      code <- paste(code, ", isCount = ", input$isCount, sep = "")    
+      code <- paste(code, ", isCount = ", input$isCount, sep = "")  
+    if(input$aClusterLabel)
+      code <- paste(code, ", clusterLabel = '", input$clusterLabel, "'", sep = "")  
     code <- paste(code, ")", sep = "")
   })
   
