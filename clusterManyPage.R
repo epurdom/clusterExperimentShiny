@@ -7,23 +7,11 @@ require(stringr) #shouldn't need once make package.
 dimReduceInput <- function(id, label = "inputs") {
   # Create a namespace function using the provided id
   ns <- NS(id)
-  browser()
+  
   tagList(
 
     tags$hr(),
-	# checkboxInput(id,sidelabel="Select Dimensionality Reduction?", options=c("none","PCA", "var","cv", "mad"),val="dimReduce",aVal="aDimReduce", hVal="hDimReduce", help="What method(s) of dimensionality reduction to perform before clustering.",required=FALSE),
-
-    fluidRow(
-      column(3, checkboxInput(ns("aDimReduce"), value = FALSE, label = "Choose Dimensionality Reduction?")),
-      conditionalPanel(condition = paste0("input['", ns("aDimReduce"), "']"),
-         column(3, checkboxGroupInput(ns("dimReduce"), choices = c("none","PCA", "var","cv", "mad"), label = "dimReduce")),
-         column(2, checkboxInput(ns("hDimReduce"), value = FALSE, label = "Help Text and Instructions")),
-         conditionalPanel(condition = paste0("input['", ns("hDimReduce"), "']"),
-             column(4, helpText("what type of dimensionality reduction to perform before clustering.")
-             )
-         )
-      )
-    ),
+	multipleOptionsInput(id,sidelabel="Select Dimensionality Reduction?", options=c("none","PCA", "var","cv", "mad"),val="dimReduce",aVal="aDimReduce", hVal="hDimReduce", help="What method(s) of dimensionality reduction to perform before clustering.",required=FALSE),
       conditionalPanel(condition = paste0("input['", ns("dimReduce"), "'][0] == 'PCA'",
                                           "|| input['", ns("dimReduce"), "'][1] == 'PCA'",
                                           "|| input['", ns("dimReduce"), "'][2] == 'PCA'",
