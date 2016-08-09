@@ -108,14 +108,7 @@ clusterFunctionInputs <- function(id, label = "inputs") {
 	vectorInput(id,"Choose k/k0", "e.g. 3,5:7",val="ks",aVal="aKs", hVal="hKs", defaultValue=NULL, help="When clustering the samples, this argument is interpreted differently depending on other choices for that cluster run. If sequential=TRUE in a clustering, this argument defines the argument k0 of seqCluster. Otherwise, this argument sets the 'k' in the clustering (when using a clustering function that needs 'k'). This argument also sets 'k' for subsampling, if 'subsample=TRUE'. For clusterings where 'findBestK=TRUE', this argument also defines the range of k values to search over.",required=TRUE),
 
     tags$hr(),
-    fluidRow(
-
-      column(3,
-             h3("distFunction"),
-             helpText("need clarity")
-      )
-
-    ),
+    multipleOptionsInput(id, "Distance Function",val="distFunction",aVal="aDistFunction",hVal="hDistFunction",options="Euclidean"),
 
     tags$hr(),
     # #This might need to be down with clusterD by line 27X
