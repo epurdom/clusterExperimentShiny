@@ -1,5 +1,8 @@
-vectorInput<-function(id,sidelabel, aboveLabel,val,aVal, hVal, defaultValue=NULL, help="No help yet available",required=FALSE){
+vectorInput<-function(id,sidelabel, aboveLabel,val, defaultValue=NULL, help="No help yet available",required=FALSE){
 	ns <- NS(id)
+	##Should be able to do this and not require user define these terms.
+	aVal<-paste("a",val,sep="")
+	hVal<-paste("h",val,sep="")
 #	if(!required){ #for now, not implement, because don't know how to do the required version...
 	    fluidRow(
 	      column(3, checkboxInput(ns(aVal), value = FALSE, label = sidelabel)),
@@ -18,8 +21,11 @@ vectorInput<-function(id,sidelabel, aboveLabel,val,aVal, hVal, defaultValue=NULL
 
 }
 
-logicalInput<-function(id,sidelabel, val,aVal, hVal, help="No help yet available",required=FALSE){
+logicalInput<-function(id,sidelabel, val, help="No help yet available",required=FALSE){
 	ns<-NS(id)
+	##Should be able to do this and not require user define these terms.
+	aVal<-paste("a",val,sep="")
+	hVal<-paste("h",val,sep="")
     fluidRow(
       column(3, checkboxInput(ns(aVal), value = FALSE, label = sidelabel)),
       conditionalPanel(condition = paste0("input['", ns(aVal), "']"),
@@ -34,11 +40,11 @@ logicalInput<-function(id,sidelabel, val,aVal, hVal, help="No help yet available
     )
 }
 
-multipleOptionsInput<-function(id, sidelabel,options,val,aVal, hVal, help="No help yet available",required=FALSE){
+multipleOptionsInput<-function(id, sidelabel,options,val, help="No help yet available",required=FALSE){
 	ns<-NS(id)
-	###Should be able to do this and not require user define these terms.
-	#aVal<-paste("a",val,sep="")
-	#hVal<-paste("h",val,sep="")
+	##Should be able to do this and not require user define these terms.
+	aVal<-paste("a",val,sep="")
+	hVal<-paste("h",val,sep="")
     fluidRow(
       column(3, checkboxInput(ns(aVal), value = FALSE, label = sidelabel)),
       conditionalPanel(condition = paste0("input['", ns(aVal), "']"),

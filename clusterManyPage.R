@@ -11,14 +11,14 @@ dimReduceInput <- function(id, label = "inputs") {
   tagList(
 
     tags$hr(),
-	multipleOptionsInput(id,sidelabel="Select Dimensionality Reduction?", options=c("none","PCA", "var","cv", "mad"),val="dimReduce",aVal="aDimReduce", hVal="hDimReduce", help="What method(s) of dimensionality reduction to perform before clustering.",required=FALSE),
+	multipleOptionsInput(id,sidelabel="Select Dimensionality Reduction?", options=c("none","PCA", "var","cv", "mad"),val="dimReduce", help="What method(s) of dimensionality reduction to perform before clustering.",required=FALSE),
       conditionalPanel(condition = paste0("input['", ns("dimReduce"), "'][0] == 'PCA'",
                                           "|| input['", ns("dimReduce"), "'][1] == 'PCA'",
                                           "|| input['", ns("dimReduce"), "'][2] == 'PCA'",
                                           "|| input['", ns("dimReduce"), "'][3] == 'PCA'",
                                           "|| input['", ns("dimReduce"), "'][4] == 'PCA'"),
           tags$hr(),
-		  vectorInput(id,"# PCA dims\n(nPCADims)", "e.g. 5,25,50",val="nPCADims",aVal="aNPCADims", hVal="hNPCADims", defaultValue=NULL, help="Please enter a list (separated by commas) of the number of PCA dimensions to keep. Used when 'PCA' is identified as choice in dimensionality reduction. If NA is included, then the full dataset will also be included.",required=FALSE)
+		  vectorInput(id,"# PCA dims\n(nPCADims)", "e.g. 5,25,50",val="nPCADims",defaultValue=NULL, help="Please enter a list (separated by commas) of the number of PCA dimensions to keep. Used when 'PCA' is identified as choice in dimensionality reduction. If NA is included, then the full dataset will also be included.",required=FALSE)
       ),
       #horrible syntax and overkill, but what to do with the poor design of Shiny for this circumstance?
       conditionalPanel(condition = paste0("input['", ns("dimReduce"), "'][0] == 'mad'",
@@ -34,7 +34,7 @@ dimReduceInput <- function(id, label = "inputs") {
                                           "|| input['", ns("dimReduce"), "'][2] == 'cv'",
                                           "|| input['", ns("dimReduce"), "'][3] == 'cv'"),
           tags$hr(),
-		  vectorInput(id,"# variable dimensions:\n(nVarDims)", "e.g. 100,500,1000",val="nVarDims",aVal="aNVarDims", hVal="hNVarDims", defaultValue=NULL, help="A list (separated by commas) of the number of the most variable features to keep. Used when any of 'var', 'cv', or 'mad' is identified as a choice in dimensionality reduction (the same set of values is used for all). If NA is included, then the full dataset will also be included.",required=FALSE)
+		  vectorInput(id,"# variable dimensions:\n(nVarDims)", "e.g. 100,500,1000",val="nVarDims",defaultValue=NULL, help="A list (separated by commas) of the number of the most variable features to keep. Used when any of 'var', 'cv', or 'mad' is identified as a choice in dimensionality reduction (the same set of values is used for all). If NA is included, then the full dataset will also be included.",required=FALSE)
 
     )
 
@@ -69,44 +69,38 @@ clusterFunctionInputs <- function(id, label = "inputs") {
       #input alpha, conditional on clusterFunction = "tight" or clusterFunction = "hierarchical01"
       #Danger!
       #horrible syntax and overkill, but what to do with the poor design of Shiny for this circumstance?
-    conditionalPanel(condition = paste0("input['", ns("clusterFunction"), "'][0] == 'tight'"," || input['", ns("clusterFunction"), "'][0] == 'hierarchical01' ",
-                                        " || input['", ns("clusterFunction"), "'][1] == 'tight' ",
-                                        " || input['", ns("clusterFunction"), "'][1] == 'hierarchical01' ",
-                                        " || input['", ns("clusterFunction"), "'][2] == 'tight' ",
-                                        " || input['", ns("clusterFunction"), "'][2] == 'hierarchical01' ",
-                                        " || input['", ns("clusterFunction"), "'][3] == 'tight' ",
-                                        " || input['", ns("clusterFunction"), "'][3] == 'hierarchical01' "),
+    conditionalPanel(condition = setUpConditionalPanelTest(id,"clusterFunction",allOptions=clusterFunctionChoices, validOptions=c("tight","hierarchical01")),
         tags$hr(),
-			vectorInput(id,"Set alpha", "e.g. 0.1,0.2,0.3",val="alphas",aVal="aAlphas", hVal="hAlphas", defaultValue=NULL, help="List of comma-separated values between 0 and 1 giving values of alpha to be used by 0-1 clustering functions. Determines tightness required in creating clusters from the dissimilarity matrix.",required=FALSE)
+			vectorInput(id,"Set alpha", "e.g. 0.1,0.2,0.3",val="alphas", defaultValue=NULL, help="List of comma-separated values between 0 and 1 giving values of alpha to be used by 0-1 clustering functions. Determines tightness required in creating clusters from the dissimilarity matrix.",required=FALSE)
     ),
              #find best K logical, conditional on clusterFunction = "hierarchicalK" or "pam"
 	conditionalPanel(condition =		setUpConditionalPanelTest(id,"clusterFunction",allOptions=clusterFunctionChoices, validOptions=c("hierarchicalK","pam")),
         tags$hr(),
-		logicalInput(id,sidelabel="Find Best K Automatically?", val="findBestK",aVal="aFindBestK", hVal="hFindBestK", help="Whether should find best K based on average silhouette width (only used if clusterFunction of type 'K')",required=FALSE),
+		logicalInput(id,sidelabel="Find Best K Automatically?", val="findBestK", help="Whether should find best K based on average silhouette width (only used if clusterFunction of type 'K')",required=FALSE),
 
         tags$hr(),
-        logicalInput(id,sidelabel="Remove samples with low silhouette?", val="removeSil",aVal="aRemoveSil", hVal="hRemoveSil", help="logical as to whether remove when silhouette less than 'silCutoff' parameter (only used if clusterFunction of type 'K')",required=FALSE),
+        logicalInput(id,sidelabel="Remove samples with low silhouette?", val="removeSil", help="logical as to whether remove when silhouette less than 'silCutoff' parameter (only used if clusterFunction of type 'K')",required=FALSE),
 
         conditionalPanel(condition = paste0("input['", ns("removeSil"), "'][0] == 'TRUE'",
                                             " && input['", ns("aRemoveSil"), "']"),
             tags$hr(),
             #Enter Sil cutoff, conditional upon removeSil == TRUE,
             #which is conditional upon clusterFunction = "hierarchicalK"
-				vectorInput(id,"Silhouette Cutoff", "e.g. 0,.1,3",val="silCutoff",aVal="aSilCutoff", hVal="hSilCutoff", defaultValue=NULL, help="Real-valued numbers in comma separated list giving requirement on minimum silhouette width for sample to be included in cluster (only when removeSil=TRUE).",required=FALSE)
+				vectorInput(id,"Silhouette Cutoff", "e.g. 0,.1,3",val="silCutoff", defaultValue=NULL, help="Real-valued numbers in comma separated list giving requirement on minimum silhouette width for sample to be included in cluster (only when removeSil=TRUE).",required=FALSE)
 
         )
     ),
 
     tags$hr(),
-	vectorInput(id,"Choose k/k0", "e.g. 3,5:7",val="ks",aVal="aKs", hVal="hKs", defaultValue=NULL, help="When clustering the samples, this argument is interpreted differently depending on other choices for that cluster run. If sequential=TRUE in a clustering, this argument defines the argument k0 of seqCluster. Otherwise, this argument sets the 'k' in the clustering (when using a clustering function that needs 'k'). This argument also sets 'k' for subsampling, if 'subsample=TRUE'. For clusterings where 'findBestK=TRUE', this argument also defines the range of k values to search over.",required=TRUE),
+	vectorInput(id,"Choose k/k0", "e.g. 3,5:7",val="ks", defaultValue=NULL, help="When clustering the samples, this argument is interpreted differently depending on other choices for that cluster run. If sequential=TRUE in a clustering, this argument defines the argument k0 of seqCluster. Otherwise, this argument sets the 'k' in the clustering (when using a clustering function that needs 'k'). This argument also sets 'k' for subsampling, if 'subsample=TRUE'. For clusterings where 'findBestK=TRUE', this argument also defines the range of k values to search over.",required=TRUE),
 
     tags$hr(),
-    multipleOptionsInput(id, "Distance Function",val="distFunction",aVal="aDistFunction",hVal="hDistFunction",options="Euclidean"),
+    multipleOptionsInput(id, "Distance Function",val="distFunction",options="Euclidean"),
 
     tags$hr(),
     # #This might need to be down with clusterD by line 27X
     # #Enter Min clustr Sizes, not conditional
-	vectorInput(id,"Change minSizes?", "e.g. 3,5,7",val="minSizes",aVal="aMinSizes", hVal="hMinSizes", defaultValue=NULL, help="List of comma separated integers defining the minimimum size required for a cluster. Clusters smaller than this are not kept and samples are left unassigned. If sequential chosen, minSize is used for each sequential selection of clusters.",required=FALSE)
+	vectorInput(id,"Change minSizes?", "e.g. 3,5,7",val="minSizes", defaultValue=NULL, help="List of comma separated integers defining the minimimum size required for a cluster. Clusters smaller than this are not kept and samples are left unassigned. If sequential chosen, minSize is used for each sequential selection of clusters.",required=FALSE)
 
   )
 }
