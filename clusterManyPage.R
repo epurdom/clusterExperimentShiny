@@ -46,7 +46,7 @@ dimReduceInput <- function(id, label = "inputs") {
 clusterFunctionInputs <- function(id, label = "inputs") {
 
   ns <- NS(id)
-
+  clusterFunctionChoices<-c("tight", "hierarchical01","hierarchicalK", "pam")
   tagList(
 
     fluidRow(
@@ -54,7 +54,7 @@ clusterFunctionInputs <- function(id, label = "inputs") {
       column(3, checkboxInput(ns("aClusterFunction"), value = FALSE, label = "Choose Cluster Function")),
       conditionalPanel(condition = paste0("input['", ns("aClusterFunction"), "']"),
           column(3, checkboxGroupInput(ns("clusterFunction"),  label = "Cluster Function",
-                                       choices = c("tight", "hierarchical01","hierarchicalK", "pam"))
+                                       choices =clusterFunctionChoices )
           ),
           column(2, checkboxInput(ns("hClusterFunction"), value = FALSE,
                                   label = "Help Text and Instructions")
@@ -79,15 +79,8 @@ clusterFunctionInputs <- function(id, label = "inputs") {
         tags$hr(),
 			vectorInput(id,"Set alpha", "e.g. 0.1,0.2,0.3",val="alphas",aVal="aAlphas", hVal="hAlphas", defaultValue=NULL, help="List of comma-separated values between 0 and 1 giving values of alpha to be used by 0-1 clustering functions. Determines tightness required in creating clusters from the dissimilarity matrix.",required=FALSE)
     ),
-             #find best K logical, conditional on clusterFunction = "hierarchicalK"
-    conditionalPanel(condition = paste0("input['", ns("clusterFunction"), "'][0] == 'hierarchicalK'",
-                                        " || input['", ns("clusterFunction"), "'][1] == 'hierarchicalK'",
-                                        " || input['", ns("clusterFunction"), "'][2] == 'hierarchicalK'",
-                                        " || input['", ns("clusterFunction"), "'][3] == 'hierarchicalK'",
-                                        " || input['", ns("clusterFunction"), "'][0] == 'pam'",
-                                        " || input['", ns("clusterFunction"), "'][1] == 'pam'",
-                                        " || input['", ns("clusterFunction"), "'][2] == 'pam'",
-                                        " || input['", ns("clusterFunction"), "'][3] == 'pam'"),
+             #find best K logical, conditional on clusterFunction = "hierarchicalK" or "pam"
+	conditionalPanel(condition =		setUpConditionalPanelTest(id,"clusterFunction",allOptions=clusterFunctionChoices, validOptions=c("hierarchicalK","pam")),
         tags$hr(),
 		logicalInput(id,sidelabel="Find Best K Automatically?", val="findBestK",aVal="aFindBestK", hVal="hFindBestK", help="Whether should find best K based on average silhouette width (only used if clusterFunction of type 'K')",required=FALSE),
 

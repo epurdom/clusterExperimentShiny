@@ -51,6 +51,20 @@ multipleOptionsInput<-function(id, sidelabel,options,val,aVal, hVal, help="No he
     )
 }
 
+setUpConditionalPanelTest<-function(id,val,allOptions, validOptions){
+	ns<-NS(id)
+	nAll<-length(allOptions)
+	startStr<-sapply(0:(nAll-1),function(i){
+		paste0("input['",ns(val),"'][",i,"]==",collapse="")
+	})
+	endString<-sapply(validOptions,function(x){paste0("'",x,"'",collapse="")})
+	#take all combinations of these
+	combs<-expand.grid(startStr,endString,stringsAsFactors=FALSE)
+	totalStr<-paste0(apply(combs,1,paste0,collapse=""),collapse="||")
+	return(totalStr)
+    
+}
+
 #based on suggestion in ???
 myConditionalPanel<-function(){
 	
