@@ -1,41 +1,30 @@
+#################
+##Description####
 #This file, clusterManyPage.R, contains the functions, inputs, and server-side computations of the clusterMany tab.
-
-require(stringr) #shouldn't need once make package.
-
 #This userFile input is a very large function that recieves all of the inputs for clusterMany from the user
+#################
 
-dimReduceInput <- function(id, label = "inputs") {
+#################
+#Dimension reduction tab
+#################
+dimReduceInput <- function(id, label = "inputs"){
   # Create a namespace function using the provided id
   ns <- NS(id)
-  
+  dimReduceOptions<-c("none","PCA", "var","cv", "mad")
   tagList(
-
     tags$hr(),
-	multipleOptionsInput(id,sidelabel="Select Dimensionality Reduction?", options=c("none","PCA", "var","cv", "mad"),val="dimReduce", help="What method(s) of dimensionality reduction to perform before clustering.",required=FALSE),
-      conditionalPanel(condition = paste0("input['", ns("dimReduce"), "'][0] == 'PCA'",
-                                          "|| input['", ns("dimReduce"), "'][1] == 'PCA'",
-                                          "|| input['", ns("dimReduce"), "'][2] == 'PCA'",
-                                          "|| input['", ns("dimReduce"), "'][3] == 'PCA'",
-                                          "|| input['", ns("dimReduce"), "'][4] == 'PCA'"),
-          tags$hr(),
-		  vectorInput(id,"# PCA dims\n(nPCADims)", "e.g. 5,25,50",val="nPCADims",defaultValue=NULL, help="Please enter a list (separated by commas) of the number of PCA dimensions to keep. Used when 'PCA' is identified as choice in dimensionality reduction. If NA is included, then the full dataset will also be included.",required=FALSE)
-      ),
-      #horrible syntax and overkill, but what to do with the poor design of Shiny for this circumstance?
-      conditionalPanel(condition = paste0("input['", ns("dimReduce"), "'][0] == 'mad'",
-                                          "|| input['", ns("dimReduce"), "'][1] == 'mad'",
-                                          "|| input['", ns("dimReduce"), "'][2] == 'mad'",
-                                          "|| input['", ns("dimReduce"), "'][3] == 'mad'",
-                                          "|| input['", ns("dimReduce"), "'][4] == 'mad'",
-                                          "|| input['", ns("dimReduce"), "'][0] == 'var'",
-                                          "|| input['", ns("dimReduce"), "'][1] == 'var'",
-                                          "|| input['", ns("dimReduce"), "'][2] == 'var'",
-                                          "|| input['", ns("dimReduce"), "'][0] == 'cv'",
-                                          "|| input['", ns("dimReduce"), "'][1] == 'cv'",
-                                          "|| input['", ns("dimReduce"), "'][2] == 'cv'",
-                                          "|| input['", ns("dimReduce"), "'][3] == 'cv'"),
-          tags$hr(),
-		  vectorInput(id,"# variable dimensions:\n(nVarDims)", "e.g. 100,500,1000",val="nVarDims",defaultValue=NULL, help="A list (separated by commas) of the number of the most variable features to keep. Used when any of 'var', 'cv', or 'mad' is identified as a choice in dimensionality reduction (the same set of values is used for all). If NA is included, then the full dataset will also be included.",required=FALSE)
-
+	multipleOptionsInput(id,sidelabel="Select Dimensionality Reduction?", options=dimReduceOptions,val="dimReduce", help="What method(s) of dimensionality reduction to perform before clustering.",required=FALSE),
+	###Conditional: nPCADims if PCA
+    conditionalPanel(
+		condition = setUpConditionalPanelTest( id, val="dimReduce", allOptions=dimReduceOptions, validOptions="PCA"),
+        tags$hr(),
+		vectorInput(id,"# PCA dims\n(nPCADims)", "e.g. 5,25,50",val="nPCADims",defaultValue=NULL, help="Please enter a list (separated by commas) of the number of PCA dimensions to keep. Used when 'PCA' is identified as choice in dimensionality reduction. If NA is included, then the full dataset will also be included.",required=FALSE)
+    ),
+	###Conditional: nVarDims if mad/cv/var
+    conditionalPanel(
+		condition =  setUpConditionalPanelTest( id, val="dimReduce", allOptions=dimReduceOptions, validOptions=c("mad","var","cv")),
+        tags$hr(),
+		vectorInput(id,sidelabel="# variable dimensions:\n(nVarDims)", aboveLabel="e.g. 100,500,1000",val="nVarDims",defaultValue=NULL, help="A list (separated by commas) of the number of the most variable features to keep. Used when any of 'var', 'cv', or 'mad' is identified as a choice in dimensionality reduction (the same set of values is used for all). If NA is included, then the full dataset will also be included.",required=FALSE)
     )
 
   )
@@ -43,67 +32,55 @@ dimReduceInput <- function(id, label = "inputs") {
 
 
 
+#################
+#Clustering options tab
+#################
 clusterFunctionInputs <- function(id, label = "inputs") {
 
   ns <- NS(id)
   clusterFunctionChoices<-c("tight", "hierarchical01","hierarchicalK", "pam")
   tagList(
-
-    fluidRow(
-      #horrible syntax and overkill, but what to do with the poor design of Shiny for this circumstance?
-      column(3, checkboxInput(ns("aClusterFunction"), value = FALSE, label = "Choose Cluster Function")),
-      conditionalPanel(condition = paste0("input['", ns("aClusterFunction"), "']"),
-          column(3, checkboxGroupInput(ns("clusterFunction"),  label = "Cluster Function",
-                                       choices =clusterFunctionChoices )
-          ),
-          column(2, checkboxInput(ns("hClusterFunction"), value = FALSE,
-                                  label = "Help Text and Instructions")
-          ),
-          conditionalPanel(condition = paste0("input['", ns("hClusterFunction"), "']"),
-                column(4, helpText("function used for the clustering.")
-                )
-          )
-      )
-    ),
-
-      #input alpha, conditional on clusterFunction = "tight" or clusterFunction = "hierarchical01"
-      #Danger!
-      #horrible syntax and overkill, but what to do with the poor design of Shiny for this circumstance?
-    conditionalPanel(condition = setUpConditionalPanelTest(id,"clusterFunction",allOptions=clusterFunctionChoices, validOptions=c("tight","hierarchical01")),
+	  multipleOptionsInput(id, sidelabel="Choose Cluster Function (required)",options=clusterFunctionChoices,val="clusterFunction", help="Algorithm used for the clustering. ",required=FALSE),
+	  #01 algorithms need choose alpha
+    conditionalPanel(condition =  setUpConditionalPanelTest(id,"clusterFunction",allOptions=clusterFunctionChoices, validOptions=c("tight","hierarchical01")),
         tags$hr(),
-			vectorInput(id,"Set alpha", "e.g. 0.1,0.2,0.3",val="alphas", defaultValue=NULL, help="List of comma-separated values between 0 and 1 giving values of alpha to be used by 0-1 clustering functions. Determines tightness required in creating clusters from the dissimilarity matrix.",required=FALSE)
+			vectorInput(id,"Set alpha?", "e.g. 0.1,0.2,0.3",val="alphas", defaultValue=NULL, help="List of comma-separated values between 0 and 1 giving values of alpha to be used by 0-1 clustering functions. Determines tightness required in creating clusters from the dissimilarity matrix.",required=FALSE)
     ),
-             #find best K logical, conditional on clusterFunction = "hierarchicalK" or "pam"
+     #If K algorithms findBestK, removeSil
 	conditionalPanel(condition =		setUpConditionalPanelTest(id,"clusterFunction",allOptions=clusterFunctionChoices, validOptions=c("hierarchicalK","pam")),
         tags$hr(),
-		logicalInput(id,sidelabel="Find Best K Automatically?", val="findBestK", help="Whether should find best K based on average silhouette width (only used if clusterFunction of type 'K')",required=FALSE),
-
-        tags$hr(),
+		logicalInput(id,sidelabel="Find Best K Automatically?", val="findBestK", help="Whether should find best K based on average silhouette width (only used if clusterFunction of type 'K')",required=FALSE)
+	),
+	tags$hr(),
+	vectorInput(id,"Set k/k0?", "e.g. 3,5:7",val="ks", defaultValue=NULL, help="When clustering the samples, this argument is interpreted differently depending on other choices for that cluster run. If sequential=TRUE in a clustering, this argument defines the argument k0 of seqCluster. Otherwise, this argument sets the 'k' in the clustering (when using a clustering function that needs 'k'). This argument also sets 'k' for subsampling, if 'subsample=TRUE'. For clusterings where 'findBestK=TRUE', this argument also defines the range of k values to search over.",required=FALSE),
+	
+    #If K algorithms, removeSil
+    conditionalPanel(
+		condition = setUpConditionalPanelTest( id,"clusterFunction", allOptions=clusterFunctionChoices, validOptions=c("hierarchicalK","pam")),
+		tags$hr(),
         logicalInput(id,sidelabel="Remove samples with low silhouette?", val="removeSil", help="logical as to whether remove when silhouette less than 'silCutoff' parameter (only used if clusterFunction of type 'K')",required=FALSE),
-
-        conditionalPanel(condition = paste0("input['", ns("removeSil"), "'][0] == 'TRUE'",
-                                            " && input['", ns("aRemoveSil"), "']"),
+		#if removeSil=TRUE, need silcutoff
+        conditionalPanel(condition = setUpConditionalPanelTest(id,"clusterFunction",allOptions=c("TRUE","FALSE"), validOptions=c("hierarchicalK","pam") ),
+		# paste0("input['", ns("removeSil"), "'][0] == 'TRUE'",
+#                                             " && input['", ns("aRemoveSil"), "']"),
             tags$hr(),
-            #Enter Sil cutoff, conditional upon removeSil == TRUE,
-            #which is conditional upon clusterFunction = "hierarchicalK"
-				vectorInput(id,"Silhouette Cutoff", "e.g. 0,.1,3",val="silCutoff", defaultValue=NULL, help="Real-valued numbers in comma separated list giving requirement on minimum silhouette width for sample to be included in cluster (only when removeSil=TRUE).",required=FALSE)
-
+			vectorInput(id,"Set Silhouette Cutoff?", "e.g. 0,.1,3",val="silCutoff", defaultValue=NULL, help="Real-valued numbers in comma separated list giving requirement on minimum silhouette width for sample to be included in cluster (only when removeSil=TRUE).",required=FALSE)
         )
     ),
-
     tags$hr(),
-	vectorInput(id,"Choose k/k0", "e.g. 3,5:7",val="ks", defaultValue=NULL, help="When clustering the samples, this argument is interpreted differently depending on other choices for that cluster run. If sequential=TRUE in a clustering, this argument defines the argument k0 of seqCluster. Otherwise, this argument sets the 'k' in the clustering (when using a clustering function that needs 'k'). This argument also sets 'k' for subsampling, if 'subsample=TRUE'. For clusterings where 'findBestK=TRUE', this argument also defines the range of k values to search over.",required=TRUE),
-
-    tags$hr(),
-    multipleOptionsInput(id, "Distance Function",val="distFunction",options="Euclidean"),
+    multipleOptionsInput(id, "Set distance function",val="distFunction",options="Euclidean",required=FALSE),
 
     tags$hr(),
     # #This might need to be down with clusterD by line 27X
     # #Enter Min clustr Sizes, not conditional
-	vectorInput(id,"Change minSizes?", "e.g. 3,5,7",val="minSizes", defaultValue=NULL, help="List of comma separated integers defining the minimimum size required for a cluster. Clusters smaller than this are not kept and samples are left unassigned. If sequential chosen, minSize is used for each sequential selection of clusters.",required=FALSE)
+	vectorInput(id,"Set minimum cluster size?", "e.g. 3,5,7",val="minSizes", defaultValue=NULL, help="List of comma separated integers defining the minimimum size required for a cluster. Clusters smaller than this are not kept and samples are left unassigned. If sequential chosen, minSize is used for each sequential selection of clusters.",required=FALSE)
 
   )
 }
+
+#################
+#
+#################
 
 sSBInputs <- function(id, label = "SSB inputs") {
   
