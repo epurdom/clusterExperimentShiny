@@ -5,35 +5,11 @@ capwords <- function(s, strict = FALSE) {
                              sep = "", collapse = " " )
     sapply(strsplit(s, split = " "), cap, USE.NAMES = !is.null(names(s)))
 }
-<<<<<<< HEAD
 vectorInput<-function(id, sidelabel, aboveLabel, val, defaultValue=NULL, help="No help yet available", required=FALSE){
-=======
-convertSideLabel<-function(sidelabel,val){	paste0(sidelabel,paste0("(",val,")",collapse=""),collapse="\n") #note sure about this
-}
-singleNumericInput<-function(id,sidelabel, aboveLabel,val, defaultValue=NULL, help="No help yet available",required=FALSE){
-	ns <- NS(id)
-	aVal<-paste("a",capwords(val),sep="")
-	hVal<-paste("h",capwords(val),sep="")
-	sidelabel<-convertSideLabel(sidelabel,val)
-	fluidRow(
-	  column(3, checkboxInput(ns(aVal), value = FALSE, label = sidelabel)),
-	  conditionalPanel(condition = paste0("input['", ns(aVal), "']"),
-	      column(3, numericInput(ns(val), label = NULL, value = 1, min = 1, step = 1))
-	  ),
-	  column(2, checkboxInput(ns(hVal), value = FALSE, label = "Click here for help")),
-	  conditionalPanel(condition = paste0("input['", ns(hVal), "']"),
-	                   column(4, helpText(help ))
-	  )
-	)
-}
-
-vectorInput<-function(id,sidelabel, aboveLabel,val, defaultValue=NULL, help="No help yet available",required=FALSE){
->>>>>>> 918c878c0b2f2d304b6bc29219119f69a308e16d
 	ns <- NS(id)
 	##Should be able to do this and not require user define these terms.
 	aVal<-paste("a",capwords(val),sep="")
 	hVal<-paste("h",capwords(val),sep="")
-	sidelabel<-convertSideLabel(sidelabel,val)
 	if(!required){ #for now, not implement, because don't know how to do the required version...
 	    fluidRow(
 	      column(3, checkboxInput(ns(aVal), value = FALSE, label = sidelabel)),
@@ -70,7 +46,6 @@ logicalInput<-function(id,sidelabel, val, help="No help yet available",required=
 	##Should be able to do this and not require user define these terms.
 	aVal<-paste("a",capwords(val),sep="")
 	hVal<-paste("h",capwords(val),sep="")
-	sidelabel<-convertSideLabel(sidelabel,val)
 	if(!required){
 	    fluidRow(
 	      column(3, checkboxInput(ns(aVal), value = FALSE, label = sidelabel)),
@@ -105,17 +80,16 @@ multipleOptionsInput<-function(id, sidelabel,options,val, help="No help yet avai
 	##Should be able to do this and not require user define these terms.
 	aVal<-paste("a",capwords(val),sep="")
 	hVal<-paste("h",capwords(val),sep="")
-	sidelabel<-convertSideLabel(sidelabel,val)
 	if(!required){
 	    fluidRow(
 	      column(3, checkboxInput(ns(aVal), value = FALSE, label = sidelabel)),
 	      conditionalPanel(condition = paste0("input['", ns(aVal), "']"),
-	         column(3, checkboxGroupInput(ns(val), choices = options, label = "Choose all of interest"))),
-	      column(2, checkboxInput(ns(hVal), value = FALSE, label = "Click here for help")),
-	      conditionalPanel(condition = paste0("input['", ns(hVal), "']"),
+	         column(3, checkboxGroupInput(ns(val), choices = options, label = "Choose all of interest")),
+	         column(2, checkboxInput(ns(hVal), value = FALSE, label = "Click here for help")),
+	         conditionalPanel(condition = paste0("input['", ns(hVal), "']"),
 	             column(4, helpText(help))
+	         )
 	      )
-	      
 	    )
 	}
 	else{
@@ -133,37 +107,63 @@ multipleOptionsInput<-function(id, sidelabel,options,val, help="No help yet avai
 
 }
 
-singleOptionsInput<-function(id, sidelabel,options,val, help="No help yet available",required=FALSE){
-	ns<-NS(id) #If id argument to NS is missing, returns a function that expects an id string as its only argument and returns that id with the namespace prepended.
-	##Should be able to do this and not require user define these terms.
-	aVal<-paste("a",capwords(val),sep="")
-	hVal<-paste("h",capwords(val),sep="")
-	sidelabel<-convertSideLabel(sidelabel,val)
-	if(!required){
-	    fluidRow(
-	      column(3, checkboxInput(ns(aVal), value = FALSE, label = sidelabel)),
-	      conditionalPanel(condition = paste0("input['", ns(aVal), "']"),
-	         column(3, selectInput(ns(val), choices = options, label = "Choose one",multiple=FALSE))),
-	      column(2, checkboxInput(ns(hVal), value = FALSE, label = "Click here for help")),
-	      conditionalPanel(condition = paste0("input['", ns(hVal), "']"),
-	             column(4, helpText(help))
-	      )
-	    )
-	}
-	else{
-		
-	    fluidRow(
-	      column(3, sidelabel), #creates problem here, because need if required=FALSE, the value of ns(aVal) is set to be true in the input list...e.g. input$aDimReduce needs to be set to TRUE to be able to get the code set up to run (under function makeCode)
-	      column(3,selectInput(ns(val), choices = options, label = "Choose one")),
-	      column(2, checkboxInput(ns(hVal), value = FALSE, label = "Click here for help")),
-	      conditionalPanel(condition = paste0("input['", ns(hVal), "']"),
-	             column(4, helpText(help))
-	         
-	      )
-	    )
-	}
-
+singleNumericInput <- function(id, sidelabel, aboveLabel, val, defaultValue, help, required = FALSE) {
+  ns <- NS(id)
+  aVal<-paste("a",capwords(val),sep="")
+  hVal<-paste("h",capwords(val),sep="")
+  if(!required) {
+    fluidRow(
+      column(3, checkboxInput(ns(aVal), value = FALSE, label = sidelabel)),
+      conditionalPanel(condition = paste0("input['", ns(aVal), "']"),
+          column(3, numericInput(ns(val), label = aboveLabel, value = defaultValue))
+      ),
+      column(2, checkboxInput(ns(hVal), value = FALSE, label = "Help Text and Instructions")),
+      conditionalPanel(condition = paste0("input['", ns(hVal), "']"),
+          column(4, helpText(help))
+      )
+    )
+  } else {
+    fluidRow(
+      column(3, sidelabel), #creates problem here, because need if required=FALSE, the value of ns(aVal) is set to be true in the input list...e.g. input$aDimReduce needs to be set to TRUE to be able to get the code set up to run (under function makeCode)
+      column(3, numericInput(ns(val), label = aboveLabel, value = defaultValue)),
+      column(2, checkboxInput(ns(hVal), value = FALSE, label = "Click here for help")),
+      conditionalPanel(condition = paste0("input['", ns(hVal), "']"),
+                       column(4, helpText(help))
+                       
+      )
+    )
+  }
+  
 }
+
+singleOptionsInput <- function(id, sidelabel, options, val, help, required = FALSE) {
+  ns <- NS(id)
+  aVal<-paste("a",capwords(val),sep="")
+  hVal<-paste("h",capwords(val),sep="")
+  if(!required){
+    fluidRow(
+      column(3, checkboxInput(ns(aVal), value = FALSE, label = sidelabel)),
+      conditionalPanel(condition = paste0("input['", ns(aVal), "']"),
+          column(3, radioButtons(ns(val), choices = options, label = "Select one:")),
+          column(2, checkboxInput(ns(hVal), value = FALSE, label = "Click here for help")),
+          conditionalPanel(condition = paste0("input['", ns(hVal), "']"),
+              column(4, helpText(help))
+          )
+      )
+    )
+  } else {
+    fluidRow(
+      column(3, sidelabel), #creates problem here, because need if required=FALSE, the value of ns(aVal) is set to be true in the input list...e.g. input$aDimReduce needs to be set to TRUE to be able to get the code set up to run (under function makeCode)
+      column(3, radioButtons(ns(val), choices = options, label = "Select one:")),
+      column(2, checkboxInput(ns(hVal), value = FALSE, label = "Click here for help")),
+      conditionalPanel(condition = paste0("input['", ns(hVal), "']"),
+                       column(4, helpText(help))
+                       
+      )
+    )
+  }
+}
+
 
 #based on suggestion in https://groups.google.com/forum/#!searchin/shiny-discuss/conditionalPanel(condition$20$3D$20paste0(%22input%5B$27%22$2C$20ns(%7Csort:relevance/shiny-discuss/ZItFs3014YE/PPY_8XIiBwAJ
 setUpConditionalPanelTest<-function(id,val,allOptions, validOptions){
@@ -179,10 +179,4 @@ setUpConditionalPanelTest<-function(id,val,allOptions, validOptions){
 	return(totalStr)
     
 }
-
-# whichClustersInput <- function(id, sidelabel,options,val, help="No help yet available",required=FALSE) {
-#   ns<-NS(id) #If id argument to NS is missing, returns a function that expects an id string as its only argument and returns that id with the namespace prepended.
-#   
-#   capture.output(show(se))
-# }
 

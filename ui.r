@@ -19,6 +19,7 @@ shinyUI(navbarPage("Cluster Experiment",
                              tabsetPanel(
                                tabPanel("RDA file input",
                                         rdaFileInput("fileInput", "User rda file"),
+                                        h4("Summary of object uploaded:"),
                                         uiOutput("isRda")),
                                tabPanel("CSV format input",
                                   csvFile("fileInput", "User file"),

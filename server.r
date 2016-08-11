@@ -34,8 +34,7 @@ shinyServer(function(input, output, session) {
     else 
       sE <<- holder
     HTML(
-      paste("Summarized experiment object successfully created.", "<br/>", 
-            "Summary of object:", "<br/>", paste(capture.output(show(sE)), collapse = "<br/>"))
+      paste(capture.output(show(sE)), collapse = "<br/>")
     )
   })
   
@@ -132,7 +131,7 @@ shinyServer(function(input, output, session) {
       })
       
       output$makeDendrogramWhichClusters <- renderUI({
-        multipleOptionsInput("mDInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
+        singleOptionsInput("mDInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
                              val = "whichClusters", help = "an integer index or character string that identifies which
                              cluster should be used to make the dendrogram. Default is primaryCluster.")
       })
@@ -205,7 +204,7 @@ shinyServer(function(input, output, session) {
     })
     
     output$makeDendrogramWhichClusters <- renderUI({
-      multipleOptionsInput("mDInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
+      singleOptionsInput("mDInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
                            val = "whichClusters", help = "an integer index or character string that identifies which
                            cluster should be used to make the dendrogram. Default is primaryCluster.")
     })
