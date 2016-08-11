@@ -5,12 +5,6 @@
 plotClusterInput <- function(id, label = "plotCluster inputs") {
   ns <- NS(id)
   tagList(
-    fluidRow(
-      column(3, 
-             h3("Which Clusters"),
-             helpText("waiting on discussion with Elizabeth")
-      )
-    ),
     
     tags$hr(),
     fluidRow(
@@ -191,7 +185,7 @@ plotClusterInput <- function(id, label = "plotCluster inputs") {
 
 makePlotClustersCode <- function(input, output, session, stringsAsFactors) {
   code <- reactive({
-    code <- paste("plotClusters(cE" )
+    code <- paste("")
     if(input$aSampleData) {
       if(input$sampleData != 'NULL') {
         code <- paste(code, ", sampleData = c(", input$sampleData, ")", sep = "")

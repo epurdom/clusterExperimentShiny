@@ -131,9 +131,15 @@ shinyServer(function(input, output, session) {
       })
       
       output$makeDendrogramWhichClusters <- renderUI({
-        singleOptionsInput("mDInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
-                             val = "whichClusters", help = "an integer index or character string that identifies which
+        singleOptionsInput("mDInputs", sidelabel = "Add detailed whichCluster?", options = unique(clusterTypes(cE)),
+                             val = "whichCluster", help = "an integer index or character string that identifies which
                              cluster should be used to make the dendrogram. Default is primaryCluster.")
+      })
+      
+      output$plotClustersWhichClusters <- renderUI({
+        multipleOptionsInput("plotClustersInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
+                           val = "whichClusters", help = "an integer index or character string that identifies which
+                           cluster should be used to plotCluster.")
       })
   })
   
@@ -204,9 +210,15 @@ shinyServer(function(input, output, session) {
     })
     
     output$makeDendrogramWhichClusters <- renderUI({
-      singleOptionsInput("mDInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
-                           val = "whichClusters", help = "an integer index or character string that identifies which
+      singleOptionsInput("mDInputs", sidelabel = "Add detailed whichCluster?", options = unique(clusterTypes(cE)),
+                           val = "whichCluster", help = "an integer index or character string that identifies which
                            cluster should be used to make the dendrogram. Default is primaryCluster.")
+    })
+    
+    output$plotClustersWhichClusters <- renderUI({
+      multipleOptionsInput("plotClustersInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
+                         val = "whichClusters", help = "an integer index or character string that identifies which
+                         cluster should be used to plotCluster.")
     })
     
   })
@@ -247,29 +259,29 @@ shinyServer(function(input, output, session) {
   # Start make Dendrogram Tab
   #####################################################
   
-  makeDendrogramCode <- callModule(makeMakeDendrogramCode, "mDInputs", 
+  makeDendrogramLatterCode <- callModule(makeMakeDendrogramCode, "mDInputs", 
                                 stringsAsFactors = FALSE)
   
   # output$makeDendrogramCode <- renderText({
   #   makeDendrogramCode()
   # })
-  output$makeDendrogramCode <- renderText({
+  
+  makeDendrogramCode <- function(){
     code <- paste("cE <<- makeDendrogram(cE")
-    if(input[["mDInputs-aWhichClusters"]])
-    code <- paste(code, ", whichClusters = c('",
-                  paste(input[["mDInputs-whichClusters"]], collapse = "', '"), "')", sep = "")
-    code <- paste(code, makeDendrogramCode(), sep = "")
+    if(input[["mDInputs-aWhichCluster"]])
+      code <- paste(code, ", whichCluster = '", 
+                    paste(input[["mDInputs-whichCluster"]]), "'", sep = "")
+    code <- paste(code, makeDendrogramLatterCode(), sep = "")
     return(code)
+  }
+  
+  output$makeDendrogramCode <- renderText({
+    makeDendrogramCode()
   })
   
   observeEvent(input$runMakeDendrogram, {
     
-    code <- paste("cE <<- makeDendrogram(cE")
-    if(input[["mDInputs-aWhichClusters"]])
-      code <- paste(code, ", whichCluster = c('", 
-                    paste(input[["mDInputs-whichClusters"]], collapse = "', '"), "')", sep = "")
-    code <- paste(code, makeDendrogramCode(), sep = "")
-    eval(parse(text = code))
+    eval(parse(text = makeDendrogramCode()))
     
     output$imgPlotDendrogram <- renderPlot({
       # cE is the clusterExperiment object 
@@ -359,6 +371,13 @@ shinyServer(function(input, output, session) {
       par(mar=plotCMar)
       plotHeatmap(cE)
     })
+    
+    output$plotClustersWhichClusters <- renderUI({
+      multipleOptionsInput("plotClustersInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
+                           val = "whichClusters", help = "an integer index or character string that identifies which
+                           cluster should be used to plotCluster.")
+    })
+    
   })
   
   output$downloadDefaultPlotClustersMergeClusters <- downloadHandler(
@@ -388,15 +407,25 @@ shinyServer(function(input, output, session) {
   )
 
   #####################################################
-  # Start Personalized plots: plotClusters
+  # Start Personalized  plotClusters
   #####################################################
   
   
-  plotClustersCMCode <- callModule(makePlotClustersCode, "clusterManyPlotClusters",
+  plotClustersLatterCode <- callModule(makePlotClustersCode, "plotClustersInputs",
                                    stringsAsFactors = FALSE)
   
-  output$plotClustersCodeCM <- renderText({
-    plotClustersCMCode()
+  plotClustersCode <- function() {
+    code <- paste("cE <<- plotClusters(cE")
+    if(input[["plotClustersInputs-aWhichClusters"]]) {
+      code <- paste(code, ", whichClusters = c('",
+                    paste(input[["plotClustersInputs-whichClusters"]], collapse = "', '"), "')", sep = "")
+    }
+    code <- paste(code, plotClustersLatterCode(), sep = "")
+    return(code)
+  }
+  
+  output$plotClustersCode <- renderText({
+    plotClustersCode()
   })
   
   observeEvent(input$runPCCM, {
@@ -404,7 +433,7 @@ shinyServer(function(input, output, session) {
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
-      eval(parse(text = plotClustersCMCode()))
+      eval(parse(text = plotClustersCode()))
     })
   })
   
@@ -416,13 +445,13 @@ shinyServer(function(input, output, session) {
       # defaultMar<-par("mar")
       # plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       # par(mar=plotCMar)
-      eval(parse(text = plotClustersCMCode()))
+      eval(parse(text = plotClustersCode()))
       dev.off()
     }
   )
   
   #####################################################
-  # Start Personalized plots: plotDendrogram
+  # Start Personalized  plotDendrogram
   #####################################################
   plotDendrogramCode <- callModule(makePlotDendrogramCode, "plotDendrogram",
                                    stringsAsFactors = FALSE)

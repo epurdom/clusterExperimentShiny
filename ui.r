@@ -181,18 +181,20 @@ shinyUI(navbarPage("Cluster Experiment",
                              tabPanel("Plot Clusters",
                                       fluidRow(
                                         column(6,
-                                               plotClustersHelpText("clusterManyPlotClusters",
+                                               plotClustersHelpText("plotClustersInputs",
                                                                     "Help Text for plot Clusters, cM")
                                         ),
                                         column(6,
                                                h3("Code to be Run:"),
-                                               textOutput("plotClustersCodeCM"),
+                                               textOutput("plotClustersCode"),
                                                actionButton("runPCCM", "Run Plot Cluster Code")
                                         )
                                       ),
                                       navlistPanel("Plot Clusters",
                                                    tabPanel("Specialized Inputs",
-                                                            plotClusterInput("clusterManyPlotClusters", 
+                                                            h3("Specialized Plot Cluster Inputs"),
+                                                            uiOutput("plotClustersWhichClusters"),
+                                                            plotClusterInput("plotClustersInputs", 
                                                                              "inputs for plot Clusters, cM")
                                                    ),
                                                    tabPanel("Output Plot",
