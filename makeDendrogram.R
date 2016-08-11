@@ -3,12 +3,6 @@ makeDendrogramInput <- function(id, label = "cMInputs") {
   ns <- NS(id)
   
   tagList(
-    h2("Inputs for Make Dendrogram"),
-    fluidRow(
-      column(3, h4("Which Clusters"),
-             helpText("UNFINISHED - I am assuming we are just using the most recent cluster from clusterMany")
-      )
-    ),
     tags$hr(),
     fluidRow(
       column(3, checkboxInput(ns("aDimReduce"), value = FALSE, label = "Add Dimensionailty Reduction?")),
@@ -77,7 +71,7 @@ makeDendrogramInput <- function(id, label = "cMInputs") {
 
 makeMakeDendrogramCode <- function(input, output, session, stringsAsFactors) {
   code <- reactive({
-    code <- paste("cE <<- makeDendrogram(cE ")
+    code <- paste("")
     if(input$aDimReduce)
       code <- paste(code, ", dimReduce = '", input$dimReduce, "'", sep = "")
     if(input$andims)
@@ -92,4 +86,13 @@ makeMakeDendrogramCode <- function(input, output, session, stringsAsFactors) {
   })
   
   return(code)
+}
+
+
+makeDendrogramHelpText <- function(id, label = "help title and text") {
+  ns <- NS(id)
+  tagList(
+    h3("Specialized Inputs for makeDendrogram()"),
+    helpText("helptext here")
+  )
 }

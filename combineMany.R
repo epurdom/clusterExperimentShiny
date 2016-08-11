@@ -3,12 +3,12 @@ combineManyInput <- function(id, label = "cMInputs") {
   ns <- NS(id)
   
   tagList(
-    h2("Inputs for Combine Many"),
-    fluidRow(
-      column(3, h4("Which Clusters"),
-             helpText("UNFINISHED - I am assuming we are just using the most recent cluster from clusterMany")
-      )
-    ),
+
+    
+    # multipleOptionsInput(id, sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
+    #                      val = "whichClusters", help = "a numeric or character vector that specifies
+    #                      which clusters to compare"),
+    
     tags$hr(),
     fluidRow(
       column(3, checkboxInput(ns("aProportion"), value = FALSE, label = "Add Proportion?")),
@@ -57,7 +57,7 @@ combineManyInput <- function(id, label = "cMInputs") {
 
 makeCombineManyCode <- function(input, output, session, stringsAsFactors) {
   code <- reactive({
-    code <- paste("cE <<- combineMany(cE")#, whichClusters = 'clusterMany' ")
+    code <- paste("")#, whichClusters = 'clusterMany' ")
     if(input$aProportion)
       code <- paste(code, ", proportion = ", input$proportion)
     if(input$aPropUnassigned)
@@ -69,4 +69,12 @@ makeCombineManyCode <- function(input, output, session, stringsAsFactors) {
   })
   
   return(code)
+}
+
+combineManyHelpText <- function(id, label = "help title and text") {
+  ns <- NS(id)
+  tagList(
+    h3("Specialized Inputs for combineMany()"),
+    helpText("helptext here")
+  )
 }

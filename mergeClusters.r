@@ -99,3 +99,11 @@ makeMergeClustersCode <- function(input, output, session, stringsAsFactors) {
   
   return(code)
 }
+
+mergeClustersHelpText <- function(id, label = "help title and text") {
+  ns <- NS(id)
+  tagList(
+    h3("Specialized Inputs for MergeClusters()"),
+    helpText("helptext here")
+  )
+}

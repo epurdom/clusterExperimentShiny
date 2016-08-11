@@ -5,7 +5,7 @@ capwords <- function(s, strict = FALSE) {
                              sep = "", collapse = " " )
     sapply(strsplit(s, split = " "), cap, USE.NAMES = !is.null(names(s)))
 }
-vectorInput<-function(id,sidelabel, aboveLabel,val, defaultValue=NULL, help="No help yet available",required=FALSE){
+vectorInput<-function(id, sidelabel, aboveLabel, val, defaultValue=NULL, help="No help yet available", required=FALSE){
 	ns <- NS(id)
 	##Should be able to do this and not require user define these terms.
 	aVal<-paste("a",capwords(val),sep="")
@@ -122,4 +122,9 @@ setUpConditionalPanelTest<-function(id,val,allOptions, validOptions){
     
 }
 
+# whichClustersInput <- function(id, sidelabel,options,val, help="No help yet available",required=FALSE) {
+#   ns<-NS(id) #If id argument to NS is missing, returns a function that expects an id string as its only argument and returns that id with the namespace prepended.
+#   
+#   capture.output(show(se))
+# }
 

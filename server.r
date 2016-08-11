@@ -1,9 +1,10 @@
 source("global.R")
 options(shiny.maxRequestSize=30*1024^2)
+# sE <- SummarizedExperiment()
 
 shinyServer(function(input, output, session) {
   #sE is the Summarized/Cluster Experiment initially loaded which will remain unaltered
-  sE <- SummarizedExperiment()
+  #sE <- SummarizedExperiment()
 
   avaliableWhichClusters <- function() {
     return(unique(clusterTypes(cE)))
@@ -26,13 +27,16 @@ shinyServer(function(input, output, session) {
                             stringsAsFactors = FALSE)  
   
   
-  output$isRda <- renderText({
+  output$isRda <- renderUI({
     holder <- rdaFile()
     if (is.null(holder))
       return("No data uploaded yet!")
     else 
       sE <<- holder
-    return(paste("Summarized experiment object successfully created, with dimensions of: ", dim(sE)[1], " by ", dim(sE)[2]))
+    HTML(
+      paste("Summarized experiment object successfully created.", "<br/>", 
+            "Summary of object:", "<br/>", paste(capture.output(show(sE)), collapse = "<br/>"))
+    )
   })
   
   output$isAssay <- renderText({
@@ -120,6 +124,18 @@ shinyServer(function(input, output, session) {
       #I would like to know if this works as intentioned.
       plotClusters(cE, whichClusters = "clusterMany")
     }, height = (40/3) * getSEIterations())
+      
+      output$combineManyWhichClusters <- renderUI({
+        multipleOptionsInput("cMInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
+                             val = "whichClusters", help = "a numeric or character vector that specifies
+                             which clusters to compare")
+      })
+      
+      output$makeDendrogramWhichClusters <- renderUI({
+        multipleOptionsInput("mDInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
+                             val = "whichClusters", help = "an integer index or character string that identifies which
+                             cluster should be used to make the dendrogram. Default is primaryCluster.")
+      })
   })
   
   #This function could certainly be refined
@@ -146,12 +162,27 @@ shinyServer(function(input, output, session) {
                                 stringsAsFactors = FALSE)
   
   output$combineManyCode <- renderText({
-    combineManyCode()
+    code <- paste("cE <<- combineMany(cE")
+    if(input[["cMInputs-aWhichClusters"]])
+      code <- paste(code, ", whichClusters = c('", 
+                    paste(input[["cMInputs-whichClusters"]], collapse = "','"), "')", sep = "")
+    code <- paste(code, combineManyCode(), sep = "")
+      return(code)
   })
-  
+  # output$combineManyWhichClusters <- renderUI({
+  #    multipleOptionsInput("cMInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
+  #                         val = "whichClusters", help = "a numeric or character vector that specifies
+  #                         which clusters to compare")
+  # })
   observeEvent(input$runCombineMany, {
     
-    eval(parse(text = combineManyCode()))
+    code <- paste("cE <<- combineMany(cE")
+    if(input[["cMInputs-aWhichClusters"]])
+      code <- paste(code, ", whichClusters = c('", 
+                    paste(input[["cMInputs-whichClusters"]], collapse = "','"), "')", sep = "")
+    code <- paste(code, combineManyCode(), sep = "")
+    
+    eval(parse(text = code))
     
     output$imgCombineManyPC <- renderPlot({
       # cE is the clusterExperiment object 
@@ -172,6 +203,13 @@ shinyServer(function(input, output, session) {
       # mat = matrix(rnorm(1000), ncol = 10, nrow = 100)
       # aheatmap(mat) # Should throw error... but doesnt
     })
+    
+    output$makeDendrogramWhichClusters <- renderUI({
+      multipleOptionsInput("mDInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
+                           val = "whichClusters", help = "an integer index or character string that identifies which
+                           cluster should be used to make the dendrogram. Default is primaryCluster.")
+    })
+    
   })
   
   output$downloadDefaultPlotPCCombineMany <- downloadHandler(
@@ -213,13 +251,26 @@ shinyServer(function(input, output, session) {
   makeDendrogramCode <- callModule(makeMakeDendrogramCode, "mDInputs", 
                                 stringsAsFactors = FALSE)
   
+  # output$makeDendrogramCode <- renderText({
+  #   makeDendrogramCode()
+  # })
   output$makeDendrogramCode <- renderText({
-    makeDendrogramCode()
+    code <- paste("cE <<- makeDendrogram(cE")
+    if(input[["mDInputs-aWhichClusters"]])
+    code <- paste(code, ", whichClusters = c('",
+                  paste(input[["mDInputs-whichClusters"]], collapse = "', '"), "')", sep = "")
+    code <- paste(code, makeDendrogramCode(), sep = "")
+    return(code)
   })
-
+  
   observeEvent(input$runMakeDendrogram, {
     
-    eval(parse(text = makeDendrogramCode()))
+    code <- paste("cE <<- makeDendrogram(cE")
+    if(input[["mDInputs-aWhichClusters"]])
+      code <- paste(code, ", whichCluster = c('", 
+                    paste(input[["mDInputs-whichClusters"]], collapse = "', '"), "')", sep = "")
+    code <- paste(code, makeDendrogramCode(), sep = "")
+    eval(parse(text = code))
     
     output$imgPlotDendrogram <- renderPlot({
       # cE is the clusterExperiment object 
@@ -235,6 +286,16 @@ shinyServer(function(input, output, session) {
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
       plotHeatmap(cE)
+    })
+    
+    #**************************************************
+    ##This image is output in Merge Clusters Input Page:
+    #**************************************************
+    output$imgInitalMergeClusters <- renderPlot({
+      defaultMar<-par("mar")
+      plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
+      par(mar=plotCMar)
+      mergeClusters(cE)
     })
     
   })
@@ -292,13 +353,13 @@ shinyServer(function(input, output, session) {
       plotClusters(cE)
     }, height = (40/3) * getCEIterations())
     
-    # output$imgPlotHeatmapMergeClusters <- renderPlot({
-    #   # cE is the clusterExperiment object 
-    #   defaultMar<-par("mar")
-    #   plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-    #   par(mar=plotCMar)
-    #   plotHeatmap(cE)
-    # })
+    output$imgPlotHeatmapMergeClusters <- renderPlot({
+      # cE is the clusterExperiment object
+      defaultMar<-par("mar")
+      plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
+      par(mar=plotCMar)
+      plotHeatmap(cE)
+    })
   })
   
   output$downloadDefaultPlotClustersMergeClusters <- downloadHandler(

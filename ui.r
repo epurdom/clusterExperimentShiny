@@ -19,10 +19,10 @@ shinyUI(navbarPage("Cluster Experiment",
                              tabsetPanel(
                                tabPanel("RDA file input",
                                         rdaFileInput("fileInput", "User rda file"),
-                                        textOutput("isRda")),
+                                        uiOutput("isRda")),
                                tabPanel("CSV format input",
                                   csvFile("fileInput", "User file"),
-                                  h3("testing"),
+                                  h3(paste(capture.output(show(sE)))),
                                   textOutput("isAssay"),
                                   h3("more testing..."),
                                   textOutput("isColData"),
@@ -71,9 +71,9 @@ shinyUI(navbarPage("Cluster Experiment",
                                         tabPanel("Plot Clusters",
                                                  tabsetPanel(
                                                      tabPanel("Default Plot",
-                                                              plotOutput("imgCE"),
-                                                              downloadButton("downloadDefaultPlotPCCM", label = "DownLoad this Plot")                                                       
-                                                     )
+                                                              downloadButton("downloadDefaultPlotPCCM", label = "DownLoad this Plot"),
+                                                              plotOutput("imgCE")                                                     
+                                                    )
                                                  )
                                             )
                                       )
@@ -81,17 +81,29 @@ shinyUI(navbarPage("Cluster Experiment",
                             #)
                               ),
                     tabPanel("Combine Many",
-                                fluidRow(),
-                                navlistPanel(
+                             fluidRow(
+                               column(6,
+                                      #Displays basic help text for Shiny App and clusterMany
+                                      combineManyHelpText("cMInputs")
+                               ),
+                               column(6,
+                                      #textual output of code that is to be run
+                                      h3("Code to be run internally:"),
+                                      textOutput("combineManyCode"),
+                                      #Action button that allows one to run above code
+                                      actionButton("runCombineMany", "Run This Code")
+                               )
+                             ),
+                               navlistPanel(
                                   tabPanel("Combine Many Inputs",
-                                           textOutput("combineManyCode"),
-                                           actionButton("runCombineMany", "Run This Code"),
+                                           h2("Inputs for Combine Many"),
+                                           uiOutput("combineManyWhichClusters"),
                                            combineManyInput("cMInputs", "")
                                   ),
                                   tabPanel("Plot Clusters",
-                                           plotOutput("imgCombineManyPC"),
-                                           downloadButton("downloadDefaultPlotPCCombineMany", label = "DownLoad this Plot")
-                                   ),
+                                           downloadButton("downloadDefaultPlotPCCombineMany", label = "DownLoad this Plot"),
+                                           plotOutput("imgCombineManyPC")
+                                  ),
                                   tabPanel("Plot CoClusters",
                                            downloadButton("downloadDefaultPlotCoClustersCombineMany", label = "DownLoad this Plot"),
                                            plotOutput("imgCombineManyPCC")
@@ -99,16 +111,28 @@ shinyUI(navbarPage("Cluster Experiment",
                                 )
                    ),
                   tabPanel("Make Dendrogram",
-                           fluidRow(),
+                           fluidRow(
+                             column(6,
+                                    #Displays basic help text for Shiny App and clusterMany
+                                    makeDendrogramHelpText("cMInputs")
+                             ),
+                             column(6,
+                                    #textual output of code that is to be run
+                                    h3("Code to be run internally:"),
+                                    textOutput("makeDendrogramCode"),
+                                    #Action button that allows one to run above code
+                                    actionButton("runMakeDendrogram", "Run This Code")
+                             )
+                           ),
                            navlistPanel(
                              tabPanel("Make Dendrogram",
-                                      textOutput("makeDendrogramCode"),
-                                      actionButton("runMakeDendrogram", "Run This Code"),
+                                      h2("Inputs for Make Dendrogram"),
+                                      uiOutput("makeDendrogramWhichClusters"),
                                       makeDendrogramInput("mDInputs", "")
                              ),
                              tabPanel("Plot Dendrogram",
-                                      plotOutput("imgPlotDendrogram"),
-                                      downloadButton("downloadDefaultPlotPDMD", label = "DownLoad this Plot")
+                                      downloadButton("downloadDefaultPlotPDMD", label = "DownLoad this Plot"),
+                                      plotOutput("imgPlotDendrogram")
                               ),
                              tabPanel("Plot HeatMap",
                                       downloadButton("downloadDefaultPlotPHMD", label = "DownLoad this Plot"),
@@ -117,12 +141,25 @@ shinyUI(navbarPage("Cluster Experiment",
                            )
                   ),
                   tabPanel("Merge Clusters",
-                           fluidRow(),
+                           fluidRow(
+                             column(6,
+                                    h3("Merge Clusters Function "),
+                                    #Displays basic help text for Shiny App and clusterMany
+                                    mergeClustersHelpText()
+                             ),
+                             column(6,
+                                    #textual output of code that is to be run
+                                    h3("Code to be run internally:"),
+                                    #Action button that allows one to run above code
+                                    textOutput("mergeClustersCode"),
+                                    actionButton("runMergeClusters", "Run This Code")
+                             )
+                           ),
                            navlistPanel(
                              
-                             tabPanel("Merge Clusters",
-                                      textOutput("mergeClustersCode"),
-                                      actionButton("runMergeClusters", "Run This Code"),
+                             tabPanel("Merge Clusters Input",
+                                      h4("Informative Dendrogram for merge cluster inputs:"),
+                                      plotOutput("imgInitalMergeClusters"),
                                       mergeClustersInput("mergeCInputs", "")
                                       ),
                              tabPanel("Plot Clusters",
@@ -131,10 +168,10 @@ shinyUI(navbarPage("Cluster Experiment",
                               ),
                              tabPanel("Plot Heatmap",
                                       downloadButton("downloadDefaultPlotHeatmapMergeClusters", label = "DownLoad this Plot"),
-                                      plotOutput("imgPlotHeatMapMergeClusters")
+                                      plotOutput("imgPlotHeatmapMergeClusters")
                              ),
-                             tabPanel("PCA Plot"
-                                      
+                             tabPanel("PCA Plot",
+                                      h3("PCA plot feature in development")
                               )
                            )
                   ),
