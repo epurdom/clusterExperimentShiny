@@ -14,6 +14,8 @@ source("combineMany.R")
 source("makeDendrogram.R")
 source("mergeClusters.r")
 source("plotDendrogram.r")
+source("plotHeatmap.r")
+source("plotCoClustering.r")
 sE <- SummarizedExperiment()
 #Making a fake arbitrary clusterExperiment Object for convenience, want to find a better way!
 cE <- clusterExperiment(matrix(data = c(0,0)), clusters = c(0), transformation = function(x){x})
