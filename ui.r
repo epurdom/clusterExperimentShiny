@@ -63,8 +63,8 @@ shinyUI(navbarPage("Cluster Experiment",
                                                  dimReduceInput("parameters", "dim inputs")
                                         ),
                                         tabPanel("Further clustering options",
-                                               h4("Warning!"),
-											   h3("If you change options on the 'General Options' tab, you should return to this tab to see what options have changed. It is best to complete the 'General Options' before starting this page"),
+                                               h3("Warning!"),
+											   h4("If you change options on the 'General Options' tab, you should return to this tab to see what options have changed. It is best to complete the 'General Options' before starting this page"),
                                                clusterFunctionInputs("parameters", "cluster function inputs")
                                         ),
                                         tabPanel("Specialized control",

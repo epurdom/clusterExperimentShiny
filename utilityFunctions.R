@@ -1,3 +1,33 @@
+###Plan:
+#Make global list of required parameters
+#functions search global list of parameters that are required to decide if required or not
+#create function to return TRUE/FALSE for makeCode to tell it whether to add entry; the function should look at val and aVal so that only adds it if both are defined. That way if unclick it, will take it out of code.
+#Also make it look up the default values in clusterExperiment and put those in as default in all. Might need to make separate look up for RSEC versus clusterMany.
+
+
+##########
+## Parse whether values have been changed and create new code
+#########
+addArguments<-function(input,currCode,val,isCharacter=TRUE){
+	if(isCharacter) paste(currCode, ", ",val,"=c('",paste(input[[val]],sep="",collapse="','"), "')", sep = "")
+		else paste(currCode, ", ",val,"=c(",paste(input[[val]],sep="",collapse=","), ")", sep = "")
+}
+testArguments<-function(input,val){
+    aVal<-paste("a",capwords(val),sep="")
+	nms<-names(input)
+	logic<-val %in% nms && !is.null(input[[val]]) && aVal%in%nms && input[[aVal]]
+    if(logic && is.character(input[[val]])) logic<-logic & input[[val]]!=""
+	return(logic)
+}
+combineArgs<-function(input, currCode,val,isCharacter=TRUE){
+	if(testArguments(input,val)) currCode<-addArguments(input,currCode,val,isCharacter)
+		return(currCode)
+}
+
+
+##########
+## Small helper functions
+#########
 #from help of tolower/toupper
 capwords <- function(s, strict = FALSE) {
     cap <- function(s) paste(toupper(substring(s, 1, 1)),
@@ -10,6 +40,10 @@ capwords <- function(s, strict = FALSE) {
 #not sure about how it looks right now, but easy to undo or fix globally this way.
 convertSideLabel<-function(sidelabel,val){	paste0(sidelabel,paste0("(",val,")",collapse=""),collapse="\n") 
 }
+
+##########
+## Conditional panels for arguments.
+#########
 
 singleNumericInput <- function(id, sidelabel, aboveLabel, val, defaultValue=NULL, help="No help yet available", required = FALSE) {
   ns <- NS(id)
@@ -43,7 +77,7 @@ singleNumericInput <- function(id, sidelabel, aboveLabel, val, defaultValue=NULL
 
 
 
-vectorInput<-function(id,sidelabel, aboveLabel,val, defaultValue=NULL, help="No help yet available",required=FALSE){
+vectorInput<-function(id,sidelabel, aboveLabel,val, defaultValue="", help="No help yet available",required=FALSE){
 	ns <- NS(id)
 	##Should be able to do this and not require user define these terms.
 	aVal<-paste("a",capwords(val),sep="")

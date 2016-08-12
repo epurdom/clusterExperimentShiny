@@ -47,9 +47,7 @@ clusterFunctionInputs <- function(id, label = "inputs") {
       # #This might need to be down with clusterD by line 27X
       # #Enter Min clustr Sizes, not conditional
   	vectorInput(id,"Set minimum cluster size?", "e.g. 3,5,7",val="minSizes", defaultValue=NULL, help="List of comma separated integers defining the minimimum size required for a cluster. Clusters smaller than this are not kept and samples are left unassigned. If sequential chosen, minSize is used for each sequential selection of clusters.",required=FALSE),
-      conditionalPanel(condition = setUpConditionalPanelTest(id,val="sequential",allOptions=c("TRUE","FALSE"), validOptions="TRUE"),
-        tags$hr(),
-  	#----------
+   	#----------
     #If 01 algorithms 
    	#----------
     conditionalPanel(condition =  setUpConditionalPanelTest(id,"clusterFunction",allOptions=clusterFunctionChoices, validOptions=c("tight","hierarchical01")),
@@ -70,7 +68,8 @@ clusterFunctionInputs <- function(id, label = "inputs") {
 			vectorInput(id,"Set Silhouette Cutoff?", "e.g. 0,.1,3",val="silCutoff", defaultValue=NULL, help="Real-valued numbers in comma separated list giving requirement on minimum silhouette width for sample to be included in cluster (only when removeSil=TRUE).",required=FALSE)
         )
     ),
-    tags$hr(),
+    conditionalPanel(condition = setUpConditionalPanelTest(id,val="sequential",allOptions=c("TRUE","FALSE"), validOptions="TRUE"),
+      tags$hr(),
 	 h4("Options related to sequential clustering"),
 	vectorInput(id,sidelabel="Set betas parameter?", aboveLabel="e.g. 0.8,0.9", val="betas", help="Comma-separated list of values between 0 and 1. Only used for clustering combinations where sequential=TRUE. Determines the similarity between two clusters required in order to deem the cluster stable as k in subsampling changes")
     )
@@ -155,91 +154,37 @@ makeCode <- function(input, output, session, stringsAsFactors) {
   clusterManyCode <- reactive({
     
     clusterManyCode <- paste("")
-    
 	#-------
-	# Sequential arguments
+	# Core arguments
 	#-------
-    if(input$aSequential) {
-      clusterManyCode <- paste(clusterManyCode, 
-                               ", sequential = c(", paste(input$sequential, collapse = ", "), ")",
-                               sep = "")
-    }
-    
-    if("TRUE" %in% input$sequential && input$aBetas) {
-      clusterManyCode <- paste(clusterManyCode, ", betas = c(", input$betas, ")", sep = "")
-    }
-    
-	#-------
-	# Subsampling arguments
-	#-------
-    if(input$aSubsample) {
-      clusterManyCode <- paste(clusterManyCode, 
-                               ", subsample = c(", paste(input$subsample, collapse = ", "), ")", 
-                               sep = "")
-    }
-    
-	#-------
-	# utility arguments
-	#-------
-    if(input$aNcores) {
-      clusterManyCode <- paste(clusterManyCode, ", ncores = ", input$ncores, sep = "")
-    }
-    
-    if(input$aRandom.seed) {
-      clusterManyCode <- paste(clusterManyCode, ", random.seed = ", input$random.seed, sep = "")
-    }
+	clusterManyCode<-combineArgs(input, clusterManyCode,"clusterFunction",isCharacter=TRUE)
+	clusterManyCode<-combineArgs(input, clusterManyCode,"subsample",isCharacter=FALSE)
+	clusterManyCode<-combineArgs(input, clusterManyCode,"sequential",isCharacter=FALSE)
     
 	#-------
 	# Dimensionality Reduction
+	#-------	
+	clusterManyCode<-combineArgs(input, clusterManyCode,"dimReduce",isCharacter=TRUE)
+	clusterManyCode<-combineArgs(input, clusterManyCode,"nVarDims",isCharacter=FALSE)
+	clusterManyCode<-combineArgs(input, clusterManyCode,"nPCADims",isCharacter=FALSE)
+	
 	#-------
-    if(input$aDimReduce) {
-      clusterManyCode <- paste(", dimReduce = c('", paste(input$dimReduce, collapse = "', '"), "')", sep = "")
-  
-      
-      if("PCA" %in% input$dimReduce && input$aNPCADims) {
-        clusterManyCode <- paste(clusterManyCode, ", nPCADims = c(", input$nPCADims, ")", sep = "")
-      }
-      if(("mad" %in% input$dimReduce || "cv" %in% input$dimReduce || "var" %in% input$dimReduce)
-         && input$aNVarDims) {
-        clusterManyCode <- paste(clusterManyCode, ", nVarDims = c(", input$nVarDims, ")", sep = "")
-      }
-    }
-    
+	# Other Arguments
 	#-------
-	# Clustering Arguments
+	clusterManyCode<-combineArgs(input, clusterManyCode,"ks",isCharacter=FALSE)
+	clusterManyCode<-combineArgs(input, clusterManyCode,"alphas",isCharacter=FALSE)
+	clusterManyCode<-combineArgs(input, clusterManyCode,"betas",isCharacter=FALSE)
+	clusterManyCode<-combineArgs(input, clusterManyCode,"minSizes",isCharacter=FALSE)
+	clusterManyCode<-combineArgs(input, clusterManyCode,"findBestK",isCharacter=FALSE)
+	clusterManyCode<-combineArgs(input, clusterManyCode,"removeSil",isCharacter=FALSE)
+	clusterManyCode<-combineArgs(input, clusterManyCode,"silCutoff",isCharacter=FALSE)
+#	clusterManyCode<-combineArgs(input, clusterManyCode,"distFunction",isCharacter=TRUE)
+
 	#-------
-    if(input$aKs){
-      clusterManyCode <- paste(clusterManyCode, ", ks = c(", input$ks, ")", sep = "") 
-    }
-    if(input$aClusterFunction) {
-      clusterManyCode <- paste(clusterManyCode, ", clusterFunction = c('", paste(input$clusterFunction, collapse = "', '"), "')", sep = "")
-    
-      if("hierarchicalK" %in% input$clusterFunction || "pam" %in% input$clusterFunction) {
-        if(input$aFindBestK) {
-        clusterManyCode <- paste(clusterManyCode,
-                                 ", findBestK = c(", paste(input$findBestK, collapse = ", "), ")", 
-                                 sep = "")
-        }
-        if(input$aRemoveSil) {
-        clusterManyCode <- paste(clusterManyCode,
-                                 ", removeSil = c(", paste(input$removeSil, collapse = ", "), ")", 
-                                 sep = "")
-        
-          if("TRUE" %in% input$removeSil && input$aSilCutoff) {
-            clusterManyCode <- paste(clusterManyCode, ", silCutoff = c(", input$silCutoff, ")", sep = "")
-          }
-        }
-      }
-      if(("tight" %in% input$clusterFunction || "hierarchical01" %in% input$clusterFunction) 
-         && input$aAlphas) {
-        clusterManyCode <- paste(clusterManyCode, ", alphas = c(", input$alphas, ")", sep = "")
-      }
-    }
-    
-    if(input$aMinSizes) {
-      clusterManyCode <- paste(clusterManyCode, ", minSizes = c(", input$minSizes, ")")
-    }
-    
+	# utility arguments
+	#-------
+	clusterManyCode<-combineArgs(input, clusterManyCode,"ncores",isCharacter=FALSE)
+	clusterManyCode<-combineArgs(input, clusterManyCode,"random.seed",isCharacter=FALSE)
 
 	#-------
 	# Specialized options for:
