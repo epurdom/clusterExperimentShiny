@@ -4,6 +4,28 @@
 #This userFile input is a very large function that recieves all of the inputs for clusterMany from the user
 #################
 
+
+#################
+# First Setup Page
+#################
+sSBInputs <- function(id, label = "SSB inputs") {
+  ns <- NS(id)
+  tagList(
+	#-------
+	#Choose cluster function
+	#-------
+	multipleOptionsInput(id, sidelabel="Set Cluster Function (required)",options=clusterFunctionChoices,val="clusterFunction", help="Algorithm used for the clustering. ",required=TRUE),
+	#----
+	# Whether Sequential
+	#----
+	logicalInput(id,sidelabel="Set sequential clustering?", val="sequential", help="Choose whether to use the sequential strategy.",required=FALSE), 
+	#----
+	# Whether Subsample
+	#----
+	logicalInput(id,sidelabel="Set subsampling?", val="subsample", help="Choose whether to subsample kmeans/pam clustering. If TRUE, the co-occurance between clusterings over subsamples is used as the distance between samples; otherwise the distance function will be determined by argument distFunction (see Clustering tabs).",required=FALSE)
+	)
+}
+
 #################
 #Dimension reduction tab
 #################
@@ -18,13 +40,13 @@ dimReduceInput <- function(id, label = "inputs"){
     conditionalPanel(
 		condition = setUpConditionalPanelTest( id, val="dimReduce", allOptions=dimReduceOptions, validOptions="PCA"),
         tags$hr(),
-		vectorInput(id,sidelabel="# PCA dims\n(nPCADims)", aboveLabel="e.g. 5,25,50",val="nPCADims",defaultValue=NULL, help="Please enter a list (separated by commas) of the number of PCA dimensions to keep. Used when 'PCA' is identified as choice in dimensionality reduction. If NA is included, then the full dataset will also be included.",required=FALSE)
+		vectorInput(id,sidelabel="# PCA dims", aboveLabel="e.g. 5,25,50",val="nPCADims",defaultValue=NULL, help="Please enter a list (separated by commas) of the number of PCA dimensions to keep. Used when 'PCA' is identified as choice in dimensionality reduction. If NA is included, then the full dataset will also be included.",required=FALSE,checkbox=TRUE)
     ),
 	###Conditional: nVarDims if mad/cv/var
     conditionalPanel(
 		condition =  setUpConditionalPanelTest( id, val="dimReduce", allOptions=dimReduceOptions, validOptions=c("mad","var","cv")),
         tags$hr(),
-		vectorInput(id,sidelabel="# variable dimensions:\n(nVarDims)", aboveLabel="e.g. 100,500,1000",val="nVarDims",defaultValue=NULL, help="A list (separated by commas) of the number of the most variable features to keep. Used when any of 'var', 'cv', or 'mad' is identified as a choice in dimensionality reduction (the same set of values is used for all). If NA is included, then the full dataset will also be included.",required=FALSE)
+		vectorInput(id,sidelabel="# variable dimensions:", aboveLabel="e.g. 100,500,1000",val="nVarDims",defaultValue=NULL, help="A list (separated by commas) of the number of the most variable features to keep. Used when any of 'var', 'cv', or 'mad' is identified as a choice in dimensionality reduction (the same set of values is used for all). If NA is included, then the full dataset will also be included.",required=FALSE,checkbox=TRUE)
     )
 
   )
@@ -64,7 +86,7 @@ clusterFunctionInputs <- function(id, label = "inputs") {
 		logicalInput(id,sidelabel="Find Best K Automatically?", val="findBestK", help="Whether should find best K based on average silhouette width (only used if clusterFunction of type 'K')",required=FALSE),
         logicalInput(id,sidelabel="Remove samples with low silhouette?", val="removeSil", help="logical as to whether remove when silhouette less than 'silCutoff' parameter (only used if clusterFunction of type 'K')",required=FALSE),
 		#if removeSil=TRUE, need silcutoff
-        conditionalPanel(condition = setUpConditionalPanelTest(id,"clusterFunction",allOptions=c("TRUE","FALSE"), validOptions=c("hierarchicalK","pam") ),
+        conditionalPanel(condition = setUpConditionalPanelTest(id,"removeSil",allOptions=c("TRUE","FALSE"), validOptions=c("TRUE") ),
 			vectorInput(id,"Set Silhouette Cutoff?", "e.g. 0,.1,3",val="silCutoff", defaultValue=NULL, help="Real-valued numbers in comma separated list giving requirement on minimum silhouette width for sample to be included in cluster (only when removeSil=TRUE).",required=FALSE)
         )
     ),
@@ -78,27 +100,7 @@ clusterFunctionInputs <- function(id, label = "inputs") {
   )
 }
 
-#################
-# First Setup Page
-#################
-sSBInputs <- function(id, label = "SSB inputs") {
-  ns <- NS(id)
-  tagList(
-	#-------
-	#Choose cluster function
-	#-------
-	multipleOptionsInput(id, sidelabel="Set Cluster Function (required)",options=clusterFunctionChoices,val="clusterFunction", help="Algorithm used for the clustering. ",required=FALSE),
-	#----
-	# Whether Sequential
-	#----
-	logicalInput(id,sidelabel="Set sequential clustering?", val="sequential", help="Choose whether to use the sequential strategy.",required=FALSE), 
-	#----
-	# Whether Subsample
-	#----
-	logicalInput(id,sidelabel="Set subsampling?", val="subsample", help="Choose whether to subsample kmeans/pam clustering. If TRUE, the co-occurance between clusterings over subsamples is used as the distance between samples; otherwise the distance function will be determined by argument distFunction (see Clustering tabs).",required=FALSE)
-	)
-}
-							 
+						 
 #################
 # Args options
 #################
@@ -147,6 +149,8 @@ makeCode <- function(input, output, session, stringsAsFactors) {
 	#-------
 	# Core arguments
 	#-------
+	#if(testArguments(input,"clusterFunction")) browser()
+	#browser()
 	clusterManyCode<-combineArgs(input, clusterManyCode,"clusterFunction",isCharacter=TRUE)
 	clusterManyCode<-combineArgs(input, clusterManyCode,"subsample",isCharacter=FALSE)
 	clusterManyCode<-combineArgs(input, clusterManyCode,"sequential",isCharacter=FALSE)

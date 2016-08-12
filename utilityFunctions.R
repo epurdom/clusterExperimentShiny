@@ -15,7 +15,12 @@ addArguments<-function(input,currCode,val,isCharacter=TRUE){
 testArguments<-function(input,val){
     aVal<-paste("a",capwords(val),sep="")
 	nms<-names(input)
-	logic<-val %in% nms && !is.null(input[[val]]) && !is.na(input[[val]]) && aVal%in%nms && input[[aVal]]
+	logic<-val %in% nms && !is.null(input[[val]]) && !is.na(input[[val]])
+	#-----
+	#If conditional argument, determine whether user has clicked on checkbox. Otherwise, only depends on the value of val
+	#if required, the 'a' value is set to null
+	#-----
+	if(logic && aVal%in%nms && !is.null(input[[aVal]])) logic<-logic && input[[aVal]] 
 	if(logic && is.character(input[[val]])) logic<-logic & input[[val]]!=""		
 	
 	#logical and multiple choice are NULL if not picked
@@ -50,14 +55,14 @@ convertSideLabel<-function(sidelabel,val){	paste0(sidelabel,paste0("(",val,")",c
 ## Conditional panels for arguments.
 #########
 
-singleNumericInput <- function(id, sidelabel, aboveLabel, val, defaultValue=NULL, help="No help yet available", required = FALSE) {
+singleNumericInput <- function(id, sidelabel, aboveLabel, val, defaultValue=NULL, help="No help yet available", required = FALSE,checkbox=FALSE) {
   ns <- NS(id)
   aVal<-paste("a",capwords(val),sep="")
   hVal<-paste("h",capwords(val),sep="")
   sidelabel<-convertSideLabel(sidelabel,val)
   if(!required) {
     fluidRow(
-      column(3, checkboxInput(ns(aVal), value = FALSE, label = sidelabel)),
+      column(3, checkboxInput(ns(aVal), value = checkbox, label = sidelabel)),
       conditionalPanel(condition = paste0("input['", ns(aVal), "']"),
           column(3, numericInput(ns(val), label = aboveLabel, value = defaultValue))
       ),
@@ -82,7 +87,7 @@ singleNumericInput <- function(id, sidelabel, aboveLabel, val, defaultValue=NULL
 
 
 
-vectorInput<-function(id,sidelabel, aboveLabel,val, defaultValue="", help="No help yet available",required=FALSE){
+vectorInput<-function(id,sidelabel, aboveLabel,val, defaultValue="", help="No help yet available",required=FALSE,checkbox=FALSE){
 	ns <- NS(id)
 	##Should be able to do this and not require user define these terms.
 	aVal<-paste("a",capwords(val),sep="")
@@ -90,7 +95,7 @@ vectorInput<-function(id,sidelabel, aboveLabel,val, defaultValue="", help="No he
 	sidelabel<-convertSideLabel(sidelabel,val)
 	if(!required){ #for now, not implement, because don't know how to do the required version...
 	    fluidRow(
-	      column(3, checkboxInput(ns(aVal), value = FALSE, label = sidelabel)),
+	      column(3, checkboxInput(ns(aVal), value = checkbox, label = sidelabel)),
 	      conditionalPanel(condition = paste0("input['", ns(aVal), "']"),
 	                       column(3, textInput(ns(val), label = aboveLabel, value = defaultValue))
 	      ),
@@ -119,7 +124,7 @@ vectorInput<-function(id,sidelabel, aboveLabel,val, defaultValue="", help="No he
 
 }
 
-logicalInput<-function(id,sidelabel, val, help="No help yet available",required=FALSE){
+logicalInput<-function(id,sidelabel, val, help="No help yet available",required=FALSE,checkbox=FALSE){
 	ns<-NS(id)
 	##Should be able to do this and not require user define these terms.
 	aVal<-paste("a",capwords(val),sep="")
@@ -127,7 +132,7 @@ logicalInput<-function(id,sidelabel, val, help="No help yet available",required=
 	sidelabel<-convertSideLabel(sidelabel,val)
 	if(!required){
 	    fluidRow(
-	      column(3, checkboxInput(ns(aVal), value = FALSE, label = sidelabel)),
+	      column(3, checkboxInput(ns(aVal), value = checkbox, label = sidelabel)),
 	      conditionalPanel(condition = paste0("input['", ns(aVal), "']"),
 	          column(3, checkboxGroupInput(ns(val), label = "Can choose more than one", choices = c("TRUE", "FALSE")))
 	      ),
@@ -152,7 +157,7 @@ logicalInput<-function(id,sidelabel, val, help="No help yet available",required=
 
 }
 
-multipleOptionsInput<-function(id, sidelabel,options,val, help="No help yet available",required=FALSE){
+multipleOptionsInput<-function(id, sidelabel,options,val, help="No help yet available",required=FALSE,checkbox=FALSE){
 	ns<-NS(id) #If id argument to NS is missing, returns a function that expects an id string as its only argument and returns that id with the namespace prepended.
 
 
@@ -162,7 +167,7 @@ multipleOptionsInput<-function(id, sidelabel,options,val, help="No help yet avai
 	sidelabel<-convertSideLabel(sidelabel,val)
 	if(!required){
 	    fluidRow(
-	      column(3, checkboxInput(ns(aVal), value = FALSE, label = sidelabel)),
+	      column(3, checkboxInput(ns(aVal), value = checkbox, label = sidelabel)),
 	      conditionalPanel(condition = paste0("input['", ns(aVal), "']"),
 	         column(3, checkboxGroupInput(ns(val), choices = options, label = "Choose all of interest"))),
 	      column(2, checkboxInput(ns(hVal), value = FALSE, label = "Click here for help")),
@@ -187,7 +192,7 @@ multipleOptionsInput<-function(id, sidelabel,options,val, help="No help yet avai
 
 }
 
-singleOptionsInput<-function(id, sidelabel,options,val, help="No help yet available",required=FALSE){
+singleOptionsInput<-function(id, sidelabel,options,val, help="No help yet available",required=FALSE,checkbox=FALSE){
 	ns<-NS(id) #If id argument to NS is missing, returns a function that expects an id string as its only argument and returns that id with the namespace prepended.
 	##Should be able to do this and not require user define these terms.
 	aVal<-paste("a",capwords(val),sep="")
@@ -195,7 +200,7 @@ singleOptionsInput<-function(id, sidelabel,options,val, help="No help yet availa
 	sidelabel<-convertSideLabel(sidelabel,val)
 	if(!required){
 	    fluidRow(
-	      column(3, checkboxInput(ns(aVal), value = FALSE, label = sidelabel)),
+	      column(3, checkboxInput(ns(aVal), value = checkbox, label = sidelabel)),
 	      conditionalPanel(condition = paste0("input['", ns(aVal), "']"),
 	         column(3, selectInput(ns(val), choices = options, label = "Choose one",multiple=FALSE))),
 	      column(2, checkboxInput(ns(hVal), value = FALSE, label = "Click here for help")),
