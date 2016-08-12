@@ -43,7 +43,7 @@ clusterFunctionInputs <- function(id, label = "inputs") {
   tagList(
   	h4("Options related to all clustering"),
       vectorInput(id,"Set k/k0?", "e.g. 3,5:7",val="ks", defaultValue=NULL, help="When clustering the samples, this argument is interpreted differently depending on other choices for that cluster run. If sequential=TRUE in a clustering, this argument defines the argument k0 of seqCluster. Otherwise, this argument sets the 'k' in the clustering (when using a clustering function that needs 'k'). This argument also sets 'k' for subsampling, if 'subsample=TRUE'. For clusterings where 'findBestK=TRUE', this argument also defines the range of k values to search over.",required=FALSE),
-  	multipleOptionsInput(id, "Set distance function",val="distFunction",options="Euclidean",required=FALSE),
+  	multipleOptionsInput(id, "Set distance function",val="distFunction",options="Euclidean",required=FALSE,help="This is not yet implemented. Checking the box will have no affect!"),
       # #This might need to be down with clusterD by line 27X
       # #Enter Min clustr Sizes, not conditional
   	vectorInput(id,"Set minimum cluster size?", "e.g. 3,5,7",val="minSizes", defaultValue=NULL, help="List of comma separated integers defining the minimimum size required for a cluster. Clusters smaller than this are not kept and samples are left unassigned. If sequential chosen, minSize is used for each sequential selection of clusters.",required=FALSE),
@@ -81,22 +81,8 @@ clusterFunctionInputs <- function(id, label = "inputs") {
 #################
 # First Setup Page
 #################
-#EAP: why did subsampling not previously show up? And why is transform here?      
-    #   conditionalPanel(condition = paste0("input['", ns("subsample"), "'][0] == 'FALSE'",
-    #                                       "|| input['", ns("subsample"), "'][1] == 'FALSE'"),
-    #                    tags$hr(),
-    #                    fluidRow(
-    #                            h3("Transform Function:"),
-    #                            helpText("Help")
-    #                    )
-    #   )
-    #
-    # ),
-
 sSBInputs <- function(id, label = "SSB inputs") {
-  
   ns <- NS(id)
-  
   tagList(
 	#-------
 	#Choose cluster function
@@ -120,9 +106,12 @@ specializedInputs <- function(id, label = "Specializedinputs") {
 	tagList(
 		singleNumericInput(id,sidelabel="Set # cores for parallel processing", aboveLabel="Enter integer values",val="ncores", defaultValue=NULL, help="Enter single integer value to indicate the number of cores that should be used. A value greater than 1 will launch parallel processing of the different clustering combinations on different cores using mclapply.",required=FALSE),
 		singleNumericInput(id,sidelabel="Set random seed for reproducability?", aboveLabel="Enter integer values",val="random.seed", defaultValue=NULL, help="Enter a single arbitrary value to set the seed. This seed will be set before every clustering combination, including if the clustering is done on parallel cores.",required=FALSE),
+		#--------
+		#Specialized arguments
+		#---------
 		tags$hr(),
     	h4("Note: The remaining arguments set here are quite specialized, and most users will not need to set these. Arguments set here will apply globally to all clusterings"),
-    #Input sequential clustering arguments, conditional upon sequential clustering choice
+    	#Sequential clustering arguments, conditional upon sequential clustering choice
 	    conditionalPanel(
 			condition = setUpConditionalPanelTest(id, "sequential", allOptions = c("TRUE","FALSE"), validOptions="TRUE"),
 	    	tags$hr(),
@@ -132,6 +121,7 @@ specializedInputs <- function(id, label = "Specializedinputs") {
 	        singleNumericInput(id,sidelabel="Set kmin", aboveLabel="(Integer value)",val="kmin", defaultValue=NULL, help="each iteration of sequential detection of clustering will decrease the beginning K of subsampling, but not lower than k.min.",required=FALSE),
 			singleNumericInput(id,sidelabel="Set kmax", aboveLabel="(Integer value)",val="kmax", defaultValue=NULL, help="algorithm will stop if K in iteration is increased beyond this point.",required=FALSE)
 	    ),
+		#Subsampling arguments
 		conditionalPanel(
 			condition = setUpConditionalPanelTest(id, "subsample", allOptions = c("TRUE","FALSE"), validOptions="TRUE"),
 			tags$hr(),
@@ -178,6 +168,7 @@ makeCode <- function(input, output, session, stringsAsFactors) {
 	clusterManyCode<-combineArgs(input, clusterManyCode,"findBestK",isCharacter=FALSE)
 	clusterManyCode<-combineArgs(input, clusterManyCode,"removeSil",isCharacter=FALSE)
 	clusterManyCode<-combineArgs(input, clusterManyCode,"silCutoff",isCharacter=FALSE)
+	# not yet implemented
 #	clusterManyCode<-combineArgs(input, clusterManyCode,"distFunction",isCharacter=TRUE)
 
 	#-------
@@ -187,98 +178,35 @@ makeCode <- function(input, output, session, stringsAsFactors) {
 	clusterManyCode<-combineArgs(input, clusterManyCode,"random.seed",isCharacter=FALSE)
 
 	#-------
-	# Specialized options for:
+	# Specialized options for sequential:
 	#-------
-    if ( "Sequential Cluster" %in% input$clusterAlg) {
-      #Initializing a counterSC for elegance in seqArgs()
-      counterSC <- 0
-      clusterManyCode <- paste(clusterManyCode, ", seqArgs = list(", sep = "")
-      if(input$aRemain.n) {
-          clusterManyCode <- paste(clusterManyCode, " remain.n = ", input$remain.n, sep = "")
-          counterSC <- counterSC + 1
-      }
+	seqArgsCode<-":"
+	#if(testArguments(input,"remain.n")) browser()
+	seqArgsCode<-combineArgs(input,seqArgsCode,"remain.n",isCharacter=FALSE)
+	seqArgsCode<-combineArgs(input,seqArgsCode,"top.can",isCharacter=FALSE)
+	seqArgsCode<-combineArgs(input,seqArgsCode,"kmin",isCharacter=FALSE)
+	seqArgsCode<-combineArgs(input,seqArgsCode,"kmax",isCharacter=FALSE)
+	
+ 	if(seqArgsCode!=":"){#then add it
+		seqArgsCode<-gsub(":,","",seqArgsCode)
+		seqArgsCode<-paste(", seqArgs=list(",seqArgsCode,")")
+      	clusterManyCode<-paste0(clusterManyCode,seqArgsCode,collapse="")
+	}
+	#-------
+	# Specialized options for subsampling:
+	#-------
+	subArgsCode<-":"
+	#if(testArguments(input,"resamp.num")) browser()
+	subArgsCode<-combineArgs(input,subArgsCode,"resamp.num",isCharacter=FALSE)
+	subArgsCode<-combineArgs(input,subArgsCode,"samp.p",isCharacter=FALSE)
+	subArgsCode<-combineArgs(input,subArgsCode,"classifyMethod",isCharacter=TRUE)
+	
+ 	if(subArgsCode!=":"){#then add it
+		subArgsCode<-gsub(":,","",subArgsCode)
+		subArgsCode<-paste(", subsampleArgs=list(",subArgsCode,")")
+      	clusterManyCode<-paste0(clusterManyCode,subArgsCode,collapse="")
+	}
       
-      if(input$aTop.can) {
-        if(counterSC == 0) {
-          clusterManyCode <- paste(clusterManyCode, " top.can = ", input$top.can, sep = "") 
-          counterSC <- counterSC + 1
-        } else {
-          clusterManyCode <- paste(clusterManyCode, ", top.can = ", input$top.can, sep = "") 
-        }
-      }
-      
-      if(input$aKmin) {
-        if(counterSC == 0) {
-          clusterManyCode <- paste(clusterManyCode, " kmin = ", input$kmin, sep = "")
-          counterSC <- counterSC + 1
-        } else {
-          clusterManyCode <- paste(clusterManyCode, ", kmin = ", input$kmin, sep = "")
-        }
-      }
-
-      if(input$aKmax) {
-        if(counterSC == 0) {
-          clusterManyCode <- paste(clusterManyCode, " kmax = ", input$kmax, sep = "")
-          counterSC <- counterSC + 1
-        } else {
-          clusterManyCode <- paste(clusterManyCode, ", kmax = ", input$kmax, sep = "")
-        }
-      }
-      
-      clusterManyCode <- paste(clusterManyCode, ")", sep = "")
-
-    }
-    
-    if("Cluster Distance" %in% input$clusterAlg) {
-      clusterManyCode <- paste(clusterManyCode, ", clusterArgs = list(", input$clusterArgsSC, ")", sep = "")
-    }
-    
-    if ( "Cluster Subsample" %in% input$clusterAlg) {
-      counterC.S. <- 0
-      
-      clusterManyCode <- paste(clusterManyCode, ", subsampleArgs = list(", sep = "")
-      
-      if(input$aClusterFunctionSC) {
-        clusterManyCode <- paste(clusterManyCode, "clusterFunction = '", input$clusterFunctionSC, "'",
-                                 sep = "")
-        counterC.S. <- counterC.S. + 1
-      }
-      
-      if(input$aClassifyMethod) {
-        if(counterC.S. == 0) {
-          clusterManyCode <- paste(clusterManyCode, " classifyMethods = '", input$classifyMethod, 
-                                   sep = "")
-          counterC.S. <- counterC.S. + 1
-        } else {
-          clusterManyCode <- paste(clusterManyCode, ", classifyMethods = '", input$classifyMethod, "'", 
-                                   sep = "")
-        }
-      }
-      
-      if(input$aResamp.num) {
-        if(counterC.S. == 0) {
-          clusterManyCode <- paste(clusterManyCode, " resamp.num = ", input$resamp.num, sep = "")
-          counterC.S. <- counterC.S. + 1
-        } else {
-          clusterManyCode <- paste(clusterManyCode, ", resamp.num = ", input$resamp.num, sep = "")
-        }
-      }
-      
-      if(input$aSamp.p) {
-        if(counterC.S. == 0) {
-          clusterManyCode <- paste(clusterManyCode, " samp.p = ", input$samp.p, sep = "")
-          counterC.S. <- counterC.S. + 1
-        } else {
-          clusterManyCode <- paste(clusterManyCode, ", samp.p = ", input$samp.p, sep = "")
-        }
-      }
-      
-      clusterManyCode <- paste(clusterManyCode, ")", sep = "")
-      
-      # clusterManyCode <- paste(clusterManyCode,  
-      #                          ", clusterArgs = list(", input$clusterArgsSC, "))", sep = "")
-    }
-    
     clusterManyCode <- paste(clusterManyCode, ")", sep = "")
     
     clusterManyCode

@@ -15,8 +15,13 @@ addArguments<-function(input,currCode,val,isCharacter=TRUE){
 testArguments<-function(input,val){
     aVal<-paste("a",capwords(val),sep="")
 	nms<-names(input)
-	logic<-val %in% nms && !is.null(input[[val]]) && aVal%in%nms && input[[aVal]]
-    if(logic && is.character(input[[val]])) logic<-logic & input[[val]]!=""
+	logic<-val %in% nms && !is.null(input[[val]]) && !is.na(input[[val]]) && aVal%in%nms && input[[aVal]]
+	if(logic && is.character(input[[val]])) logic<-logic & input[[val]]!=""		
+	
+	#logical and multiple choice are NULL if not picked
+	#numeric is NA
+	#vector input is ""
+	
 	return(logic)
 }
 combineArgs<-function(input, currCode,val,isCharacter=TRUE){
