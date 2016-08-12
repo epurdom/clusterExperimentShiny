@@ -83,19 +83,22 @@ getAdditionalDefaults<-function(class,functionName,ceDefaults){
 
 }
 findDefaults<-function(val,functionName){
-	if(class(get(functionName))=="function"){ #S3
-		ceDefaults<-as.list(args(functionName))
-	}
-	else{
-		#return(NULL)
-		ceDefaults<-methodFormals(functionName,signature="ClusterExperiment")
-		ceDefaults<-getAdditionalDefaults("matrix",functionName,ceDefaults)
-		ceDefaults<-getAdditionalDefaults("list",functionName,ceDefaults)
-	}
-	if(val%in% names(ceDefaults)){
-		if(!all(is.na(ceDefaults[[val]])) && !is.null(ceDefaults[[val]]) && all(ceDefaults[[val]]=="")) return(NULL) else return(ceDefaults[[val]])
-	}
-	else return(NULL)
+	###Not working yet, for now just have return NULL
+	return(NULL)
+	# if(class(get(functionName))=="function"){ #S3
+	# 	ceDefaults<-as.list(args(functionName))
+	# }
+	# else{
+	# 	#return(NULL)
+	# 	ceDefaults<-methodFormals(functionName,signature="ClusterExperiment")
+	# 	ceDefaults<-getAdditionalDefaults("matrix",functionName,ceDefaults)
+	# 	ceDefaults<-getAdditionalDefaults("list",functionName,ceDefaults)
+	# }
+	# if(val%in% names(ceDefaults)){
+	# 	evalVal<-eval(ceDefaults[[val]])
+	# 	if(!all(is.na(evalVal)) && !is.null(evalVal) && all(evalVal=="")) return(NULL) else return(evalVal)
+	# }
+	# else return(NULL)
 			
 }
 ##########
@@ -103,8 +106,7 @@ findDefaults<-function(val,functionName){
 #########
 
 singleNumericInput <- function(id, sidelabel, aboveLabel, val, defaultValue=NULL, help="No help yet available", required = FALSE,checkbox=FALSE,functionName) {
-#	if(val=="ncores") browser()
-  if(is.null(defaultValue)) defaultValue<-findDefaults(val,functionName)
+  if(is.null(defaultValue)) defaultValue<-findDefaults(val,functionName)[1]
   ns <- NS(id)
   aVal<-paste("a",capwords(val),sep="")
   hVal<-paste("h",capwords(val),sep="")
@@ -175,7 +177,7 @@ vectorInput<-function(id,sidelabel, aboveLabel,val, defaultValue="", help="No he
 }
 
 logicalInput<-function(id,sidelabel, val, help="No help yet available",required=FALSE,checkbox=FALSE,defaultValue=NULL,functionName){
-    if(is.null(defaultValue)) defaultValue<-findDefaults(val,functionName)
+    if(is.null(defaultValue)) defaultValue<-findDefaults(val,functionName)[1]
   ns<-NS(id)
 	##Should be able to do this and not require user define these terms.
 	aVal<-paste("a",capwords(val),sep="")
@@ -246,7 +248,8 @@ multipleOptionsInput<-function(id, sidelabel,options,val, help="No help yet avai
 }
 
 singleOptionsInput<-function(id, sidelabel,options,val, help="No help yet available",required=FALSE,checkbox=FALSE,defaultValue=NULL,functionName){
-    if(is.null(defaultValue)) defaultValue<-findDefaults(val,functionName)
+#    if(val=="classifyMethod") browser()
+	if(is.null(defaultValue)) defaultValue<-findDefaults(val,functionName)[1]
   ns<-NS(id) #If id argument to NS is missing, returns a function that expects an id string as its only argument and returns that id with the namespace prepended.
 	##Should be able to do this and not require user define these terms.
 	aVal<-paste("a",capwords(val),sep="")
