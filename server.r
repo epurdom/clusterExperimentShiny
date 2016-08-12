@@ -5,10 +5,28 @@ options(shiny.maxRequestSize=30*1024^2)
 shinyServer(function(input, output, session) {
   #sE is the Summarized/Cluster Experiment initially loaded which will remain unaltered
   #sE <- SummarizedExperiment()
+  
+  
+  #####################################################
+  # Begin startPage
+  #####################################################
+  
+  makeFile <- FALSE
+  filePath <- NULL
+  
+  observeEvent(input[["startMessage-createReproducibleFile"]], {
+    makeFile <<- TRUE
+    filePath <<- input[["startMessage-filePath"]]
+    file.create(filePath)
+    # saveFile <- file(filePath)
+    # writeLines(paste("#", input[["startMessage-fileComments"]]), saveFile)
+    # close(saveFile)
+    cat(paste("#", input[["startMessage-fileComments"]]), file = filePath, append = TRUE)
+  })
 
-  avaliableWhichClusters <- function() {
-    return(unique(clusterTypes(cE)))
-  }
+  # avaliableWhichClusters <- function() {
+  #   return(unique(clusterTypes(cE)))
+  # }
   
   
   #####################################################
@@ -31,11 +49,39 @@ shinyServer(function(input, output, session) {
     holder <- rdaFile()
     if (is.null(holder))
       return("No data uploaded yet!")
-    else 
+    else {
+      if(makeFile) {
+        cat("\n", 
+          "#loading data:",
+          "sE <- readRDS('InsertFileName')", 
+          sep = "\n",
+          file = filePath, append = TRUE)
+      }
       sE <<- holder
-    HTML(
-      paste(capture.output(show(sE)), collapse = "<br/>")
-    )
+      #Creating which clusters options
+      if(class(sE)[1] == "clusterExperiment") {
+        output$combineManyWhichClusters <- renderUI({
+          multipleOptionsInput("cMInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
+                               val = "whichClusters", help = "a numeric or character vector that specifies
+                               which clusters to compare")
+        })
+        
+        output$makeDendrogramWhichClusters <- renderUI({
+          singleOptionsInput("mDInputs", sidelabel = "Add detailed whichCluster?", options = unique(clusterTypes(cE)),
+                             val = "whichCluster", help = "an integer index or character string that identifies which
+                             cluster should be used to make the dendrogram. Default is primaryCluster.")
+        })
+        
+        output$plotClustersWhichClusters <- renderUI({
+          multipleOptionsInput("pCInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
+                               val = "whichClusters", help = "an integer index or character string that identifies which
+                               cluster should be used to plotCluster.")
+        })
+      }
+      HTML(
+        paste(capture.output(show(sE)), collapse = "<br/>")
+      )
+    }
   })
   
   output$isAssay <- renderText({
@@ -108,19 +154,32 @@ shinyServer(function(input, output, session) {
   
   
   observeEvent(input$runCM, {
+    
+
+    codeToBeEvaluated <- function() {
+      paste("clusterMany(sE, isCount = ", input$isCount, clusterManyCode(),
+                               sep = "")
+    }
+    
+    cE <<- eval(parse(text = codeToBeEvaluated()))
+    
+    if(makeFile) {
+      cat("\n", 
+        "#Cluster Many tab:",
+        codeToBeEvaluated(), 
+        "plotClusters(cE)", 
+        sep = "\n", file = filePath, append = TRUE)
+    }
+    
       output$imgCE <- renderPlot({
       # cE is the clusterExperiment object 
-      codeToBeEvaluated <- paste("clusterMany(sE, isCount = ", input$isCount, clusterManyCode(),
-                                 sep = "")
+
       # innerCode <- sub(strsplit(codeToBeEvaluated, ",")[[1]][1],  "clusterMany(sE", 
       #                  codeToBeEvaluated, fixed = TRUE)
-      
-      cE <<- eval(parse(text = codeToBeEvaluated))
       
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
-      #I would like to know if this works as intentioned.
       plotClusters(cE, whichClusters = "clusterMany")
     }, height = (40/3) * getSEIterations())
       
@@ -137,7 +196,7 @@ shinyServer(function(input, output, session) {
       })
       
       output$plotClustersWhichClusters <- renderUI({
-        multipleOptionsInput("plotClustersInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
+        multipleOptionsInput("pCInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
                            val = "whichClusters", help = "an integer index or character string that identifies which
                            cluster should be used to plotCluster.")
       })
@@ -163,16 +222,20 @@ shinyServer(function(input, output, session) {
   # Start Combine Many Tab
   #####################################################
   
-  combineManyCode <- callModule(makeCombineManyCode, "cMInputs", 
+  combineManyLatterCode <- callModule(makeCombineManyCode, "cMInputs", 
                                 stringsAsFactors = FALSE)
   
-  output$combineManyCode <- renderText({
+  combineManyCode <- function(){
     code <- paste("cE <<- combineMany(cE")
     if(input[["cMInputs-aWhichClusters"]])
       code <- paste(code, ", whichClusters = c('", 
                     paste(input[["cMInputs-whichClusters"]], collapse = "','"), "')", sep = "")
-    code <- paste(code, combineManyCode(), sep = "")
-      return(code)
+    code <- paste(code, combineManyLatterCode(), sep = "")
+    return(code)
+  }
+  
+  output$combineManyCode <- renderText({
+    combineManyCode()
   })
   # output$combineManyWhichClusters <- renderUI({
   #    multipleOptionsInput("cMInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
@@ -181,20 +244,32 @@ shinyServer(function(input, output, session) {
   # })
   observeEvent(input$runCombineMany, {
     
-    code <- paste("cE <<- combineMany(cE")
-    if(input[["cMInputs-aWhichClusters"]])
-      code <- paste(code, ", whichClusters = c('", 
-                    paste(input[["cMInputs-whichClusters"]], collapse = "','"), "')", sep = "")
-    code <- paste(code, combineManyCode(), sep = "")
+    if(makeFile) {
+      cat("\n", 
+        "#Combine Many Tab",
+        combineManyCode(), 
+        "#Plotting Clusters:",
+        "defaultMar<-par('mar')", 
+        "plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)", 
+        "par(mar=plotCMar)", 
+        "plotClusters(cE, whichClusters = 'clusterMany')", 
+        "\n",
+        "#Plotting CoClusters:",
+        "defaultMar<-par('mar')",
+        "plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)",
+        "par(mar=plotCMar)",
+        "plotCoClustering(cE)",
+        sep = "\n", file = filePath, append = TRUE)
+    }
     
-    eval(parse(text = code))
+    eval(parse(text = combineManyCode()))
     
     output$imgCombineManyPC <- renderPlot({
       # cE is the clusterExperiment object 
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
-      plotClusters(cE, whichClusters = "clusterMany")
+      plotClusters(cE, whichClusters = "clusterMany") #??????????????????? CHECK IF NECESSARY ????????????????
     }, height = (40/3) * getSEIterations())
     
     output$imgCombineManyPCC <- renderPlot({
@@ -216,7 +291,7 @@ shinyServer(function(input, output, session) {
     })
     
     output$plotClustersWhichClusters <- renderUI({
-      multipleOptionsInput("plotClustersInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
+      multipleOptionsInput("pCInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
                          val = "whichClusters", help = "an integer index or character string that identifies which
                          cluster should be used to plotCluster.")
     })
@@ -280,6 +355,24 @@ shinyServer(function(input, output, session) {
   })
   
   observeEvent(input$runMakeDendrogram, {
+    
+    if(makeFile) {
+      cat("\n", 
+        "#Make Dendrogram Tab:",
+        makeDendrogramCode(), 
+        "#Plotting Dendrogram",
+        "defaultMar<-par('mar')",
+        "plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)",
+        "par(mar=plotCMar)",
+        "plotDendrogram(cE)",
+        "\n",
+        "#Plotting Heatmap",
+        "defaultMar<-par('mar')",
+        "plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)",
+        "par(mar=plotCMar)",
+        "plotHeatmap(cE)",
+        sep = "\n", file = filePath, append = TRUE)
+    }
     
     eval(parse(text = makeDendrogramCode()))
     
@@ -354,6 +447,23 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$runMergeClusters, {
     
+    if(makeFile) {
+      cat("\n", 
+        "#Merge Clusters Tab:",
+        mergeClustersCode(), 
+        "#Plotting Clusters after call to merge clusters",
+        "defaultMar<-par('mar')",
+        "plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)",
+        "par(mar=plotCMar)",
+        "plotClusters(cE)",
+        "\n",
+        "#Plotting Heatmap after call to merge clusters",
+        "defaultMar<-par('mar')",
+        "plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)",
+        "par(mar=plotCMar)",
+        "plotHeatmap(cE)",
+        sep = "\n", file = filePath, append = TRUE)
+    }
     eval(parse(text = mergeClustersCode()))
     
     output$imgPlotClustersMergeClusters <- renderPlot({
@@ -373,7 +483,7 @@ shinyServer(function(input, output, session) {
     })
     
     output$plotClustersWhichClusters <- renderUI({
-      multipleOptionsInput("plotClustersInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
+      multipleOptionsInput("pCInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
                            val = "whichClusters", help = "an integer index or character string that identifies which
                            cluster should be used to plotCluster.")
     })
@@ -411,14 +521,14 @@ shinyServer(function(input, output, session) {
   #####################################################
   
   
-  plotClustersLatterCode <- callModule(makePlotClustersCode, "plotClustersInputs",
+  plotClustersLatterCode <- callModule(makePlotClustersCode, "pCInputs",
                                    stringsAsFactors = FALSE)
   
   plotClustersCode <- function() {
-    code <- paste("cE <<- plotClusters(cE")
-    if(input[["plotClustersInputs-aWhichClusters"]]) {
+    code <- paste("plotClusters(cE")
+    if(input[["pCInputs-aWhichClusters"]]) {
       code <- paste(code, ", whichClusters = c('",
-                    paste(input[["plotClustersInputs-whichClusters"]], collapse = "', '"), "')", sep = "")
+                    paste(input[["pCInputs-whichClusters"]], collapse = "', '"), "')", sep = "")
     }
     code <- paste(code, plotClustersLatterCode(), sep = "")
     return(code)
@@ -429,6 +539,18 @@ shinyServer(function(input, output, session) {
   })
   
   observeEvent(input$runPCCM, {
+    
+    if(makeFile) {
+      cat("\n", 
+          "#Specialized call to plotClusters:",
+          "#Plotting Clusters",
+          "defaultMar<-par('mar')",
+          "plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)",
+          "par(mar=plotCMar)",
+          plotClustersCode(), 
+          sep = "\n", file = filePath, append = TRUE)
+    }
+    
     output$imgPCCM <- renderPlot({
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
@@ -461,6 +583,18 @@ shinyServer(function(input, output, session) {
   })
   
   observeEvent(input$runPlotDendrogram, {
+    
+    if(makeFile) {
+      cat("\n", 
+          "#Specialized call to plotDendrogram:",
+          "#Plotting dendrogram",
+          "defaultMar<-par('mar')",
+          "plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)",
+          "par(mar=plotCMar)",
+          plotDendrogramCode(), 
+          sep = "\n", file = filePath, append = TRUE)
+    }
+    
     output$imgSpecializedPlotDendrogram <- renderPlot({
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
@@ -468,6 +602,73 @@ shinyServer(function(input, output, session) {
       eval(parse(text = plotDendrogramCode()))
     })
   })
+  
+  
+  #####################################################
+  # Start Personalized  plotHeatmap
+  #####################################################
+  
+  plotHeatmapCode <- callModule(makePlotHeatmapCode, "plotHeatmap",
+                                   stringsAsFactors = FALSE)
+  
+  output$plotHeatmapCode <- renderText({
+    plotHeatmapCode()
+  })
+  
+  observeEvent(input$runPlotHeatmap, {
+    
+    if(makeFile) {
+      cat("\n", 
+          "#Specialized call to plotDendrogram:",
+          "#Plotting dendrogram",
+          "defaultMar<-par('mar')",
+          "plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)",
+          "par(mar=plotCMar)",
+          plotHeatmapCode(), 
+          sep = "\n", file = filePath, append = TRUE)
+    }
+    
+    output$imgSpecializedPlotHeatmap <- renderPlot({
+      defaultMar<-par("mar")
+      plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
+      par(mar=plotCMar)
+      eval(parse(text = plotHeatmapCode()))
+    })
+  })
+  
+  
+  #####################################################
+  # Start Personalized  plotCoClustering
+  #####################################################
+  
+  plotCoClusteringCode <- callModule(makePlotCoClusteringCode, "plotCoClustering",
+                                stringsAsFactors = FALSE)
+  
+  output$plotCoClusteringCode <- renderText({
+    plotCoClusteringCode()
+  })
+  
+  observeEvent(input$runPlotCoClustering, {
+    
+    if(makeFile) {
+      cat("\n", 
+        "#Specialized call to plotDendrogram:",
+        "#Plotting dendrogram",
+        "defaultMar<-par('mar')",
+        "plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)",
+        "par(mar=plotCMar)",
+        plotCoClusteringCode(), 
+        sep = "\n", file = filePath, append = TRUE)
+    }
+    
+    output$imgSpecializedPlotCoClustering <- renderPlot({
+      defaultMar<-par("mar")
+      plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
+      par(mar=plotCMar)
+      eval(parse(text = plotCoClusteringCode()))
+    })
+  })
+  
   
 })
 

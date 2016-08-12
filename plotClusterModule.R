@@ -2,7 +2,7 @@
 
 
 
-plotClusterInput <- function(id, label = "plotCluster inputs") {
+plotClustersInput <- function(id, label = "plotCluster inputs") {
   ns <- NS(id)
   tagList(
     

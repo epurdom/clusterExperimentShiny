@@ -181,7 +181,7 @@ shinyUI(navbarPage("Cluster Experiment",
                              tabPanel("Plot Clusters",
                                       fluidRow(
                                         column(6,
-                                               plotClustersHelpText("plotClustersInputs",
+                                               plotClustersHelpText("pCInputs",
                                                                     "Help Text for plot Clusters, cM")
                                         ),
                                         column(6,
@@ -194,7 +194,7 @@ shinyUI(navbarPage("Cluster Experiment",
                                                    tabPanel("Specialized Inputs",
                                                             h3("Specialized Plot Cluster Inputs"),
                                                             uiOutput("plotClustersWhichClusters"),
-                                                            plotClusterInput("plotClustersInputs", 
+                                                            plotClustersInput("pCInputs", 
                                                                              "inputs for plot Clusters, cM")
                                                    ),
                                                    tabPanel("Output Plot",
@@ -204,6 +204,17 @@ shinyUI(navbarPage("Cluster Experiment",
                                       )
                              ),
                              tabPanel("plot CoClustering",
+                                      fluidRow(
+                                        column(6,
+                                               plotHeatmapHelpText("plotCoClustering",
+                                                                   "Help Text for plotCoClustering")
+                                        ),
+                                        column(6,
+                                               h3("Code to be Run:"),
+                                               textOutput("plotCoClusteringCode"),
+                                               actionButton("runPlotCoClustering", "Run Plot CoClustering Code")
+                                        )
+                                      ),
                                       navlistPanel(
                                         tabPanel("Specialized Inputs"),
                                         tabPanel("Output Plot")
@@ -241,6 +252,17 @@ shinyUI(navbarPage("Cluster Experiment",
                                       
                              ),
                              tabPanel("Plot Heatmap",
+                                      fluidRow(
+                                        column(6,
+                                               plotHeatmapHelpText("plotHeatmap",
+                                                                      "Help Text for plotHeatmap")
+                                        ),
+                                        column(6,
+                                               h3("Code to be Run:"),
+                                               textOutput("plotHeatmapCode"),
+                                               actionButton("runPlotHeatmap", "Run Plot Heatmap Code")
+                                        )
+                                      ),
                                       navlistPanel(
                                         tabPanel("Specialized Inputs"),
                                         tabPanel("Output Plot")
