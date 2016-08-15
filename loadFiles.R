@@ -22,7 +22,7 @@ rdaFile <- function(input, output, session, stringsAsFactors) {
     if(length(input$rdaFile[1]) > 0 && str_sub(input$rdaFile[1], start = -4) == ".rda") {
       holderObject <- readRDS(userFile()$datapath)
 
-      if (class(holderObject)[1] == "SummarizedExperiment" || class(holderObject)[1] == "clusterExperiment") {
+      if (class(holderObject)[1] == "SummarizedExperiment" || class(holderObject)[1] == "ClusterExperiment") {
 
         return(holderObject)
       }

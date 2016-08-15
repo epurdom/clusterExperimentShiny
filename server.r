@@ -23,10 +23,6 @@ shinyServer(function(input, output, session) {
     # close(saveFile)
     cat(paste("#", input[["startMessage-fileComments"]]), file = filePath, append = TRUE)
   })
-
-  # avaliableWhichClusters <- function() {
-  #   return(unique(clusterTypes(cE)))
-  # }
   
   
   #####################################################
@@ -59,7 +55,8 @@ shinyServer(function(input, output, session) {
       }
       sE <<- holder
       #Creating which clusters options
-      if(class(sE)[1] == "clusterExperiment") {
+      if(class(sE)[1] == "ClusterExperiment") {
+        cE <- sE
         output$combineManyWhichClusters <- renderUI({
           multipleOptionsInput("cMInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
                                val = "whichClusters", help = "a numeric or character vector that specifies
@@ -90,7 +87,7 @@ shinyServer(function(input, output, session) {
     if (is.null(holder))
       return("No data uploaded yet")
     
-    else if(class(holder)[1] == "SummarizedExperiment" || class(holder)[1] == "clusterExperiment") {
+    else if(class(holder)[1] == "SummarizedExperiment" || class(holder)[1] == "ClusterExperiment") {
       sE <<- holder
     }
       
@@ -119,6 +116,28 @@ shinyServer(function(input, output, session) {
   #   })
   
   #---------------End read File inputs-----------------
+  
+  
+  #####################################################
+  # Begin Save Object Tab
+  #####################################################
+
+    observeEvent(input[["saveObject-createObject"]], {
+    
+    objectPath <- input[["saveObject-filePath"]]
+    
+    output$saveObjectMessage <- renderText({
+      if(dim(cE)[1] == 2 && dim(cE)[2] == 1){
+        return("No work completed on uploaded object")
+      }
+      saveRDS(cE, file = objectPath)
+      return(paste("successfully saved internal clusterExperiment object in ", 
+                   objectPath, " via function saveRDS()"))
+    })
+
+  })
+  
+  #---------------End save Object tab-----------------
   
   #####################################################
   # Begin Cluster Many Tab

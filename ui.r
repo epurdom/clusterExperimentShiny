@@ -269,7 +269,11 @@ shinyUI(navbarPage("Cluster Experiment",
                                       )
                              )
                            
-                  )
+                  ),
+									tabPanel("Save Object",
+						            saveObjectMessage("saveObject", ""),
+									      textOutput("saveObjectMessage")
+								  )
 
         )
 )
