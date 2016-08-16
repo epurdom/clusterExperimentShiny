@@ -68,22 +68,28 @@ csvFile <- function( id, label = "upload .csv file") {
                          'text/tab-separated-values',
                          'text/plain',
                          '.csv',
-                         '.tsv',
-                         ".rda"
+                         '.tsv'
                        )
              )
              ),
       column(3,
+             h3(""),
              radioButtons(ns('sep'), 'Separator',
                           c(Comma=',',
                             Semicolon=';',
                             Tab='\t'),
-                          ','),
+                          ',')
+      ),
+      column(3,
+             h3(""),
              radioButtons(ns('quote'), 'Quote',
                           c(None='',
                             'Double Quote'='"',
                             'Single Quote'="'"),
-                          '"'),
+                          '"')
+      ),
+      column(3,
+             h3(""),
              checkboxInput(ns('header'), 'Header')
       )
     ),
@@ -99,25 +105,31 @@ csvFile <- function( id, label = "upload .csv file") {
                          'text/tab-separated-values',
                          'text/plain',
                          '.csv',
-                         '.tsv',
-                         '.rda'
+                         '.tsv'
                        )
              )
              ),
       column(3,
+             h3(""),
              radioButtons(ns('colSep'), 'Separator',
                           c(Comma=',',
                             Semicolon=';',
                             Tab='\t'),
-                          ','),
+                          ',')
+      ),
+      column(3,
+             h3(""),
              radioButtons(ns('colQuote'), 'Quote',
                           c(None='',
                             'Double Quote'='"',
                             'Single Quote'="'"),
-                          '"'),
+                          '"')
+      ),
+      column(3,
+             h3(""),
              checkboxInput(ns('colHeader'), 'Header')
       )
-      ),
+    ),
     fluidRow(
       column(4,
              h3("Choose Row data upload:"),
@@ -134,16 +146,23 @@ csvFile <- function( id, label = "upload .csv file") {
              )
       ),
       column(3,
+             h3(""),
              radioButtons(ns('rowSep'), 'Separator',
                           c(Comma=',',
                             Semicolon=';',
                             Tab='\t'),
-                          ','),
+                          ',')
+      ),
+      column(3,
+             h3(""),
              radioButtons(ns('rowQuote'), 'Quote',
                           c(None='',
                             'Double Quote'='"',
                             'Single Quote'="'"),
-                          '"'),
+                          '"')
+      ),
+      column(3,
+             h3(""),
              checkboxInput(ns('rowHeader'), 'Header')
       )
     )
@@ -169,26 +188,33 @@ dataFile <- function(input, output, session, stringsAsFactors) {
   # The user's data, parsed into a data frame, we will need to expand beyond .csv
   dataframe <- reactive({
     
-    if(length(input$file[1]) > 0 && str_sub(input$file[1], start = -4) == ".csv") {
+    # print("Args: filePath:", userFile()$datapath, ", header:",
+    #                header = input$header, ", sep: ",
+    #                sep = input$sep, ", quote: ",
+    #                quote = input$quote, ", stringsAsFactors: ",
+    #                stringsAsFactors = stringsAsFactors)
+  
+    # print(dim(read.csv(userFile()$datapath,
+    #                header = input$header,
+    #                sep = input$sep,
+    #                quote = input$quote,
+    #                stringsAsFactors = stringsAsFactors)))
+    
+    #if(length(input$file[1]) > 0 && str_sub(input$file[1], start = -4) == ".csv") {
       return(read.csv(userFile()$datapath,
                       header = input$header,
                       sep = input$sep,
                       quote = input$quote,
                       stringsAsFactors = stringsAsFactors))
-    }
-    else if(length(input$file[1]) > 0 && str_sub(input$file[1], start = -4) == ".rda") {
-      holderObject <- readRDS(userFile()$datapath)
-      if (class(holderObject)[1] == "SummarizedExperiment" || class(holderObject)[1] == "clusterExperiment")
-        return(holderObject)
-    }
-    
-    else if(length(input$file[1]) > 0) {
-      session$sendCustomMessage(type = 'helpMessage',
-                                message = 'incorrect File format, please upload a file of type
-                                .csv or an .rda file of class "SummarizedExperiment" or "clusterExperiment"')
-    }
-    else
-      return(NULL)
+    # }
+    # 
+    # else if(length(input$file[1]) > 0) {
+    #   session$sendCustomMessage(type = 'helpMessage',
+    #                             message = 'incorrect File format, please upload a file of type
+    #                             .csv or an .rda file of class "SummarizedExperiment" or "clusterExperiment"')
+    # }
+    # else
+    #   return(NULL)
     
     })
   
@@ -215,20 +241,20 @@ colDataFile <- function(input, output, session, stringsAsFactors) {
   # The user's data, parsed into a data frame, we will need to expand beyond .csv
   dataframe <- reactive({
     
-    if(length(input$colData[1]) > 0 && str_sub(input$colData[1], start = -4) == ".csv") {
+    #if(length(input$colData[1]) > 0 && str_sub(input$colData[1], start = -4) == ".csv") {
       return(read.csv(userFile()$datapath,
                       header = input$colHeader,
                       sep = input$colSep,
                       quote = input$colQuote,
                       stringsAsFactors = stringsAsFactors))
-    }
+    #}
     
-    else if(length(input$file[1]) > 0) {
-      session$sendCustomMessage(type = 'helpMessage',
-                                message = 'incorrect File format, please upload a file of type
-                                .csv or an .rda file of class "SummarizedExperiment" or "clusterExperiment"')
-    }
-    return(NULL)
+    # else if(length(input$file[1]) > 0) {
+    #   session$sendCustomMessage(type = 'helpMessage',
+    #                             message = 'incorrect File format, please upload a file of type
+    #                             .csv or an .rda file of class "SummarizedExperiment" or "clusterExperiment"')
+    # }
+    # return(NULL)
     
   })
   
@@ -256,20 +282,20 @@ rowDataFile <- function(input, output, session, stringsAsFactors) {
   # The user's data, parsed into a data frame, we will need to expand beyond .csv
   dataframe <- reactive({
     
-    if(length(input$rowData[1]) > 0 && str_sub(input$rowData[1], start = -4) == ".csv") {
+    #if(length(input$rowData[1]) > 0 && str_sub(input$rowData[1], start = -4) == ".csv") {
       return(read.csv(userFile()$datapath,
                       header = input$rowHeader,
                       sep = input$rowSep,
                       quote = input$rowQuote,
                       stringsAsFactors = stringsAsFactors))
-    }
-    
-    else if(length(input$file[1]) > 0) {
-      session$sendCustomMessage(type = 'helpMessage',
-                                message = 'incorrect File format, please upload a file of type
-                                .csv or an .rda file of class "SummarizedExperiment" or "clusterExperiment"')
-    }
-    return(NULL)
+    # }
+    # 
+    # else if(length(input$file[1]) > 0) {
+    #   session$sendCustomMessage(type = 'helpMessage',
+    #                             message = 'incorrect File format, please upload a file of type
+    #                             .csv or an .rda file of class "SummarizedExperiment" or "clusterExperiment"')
+    # }
+    # return(NULL)
     
     })
   
@@ -282,6 +308,8 @@ rowDataFile <- function(input, output, session, stringsAsFactors) {
   # Return the reactive that yields the data frame
   return(dataframe)
 } #end of colDataFile function
+
+
 
 
 makeCECode <- function(input, output, session, stringsAsFactors) {

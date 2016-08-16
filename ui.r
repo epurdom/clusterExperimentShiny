@@ -23,11 +23,12 @@ shinyUI(navbarPage("Cluster Experiment",
                                         uiOutput("isRda")),
                                tabPanel("CSV format input",
                                   csvFile("fileInput", "User file"),
-                                  h3(paste(capture.output(show(sE)))),
-                                  textOutput("isAssay"),
-                                  h3("more testing..."),
-                                  textOutput("isColData"),
-                                  textOutput("isRowData")
+                                  actionButton("makeObject", 
+                                               "Create Summarized Experiment object from selected data"),
+                                  uiOutput("isAssay")#,
+                                  # h3("more testing..."),
+                                  # textOutput("isColData"),
+                                  # textOutput("isRowData")
                               )
                               
                             )

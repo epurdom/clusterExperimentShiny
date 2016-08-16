@@ -81,32 +81,41 @@ shinyServer(function(input, output, session) {
     }
   })
   
-  output$isAssay <- renderText({
-    holder <- datafile()
+  
+  observeEvent( input$makeObject, {
     
-    if (is.null(holder))
-      return("No data uploaded yet")
-    
-    else if(class(holder)[1] == "SummarizedExperiment" || class(holder)[1] == "ClusterExperiment") {
-      sE <<- holder
-    }
+    output$isAssay <- renderUI({
+      #Removing NAs in case row and column names are uploaded accidentally as well.
       
-    else {
-      sE <<- SummarizedExperiment(data.matrix(datafile()))
-    }
-    return(paste("Summarized experiment object successfully created, with dimensions of: ", dim(sE)[1], " by ", dim(sE)[2]))
+      print(dim(datafile()))
+      print(dim(colDataFile()))
+      print(dim(rowDataFile()))
+      
+      if (is.null(assay))
+        return("No data uploaded yet")
+      
+      
+      sE <<- SummarizedExperiment(assays = datafile(), colData = colDataFile(), rowData = rowDataFile())
+      
+      
+      HTML(
+        paste(capture.output(show(sE)), collapse = "<br/>")
+      )
+    })
     
   })
   
+
+  
   #inefficient, need insight
-  output$isColData <- renderText({
-     if (is.null(colDataFile()))
-       return("")
-    sE <<- SummarizedExperiment(data.matrix(datafile()), colData = data.matrix(colDataFile()))
-    return(paste("ColData successfully added, colData dimensions are ", dim(colData(sE))[1], " by ", dim(colData(sE))[2],
-                 "on an sE object with assay of dimensions ",  dim(sE)[1], " by ", dim(sE)[2]))
-    
-  }) 
+  # output$isColData <- renderText({
+  #    if (is.null(colDataFile()))
+  #      return("")
+  #   sE <<- SummarizedExperiment(data.matrix(datafile()), colData = data.matrix(colDataFile()))
+  #   return(paste("ColData successfully added, colData dimensions are ", dim(colData(sE))[1], " by ", dim(colData(sE))[2],
+  #                "on an sE object with assay of dimensions ",  dim(sE)[1], " by ", dim(sE)[2]))
+  #   
+  # }) 
   
   # output$isRowData <- renderText({
   #   if (is.null(rowDataFile()))
