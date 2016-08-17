@@ -5,7 +5,7 @@ startPageMessage <- function(id, label = "start message") {
     tagList(
         h2("Welcome to the Shiny App for the clusterExperiment package"),
         fluidRow(
-            column(5,
+            column(7,
                    h4("Description:"),
                    p("This shiny app implements the clustering and plotting commands found in the clusterExperiment package"),
                    p("The clustering steps of the clusterExperiment package follow the following workflow:"),
@@ -15,23 +15,23 @@ startPageMessage <- function(id, label = "start message") {
                         tags$li("Create a hierarchical ordering of the clusters ('makeDendrogram')"),
                        tags$li("Merge together similar clusters ('mergeClusters')")
                        ),
-                   h4("RSEC (Robust Subsampling and Ensemble based Clustering:"),
+                   h4("RSEC (Robust Subsampling and Ensemble based Clustering:)"),
                    p("RSEC is the name or our clustering procedure for finding homogeneous clusters for single-cell sequencing and other expression data with large numbers of samples. It follows the workflow described above, but making particular choices in the choices of clusters in the 'clusterMany' step.")
             ),
-            column(3,
+            column(width=3, offset=1,
                    h4("Credits and Information"),
-                   "This shinyApp was developed by Liam Purvis and Elizabeth Purdom.",
-                   "For bugs, support, and other questions related to the shinyApp see its github page:",
-                  "www.github.com/epurdom/clusterExpShiny",
+                   p("This shinyApp was developed by Liam Purvis and Elizabeth Purdom."),
+                   p("For bugs, support, and other questions related to the shinyApp see its github page:"),
+                  a(href="www.github.com/epurdom/clusterExpShiny","www.github.com/epurdom/clusterExpShiny"),
                   tags$hr(),
-                  "The clusterExperiment package was developed by Elizabeth Purdom and Davide Risso.",
-                  "For bugs, support, and other questions for clusterExperiment see its github page:",
-                  "www.github.com/epurdom/clusterExperiment"
+                  p("The clusterExperiment package was developed by Elizabeth Purdom and Davide Risso."),
+                  p("For bugs, support, and other questions for clusterExperiment see its github page:"),
+                  a(href="www.github.com/epurdom/clusterExperiment","www.github.com/epurdom/clusterExperiment")
             )
         ),
         fluidRow(
-            column(12,
-                   h2("How to use App:"),
+            column(7,
+                   h2("How to use this app:"),
                    p("The tabs at the top of this app represent the different steps in the workflow. Normally a user would progressively start from left to right to complete the clustering workflow, as we will describe below"),
                    h4("Getting Started"),
                    p("Users should always first go to the 'Getting Started' tab. Here, users will be prompted to choose their working directory, upload their data, and decide on the file to record the R code that is used in this session."),
