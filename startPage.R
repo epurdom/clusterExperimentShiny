@@ -44,8 +44,16 @@ startPageMessage <- function(id, label = "start message") {
                    h4("Following the clustering workflow (i.e. not RSEC)"),
                    p("Instructions to come"),
                    h4("Making Customized Plots"),
-                   p("Instructions to come"),
-                   h4("Saving your object"),
+                   p("There are default plots that are made at each step of the workflow. You can at any time make these plots and customize them under the 'Personalized Plots' tab. At the tab, a drop down menu allows you to choose from:"),
+                    tags$ul(
+                        tags$li(strong("Plot Clusters:"), "add description" ),
+                        tags$li(strong("Plot CoClustering"), "add description"),
+                        tags$li(strong("PCA Plot"), "add description"),
+                        tags$li(strong("Plot Dendrogram"), "add description"),
+                        tags$li(strong("Plot Heatmap"), "add description")
+                    ),
+                   p("With each of these plots, you can choose customized options, such as the title, axis labels, which clusters to include, etc at this tab for all of these plots. You can also save these plots as png files."),
+                 h4("Saving your object"),
                    p("Instructions to come")
             )
         ),
