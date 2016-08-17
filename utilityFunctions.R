@@ -21,12 +21,11 @@ testArguments<-function(input,val){
 	#if required, the 'a' value is set to null
 	#-----
 	if(logic && aVal%in%nms && !is.null(input[[aVal]])) logic<-logic && input[[aVal]] 
-	if(logic && is.character(input[[val]])) logic<-logic & input[[val]]!=""		
+	if(logic && is.character(input[[val]])) logic<-logic & all(input[[val]]!="")
 	
 	#logical and multiple choice are NULL if not picked
 	#numeric is NA
 	#vector input is ""
-	
 	return(logic)
 }
 combineArgs<-function(input, currCode,val,isCharacter=TRUE){
