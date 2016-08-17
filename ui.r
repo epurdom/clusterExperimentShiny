@@ -4,35 +4,96 @@ source("global.R")
 shinyUI(navbarPage("Cluster Experiment",
                    tabPanel("Start Page",
                             startPageMessage("startMessage", "")),
-                   tabPanel("File Upload",
-                            fluidRow(
-                              column(3,
-                                     h3("Are Data in Counts?"),
-                                     helpText("Whether the data are in counts, in which case the default transFun argument is set as log2(x+1). 
-                                              This is simply a convenience to the user."),
-                                     checkboxInput("isCount", label = NULL, value = FALSE)
+                   tabPanel("Setup and Upload",
+                            navlistPanel(
+                              tabPanel( "Setup Working Directory",
+                                setWD("fileInput", ""),
+                                actionButton("createWD", "Create Working Directory"),
+                                fluidRow(
+                                  column(4,
+                                         h4("Would you like to create a reproducible R script from this work session?")
+                                  ),
+                                  column(4,
+                                         checkboxInput("makeScript", label = "create script", value = FALSE)
+                                  )
+                                ),
+                                conditionalPanel(condition = "input.makeScript",
+                                                 fluidRow(
+                                                   column(6, 
+                                                          h4("Please enter file path and name (of type .r) in order to create a R file of this session's work:"),
+                                                          uiOutput("createScriptInputs")
+                                                   ),
+                                                   column(6, 
+                                                          h4("Please enter any descriptive comments for the beginning of the R file:"),
+                                                          textInput("fileComments", label = "eg: Name, date, experiment", value = "")
+                                                   )
+                                                 ),
+                                                 actionButton("createReproducibleFile", label = "Create File")
+                                ),
+                                fluidRow(
+                                  column(4,
+                                         h4("Would you like to automatically save the internal cluster experiment
+                                            object every time it is updated?")
+                                  ),
+                                  column(4,
+                                         checkboxInput("autoCreateObject", label = "Automatically save object", value = FALSE)
+                                  )
+                                ),
+                                conditionalPanel(condition = "input.autoCreateObject",
+                                                h4("Please enter file path and name (of type .rda) in order to create a continuously updated R object:"),
+                                                uiOutput("createObjectInputs")#,
+                                                #actionButton("createReproducibleFile", label = "Create File")
+                                )
+
                               ),
-                              column(3,
-                                     h3("transform function")
+                              tabPanel("Upload Data",
+                                  fluidRow(
+                                    column(3,
+                                           h3("Are Data in Counts?"),
+                                           helpText("Whether the data are in counts, in which case the default transFun argument is set as log2(x+1). 
+                                                    This is simply a convenience to the user."),
+                                           checkboxInput("isCount", label = NULL, value = FALSE)
+                                    ),
+                                    column(3,
+                                           h3("transform function")
+                                    )
+                                  ),
+                                   tabsetPanel(
+                                     tabPanel("RDA file input",
+                                              rdaFileInput("fileInput", "User rda file"),
+                                              h4("Summary of object uploaded:"),
+                                              uiOutput("isRda")),
+                                     tabPanel("CSV format input",
+                                        fluidRow(
+                                          column(8, csvAssay("fileInput", "")),
+                                          column(4, 
+                                                 h5(" First 4 rows and columns of uploaded table:"),
+                                                 tableOutput("csvAssayContents")
+                                          )
+                                        ),
+                                        fluidRow(
+                                          column(8, csvColData("fileInput", "")),
+                                          column(4, 
+                                                 h5(" First 4 rows and columns of uploaded table:"),
+                                                 tableOutput("csvColContents")
+                                          )
+                                        ),
+                                        fluidRow(
+                                          column(8, csvRowData("fileInput", "")),
+                                          column(4, 
+                                                 h5(" First 4 rows and columns of uploaded table:"),
+                                                 tableOutput("csvRowContents")
+                                          )
+                                        ),
+                                        actionButton("makeObject", 
+                                                     "Create Summarized Experiment object from selected data"),
+                                        h5("Summary of summarized experiment created from uploaded data:"),
+                                        uiOutput("isAssay")
+                                    )
+                                    
+                                  )
                               )
-                            ),
-                             tabsetPanel(
-                               tabPanel("RDA file input",
-                                        rdaFileInput("fileInput", "User rda file"),
-                                        h4("Summary of object uploaded:"),
-                                        uiOutput("isRda")),
-                               tabPanel("CSV format input",
-                                  csvFile("fileInput", "User file"),
-                                  actionButton("makeObject", 
-                                               "Create Summarized Experiment object from selected data"),
-                                  uiOutput("isAssay")#,
-                                  # h3("more testing..."),
-                                  # textOutput("isColData"),
-                                  # textOutput("isRowData")
-                              )
-                              
-                            )
-                            
+                        )
                     ),
                     tabPanel("RSEC"),
                     tabPanel("Cluster Many",
@@ -200,7 +261,7 @@ shinyUI(navbarPage("Cluster Experiment",
                                                    ),
                                                    tabPanel("Output Plot",
                                                             downloadButton("downloadSpecializedPlotPCCM", label = "DownLoad this Plot"),
-                                                            plotOutput("imgPCCM")
+                                                            plotOutput("imgPC")
                                                    )
                                       )
                              ),

@@ -11,23 +11,44 @@ shinyServer(function(input, output, session) {
   # Begin startPage
   #####################################################
   
-  makeFile <- FALSE
-  filePath <- NULL
-  
-  observeEvent(input[["startMessage-createReproducibleFile"]], {
-    makeFile <<- TRUE
-    filePath <<- input[["startMessage-filePath"]]
-    file.create(filePath)
-    # saveFile <- file(filePath)
-    # writeLines(paste("#", input[["startMessage-fileComments"]]), saveFile)
-    # close(saveFile)
-    cat(paste("#", input[["startMessage-fileComments"]]), file = filePath, append = TRUE)
-  })
   
   
   #####################################################
   # Begin read file outputs
   #####################################################
+  
+  observeEvent(input$createWD, {
+    setWD(input[["fileInput-workingDirectory"]])
+    output$createScriptInputs <- renderUI({
+      textInput("filePath", label = "eg: 'homeDirectory/subdirectory/fileName.r", 
+                value = input[["fileInput-workingDirectory"]], width = '100%')
+    })
+    
+    output$createObjectInputs <- renderUI({
+      textInput("objectPath", label = "eg: 'homeDirectory/subdirectory/objectName.rda", 
+                value = input[["fileInput-workingDirectory"]], width = '50%')
+    })
+  })
+
+  makeFile <- FALSE
+  filePath <- NULL
+  
+  observeEvent(input$createReproducibleFile, {
+    makeFile <<- TRUE
+    filePath <<- input$filePath
+    if(!file.exists(filePath)) {
+      file.create(filePath)
+    }
+    # saveFile <- file(filePath)
+    # writeLines(paste("#", input[["startMessage-fileComments"]]), saveFile)
+    # close(saveFile)
+    cat(paste("\n#Beginning of Shiny script session"), file = filePath, append = TRUE)
+    
+    cat(paste("\n#Date and time: ", date()), file = filePath, append = TRUE)
+    
+    cat(paste("\n#", input$fileComments), file = filePath, append = TRUE)
+  })
+  
   rdaFile <- callModule(rdaFile, "fileInput",
                         stringsAsFactors = FALSE)
   
@@ -54,6 +75,11 @@ shinyServer(function(input, output, session) {
           file = filePath, append = TRUE)
       }
       sE <<- holder
+      
+      if(input$autoCreateObject) {
+        saveRDS(sE, input$objectPath)
+      }
+      
       #Creating which clusters options
       if(class(sE)[1] == "ClusterExperiment") {
         cE <- sE
@@ -82,30 +108,52 @@ shinyServer(function(input, output, session) {
   })
   
   
-  observeEvent( input$makeObject, {
+  observeEvent(input$makeObject, {
+    # print("print")
+    # 
+    # 
+    # print(capture.output(show(sE)))
     
     output$isAssay <- renderUI({
-      #Removing NAs in case row and column names are uploaded accidentally as well.
-      
-      print(dim(datafile()))
-      print(dim(colDataFile()))
-      print(dim(rowDataFile()))
-      
-      if (is.null(assay))
-        return("No data uploaded yet")
-      
-      
-      sE <<- SummarizedExperiment(assays = datafile(), colData = colDataFile(), rowData = rowDataFile())
-      
-      
-      HTML(
-        paste(capture.output(show(sE)), collapse = "<br/>")
-      )
+      assay <- datafile()
+      colData <- colDataFile()
+      rowData <- rowDataFile()
+      if(!is.null(assay) && !is.null(colData) && !is.null(rowData)) {
+        sE <<- SummarizedExperiment(assays = data.matrix(assay), colData = data.matrix(colData),
+                                    rowData = data.matrix(rowData))
+      } else if (!is.null(assay) && !is.null(colData) && is.null(rowData)) {
+        sE <<- SummarizedExperiment(assays = data.matrix(assay), colData = data.matrix(colData))
+      } else if(!is.null(assay) && is.null(colData) && !is.null(rowData)) {
+        sE <<- SummarizedExperiment(assays = data.matrix(assay), rowData = data.matrix(rowData))
+      } else if(!is.null(assay) && is.null(colData) && is.null(rowData)) {
+        sE <<- SummarizedExperiment(assays = data.matrix(assay))
+      } else {
+        return(HTML(paste("Error, need to upload data file")))
+      }
+      if(input$autoCreateObject) {
+        saveRDS(sE, input$objectPath)
+      }
+      #print(capture.output(show(sE)))
+      #return("xxxxxxxxYxxxxxxxxx")
+      # if (is.null(assay)) {
+      #   return(HTML(paste("No data uploaded yet")))
+      # }
+      return(HTML(paste(capture.output(show(sE)), collapse = "<br/>")))
     })
     
   })
   
+  output$csvAssayContents <- renderTable({
+    datafile()[1:4, 1:4]
+  })
+  
+  output$csvColContents <- renderTable({
+    colDataFile()[1:4, 1:4]
+  })
 
+  output$csvRowContents <- renderTable({
+    rowDataFile()[1:4, 1:4]
+  })
   
   #inefficient, need insight
   # output$isColData <- renderText({
@@ -209,7 +257,7 @@ shinyServer(function(input, output, session) {
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
       plotClusters(cE, whichClusters = "clusterMany")
-    }, height = (40/3) * getSEIterations())
+    }, height = max((40/3) * getSEIterations(), 480))
       
       output$combineManyWhichClusters <- renderUI({
         multipleOptionsInput("cMInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
@@ -228,6 +276,10 @@ shinyServer(function(input, output, session) {
                            val = "whichClusters", help = "an integer index or character string that identifies which
                            cluster should be used to plotCluster.")
       })
+      
+      if(input$autoCreateObject) {
+        saveRDS(sE, input$objectPath)
+      }
   })
   
   #This function could certainly be refined
@@ -323,6 +375,10 @@ shinyServer(function(input, output, session) {
                          val = "whichClusters", help = "an integer index or character string that identifies which
                          cluster should be used to plotCluster.")
     })
+    
+    if(input$autoCreateObject) {
+      saveRDS(sE, input$objectPath)
+    }
     
   })
   
@@ -430,6 +486,10 @@ shinyServer(function(input, output, session) {
       mergeClusters(cE)
     })
     
+    if(input$autoCreateObject) {
+      saveRDS(sE, input$objectPath)
+    }
+    
   })
   
   output$downloadDefaultPlotPDMD <- downloadHandler(
@@ -516,6 +576,10 @@ shinyServer(function(input, output, session) {
                            cluster should be used to plotCluster.")
     })
     
+    if(input$autoCreateObject) {
+      saveRDS(sE, input$objectPath)
+    }
+    
   })
   
   output$downloadDefaultPlotClustersMergeClusters <- downloadHandler(
@@ -579,19 +643,22 @@ shinyServer(function(input, output, session) {
           sep = "\n", file = filePath, append = TRUE)
     }
     
-    output$imgPCCM <- renderPlot({
+    output$imgPC <- renderPlot({
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
       eval(parse(text = plotClustersCode()))
-    })
+    }, 
+    #calculating correct height of image, INCORRECT SYNTAX:
+    height = (40/3) * sum(input[["pCInputs-whichClusters"]] == clusterTypes(cE)) )
+    
   })
   
   output$downloadSpecializedPlotPCCM <- downloadHandler(
     filename = function(){ paste("specializedPlotFromClusterMany.png")},
     content = function(file){ 
       #ggsave(fileName(), plot = plotClusters(cE, whichClusters = "clusterMany"), )
-      png(file)
+      png(file, height = (40/3) * sum(input[["pCInputs-whichClusters"]] == clusterTypes(cE)))
       # defaultMar<-par("mar")
       # plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       # par(mar=plotCMar)

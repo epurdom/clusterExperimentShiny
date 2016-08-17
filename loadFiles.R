@@ -1,3 +1,20 @@
+
+
+setWD <- function(id, label = "start message") {
+  ns <- NS(id)
+  tagList(
+      fluidRow(
+        column(6,
+            h3("Please enter a working directory for this Cluster Experiment session"),
+            textInput(ns("workingDirectory"), label = "eg: 'homeDirectory/subdirectory/filename.r", 
+                      value = "~/", width = '100%')
+        )
+      )
+  )
+}
+
+
+
 rdaFileInput <- function(id, label = "upload rda file") {
   ns <- NS(id)
   fluidRow(
@@ -14,7 +31,7 @@ rdaFile <- function(input, output, session, stringsAsFactors) {
   # The selected file, if any
   userFile <- reactive({
     # If no file is selected, don't do anything
-    validate(need(input$rdaFile, message = FALSE))
+    #validate(need(input$rdaFile, message = FALSE))
     input$rdaFile
   })
   # The user's data, parsed into a data frame, we will need to expand beyond .csv
@@ -50,7 +67,7 @@ rdaFile <- function(input, output, session, stringsAsFactors) {
 
 
 
-csvFile <- function( id, label = "upload .csv file") {
+csvAssay <- function( id, label = "upload .csv file") {
   # Create a namespace function using the provided id
   ns <- NS(id)
   
@@ -82,19 +99,23 @@ csvFile <- function( id, label = "upload .csv file") {
       ),
       column(3,
              h3(""),
-             radioButtons(ns('quote'), 'Quote',
-                          c(None='',
-                            'Double Quote'='"',
-                            'Single Quote'="'"),
-                          '"')
+             checkboxInput(ns('rowNamesFirstCol'), label = 'Are row names in first col?', value = TRUE)
       ),
       column(3,
              h3(""),
              checkboxInput(ns('header'), 'Header')
       )
-    ),
+    )
+  )
+}
+
+csvColData <- function( id, label = "upload .csv file") {
+  # Create a namespace function using the provided id
+  ns <- NS(id)
+  
+  tagList(
     fluidRow(
-      column(4,
+      column(3,
              h3("Choose column data upload:"),
              helpText("Upload the data associated with the columns. Optional, 
                       but reccomended for Bioconductor related projects."),
@@ -119,19 +140,22 @@ csvFile <- function( id, label = "upload .csv file") {
       ),
       column(3,
              h3(""),
-             radioButtons(ns('colQuote'), 'Quote',
-                          c(None='',
-                            'Double Quote'='"',
-                            'Single Quote'="'"),
-                          '"')
+             checkboxInput(ns('colRowNamesFirstCol'), label = 'Are row names in first col?', value = TRUE)
       ),
       column(3,
              h3(""),
              checkboxInput(ns('colHeader'), 'Header')
       )
-    ),
+    )
+  )
+}
+csvRowData <- function( id, label = "upload .csv file") {
+  # Create a namespace function using the provided id
+  ns <- NS(id)
+  
+  tagList(
     fluidRow(
-      column(4,
+      column(3,
              h3("Choose Row data upload:"),
              helpText("Upload the data associated with the rows. Optional."),
              fileInput(ns("rowData"), label = NULL,
@@ -154,12 +178,8 @@ csvFile <- function( id, label = "upload .csv file") {
                           ',')
       ),
       column(3,
-             h3(""),
-             radioButtons(ns('rowQuote'), 'Quote',
-                          c(None='',
-                            'Double Quote'='"',
-                            'Single Quote'="'"),
-                          '"')
+             h3(""),             
+             checkboxInput(ns('rowRowNamesFirstCol'), label = 'Are row names in first col?', value = TRUE)
       ),
       column(3,
              h3(""),
@@ -179,15 +199,18 @@ csvFile <- function( id, label = "upload .csv file") {
 # Module server function
 dataFile <- function(input, output, session, stringsAsFactors) {
   # The selected file, if any
+
   userFile <- reactive({
     # If no file is selected, don't do anything
-    validate(need(input$file, message = FALSE))
+    #validate(need(input$file, message = FALSE))
     input$file
   })
   
   # The user's data, parsed into a data frame, we will need to expand beyond .csv
   dataframe <- reactive({
-    
+    if(is.null(input$file)) {
+      return(NULL)
+    }
     # print("Args: filePath:", userFile()$datapath, ", header:",
     #                header = input$header, ", sep: ",
     #                sep = input$sep, ", quote: ",
@@ -201,11 +224,20 @@ dataFile <- function(input, output, session, stringsAsFactors) {
     #                stringsAsFactors = stringsAsFactors)))
     
     #if(length(input$file[1]) > 0 && str_sub(input$file[1], start = -4) == ".csv") {
-      return(read.csv(userFile()$datapath,
-                      header = input$header,
-                      sep = input$sep,
-                      quote = input$quote,
-                      stringsAsFactors = stringsAsFactors))
+    
+      if(input$rowNamesFirstCol) {
+        return(read.csv(userFile()$datapath,
+                        header = input$header,
+                        sep = input$sep,
+                        row.names = 1,
+                        quote = ""))#,
+                        #stringsAsFactors = stringsAsFactors))
+      } else {
+        return(read.csv(userFile()$datapath,
+                        header = input$header,
+                        sep = input$sep))#,
+                        #stringsAsFactors = stringsAsFactors))
+      }
     # }
     # 
     # else if(length(input$file[1]) > 0) {
@@ -234,13 +266,15 @@ colDataFile <- function(input, output, session, stringsAsFactors) {
   # The selected file, if any
   userFile <- reactive({
     # If no file is selected, don't do anything
-    validate(need(input$colData, message = FALSE))
+    #validate(need(input$colData, message = FALSE))
     input$colData
   })
   
   # The user's data, parsed into a data frame, we will need to expand beyond .csv
   dataframe <- reactive({
-    
+    if(is.null(input$colData)) {
+      return(NULL)
+    }
     #if(length(input$colData[1]) > 0 && str_sub(input$colData[1], start = -4) == ".csv") {
       return(read.csv(userFile()$datapath,
                       header = input$colHeader,
@@ -275,13 +309,15 @@ rowDataFile <- function(input, output, session, stringsAsFactors) {
   # The selected file, if any
   userFile <- reactive({
     # If no file is selected, don't do anything
-    validate(need(input$rowData, message = FALSE))
+    #validate(need(input$rowData, message = FALSE))
     input$rowData
   })
   
   # The user's data, parsed into a data frame, we will need to expand beyond .csv
   dataframe <- reactive({
-    
+    if(is.null(input$rowData)) {
+      return(NULL)
+    }
     #if(length(input$rowData[1]) > 0 && str_sub(input$rowData[1], start = -4) == ".csv") {
       return(read.csv(userFile()$datapath,
                       header = input$rowHeader,
