@@ -2,9 +2,9 @@ library(shiny)
 library(ggvis)
 source("global.R")
 shinyUI(navbarPage("Cluster Experiment",
-                   tabPanel("Start Page",
+                   tabPanel("Welcome Page",
                             startPageMessage("startMessage", "")),
-                   tabPanel("File Upload",
+                   tabPanel("Getting Started",
                             fluidRow(
                               column(3,
                                      h3("Are Data in Counts?"),
