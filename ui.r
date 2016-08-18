@@ -2,9 +2,9 @@ library(shiny)
 library(ggvis)
 source("global.R")
 shinyUI(navbarPage("Cluster Experiment",
-                   tabPanel("Start Page",
+                   tabPanel("Welcome Page",
                             startPageMessage("startMessage", "")),
-                   tabPanel("Setup and Upload",
+                   tabPanel("Getting Started",
                             navlistPanel(
                               tabPanel( "Setup Working Directory",
                                 setWD("fileInput", ""),
@@ -88,6 +88,7 @@ shinyUI(navbarPage("Cluster Experiment",
                                         actionButton("makeObject", 
                                                      "Create Summarized Experiment object from selected data"),
                                         h5("Summary of summarized experiment created from uploaded data:"),
+                                        h3(paste(capture.output(show(sE)),collapse="\n")),
                                         uiOutput("isAssay")
                                     )
                                     
