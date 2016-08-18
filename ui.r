@@ -5,7 +5,7 @@ shinyUI(navbarPage("Cluster Experiment",
                    tabPanel("Welcome Page",
                             startPageMessage("startMessage", "")),
                    tabPanel("Getting Started",
-                            navlistPanel(
+                            tabsetPanel(
                               tabPanel( "Setup Working Directory",
                                 setWD("fileInput", ""),
                                 actionButton("createWD", "Create Working Directory"),
@@ -88,7 +88,7 @@ shinyUI(navbarPage("Cluster Experiment",
                                         actionButton("makeObject", 
                                                      "Create Summarized Experiment object from selected data"),
                                         h5("Summary of summarized experiment created from uploaded data:"),
-                                        h3(paste(capture.output(show(sE)),collapse="\n")),
+                                        #h3(paste(capture.output(show(sE)),collapse="\n")),
                                         uiOutput("isAssay")
                                     )
                                     
@@ -336,7 +336,12 @@ shinyUI(navbarPage("Cluster Experiment",
 									tabPanel("Save Object",
 						            saveObjectMessage("saveObject", ""),
 									      textOutput("saveObjectMessage")
-								  )
+								  ),
+									tabPanel("What clusters",
+									         whatClusters("whatClusters", ""),
+									         actionButton("showSummmary", "Show Summary"),
+									         tableOutput("cESummary")
+									)
 
         )
 )

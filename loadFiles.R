@@ -109,6 +109,7 @@ csvAssay <- function( id, label = "upload .csv file") {
   )
 }
 
+
 csvColData <- function( id, label = "upload .csv file") {
   # Create a namespace function using the provided id
   ns <- NS(id)
@@ -230,13 +231,13 @@ dataFile <- function(input, output, session, stringsAsFactors) {
                         header = input$header,
                         sep = input$sep,
                         row.names = 1,
-                        quote = ""))#,
-                        #stringsAsFactors = stringsAsFactors))
+                        quote = "",
+                        stringsAsFactors = stringsAsFactors))
       } else {
         return(read.csv(userFile()$datapath,
                         header = input$header,
-                        sep = input$sep))#,
-                        #stringsAsFactors = stringsAsFactors))
+                        sep = input$sep,
+                        stringsAsFactors = stringsAsFactors))
       }
     # }
     # 
@@ -260,6 +261,23 @@ dataFile <- function(input, output, session, stringsAsFactors) {
   return(dataframe)
 } #end of dataframe function
 
+#Returns code to be written to script
+csvAssayCode <- function(input, output, session, stringsAsFactors) {
+  userFile <- reactive({
+    input$colData
+  })
+  
+  text <- reactive({
+    if(input$rowNamesFirstCol) {
+      return(paste("read.csv('", userFile()$datapath, "', header = ", input$header, ", sep = '", input$sep,
+             "', stringsAsFactors = ", stringsAsFactors, ", row.names = 1, quote = '')", sep = ""))
+    } else {
+      return(paste("read.csv(", userFile()$datapath, ", header = ", input$header, ", sep = ", input$sep,
+             ", stringsAsFactors = ", stringsAsFactors, ", quote = '')", sep = ""))
+    }
+  })
+  return(text)
+}
 
 # Module server function
 colDataFile <- function(input, output, session, stringsAsFactors) {
@@ -279,7 +297,6 @@ colDataFile <- function(input, output, session, stringsAsFactors) {
       return(read.csv(userFile()$datapath,
                       header = input$colHeader,
                       sep = input$colSep,
-                      quote = input$colQuote,
                       stringsAsFactors = stringsAsFactors))
     #}
     
@@ -302,7 +319,19 @@ colDataFile <- function(input, output, session, stringsAsFactors) {
   return(dataframe)
 } #end of colDataFile function
 
-
+#Returns code to be written to script
+csvColCode <- function(input, output, session, stringsAsFactors) {
+  userFile <- reactive({
+    input$colData
+  })
+  
+  text <- reactive({
+    return(paste("read.csv('", userFile()$datapath, "', header = ", input$colHeader, ", sep = '", 
+                 input$colSep, "', stringsAsFactors = ", 
+                 stringsAsFactors, ")", sep = ""))
+  })
+  return(text)
+}
 
 # Module server function
 rowDataFile <- function(input, output, session, stringsAsFactors) {
@@ -322,7 +351,6 @@ rowDataFile <- function(input, output, session, stringsAsFactors) {
       return(read.csv(userFile()$datapath,
                       header = input$rowHeader,
                       sep = input$rowSep,
-                      quote = input$rowQuote,
                       stringsAsFactors = stringsAsFactors))
     # }
     # 
@@ -345,7 +373,17 @@ rowDataFile <- function(input, output, session, stringsAsFactors) {
   return(dataframe)
 } #end of colDataFile function
 
-
+csvRowCode <- function(input, output, session, stringsAsFactors) {
+  userFile <- reactive({
+    input$rowData
+  })
+  text <- reactive({
+  return(paste("read.csv('", userFile()$datapath, "', header = ", input$rowHeader, ", sep = '", 
+               input$rowSep, "', stringsAsFactors = ", 
+               stringsAsFactors, ")", sep = ""))
+  })
+  return(text)
+}
 
 
 makeCECode <- function(input, output, session, stringsAsFactors) {

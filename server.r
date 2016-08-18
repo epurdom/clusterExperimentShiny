@@ -1,22 +1,24 @@
+#server.r manages the compu
+
+
+
+
+
 source("global.R")
+#This line allows large file uploads
 options(shiny.maxRequestSize=30*1024^2)
-# sE <- SummarizedExperiment()
 
 shinyServer(function(input, output, session) {
-  #sE is the Summarized/Cluster Experiment initially loaded which will remain unaltered
-  #sE <- SummarizedExperiment()
+
   
-  
-  #####################################################
-  # Begin startPage
-  #####################################################
-  
-  
+
   
   #####################################################
   # Begin read file outputs
   #####################################################
   
+  #When the create workign directory button is clicked, WD is set and the defalt inputs for the save
+  #script and save object widgets are created
   observeEvent(input$createWD, {
     setWD(input[["fileInput-workingDirectory"]])
     output$createScriptInputs <- renderUI({
@@ -29,44 +31,53 @@ shinyServer(function(input, output, session) {
                 value = input[["fileInput-workingDirectory"]], width = '50%')
     })
   })
-
+  #Sets filepath and logical make file locally in server.r to be referenced whenever script code is run
   makeFile <- FALSE
   filePath <- NULL
   
+  #creates reproducible file if it doens't already exist when clicked
   observeEvent(input$createReproducibleFile, {
     makeFile <<- TRUE
     filePath <<- input$filePath
     if(!file.exists(filePath)) {
       file.create(filePath)
     }
-    # saveFile <- file(filePath)
-    # writeLines(paste("#", input[["startMessage-fileComments"]]), saveFile)
-    # close(saveFile)
+    #initial comments for start of file 
     cat(paste("\n#Beginning of Shiny script session"), file = filePath, append = TRUE)
     
     cat(paste("\n#Date and time: ", date()), file = filePath, append = TRUE)
     
     cat(paste("\n#", input$fileComments), file = filePath, append = TRUE)
   })
-  
+  #calling functions from namespaces for uploading files
   rdaFile <- callModule(rdaFile, "fileInput",
                         stringsAsFactors = FALSE)
   
   datafile <- callModule(dataFile, "fileInput",
                          stringsAsFactors = FALSE)
   
+  csvAssayCode <- callModule(csvAssayCode, "fileInput", 
+                             stringsAsFactors = FALSE)
+  
   colDataFile <- callModule(colDataFile, "fileInput",
                             stringsAsFactors = FALSE)
+  
+  csvColCode <- callModule(csvColCode, "fileInput", 
+                             stringsAsFactors = FALSE)
   
   rowDataFile <- callModule(rowDataFile, "fileInput",
                             stringsAsFactors = FALSE)  
   
+  csvRowCode <- callModule(csvRowCode, "fileInput", 
+                           stringsAsFactors = FALSE)
   
+  #This outputs a summary of sE created from the uploaded rda file 
   output$isRda <- renderUI({
     holder <- rdaFile()
     if (is.null(holder))
       return("No data uploaded yet!")
     else {
+      #writing code to script
       if(makeFile) {
         cat("\n", 
           "#loading data:",
@@ -75,61 +86,119 @@ shinyServer(function(input, output, session) {
           file = filePath, append = TRUE)
       }
       sE <<- holder
-      
+      #saves object
       if(input$autoCreateObject) {
         saveRDS(sE, input$objectPath)
       }
       
-      #Creating which clusters options
+      #Creating which clusters options in various later tabs, only if object is type cluster experiment
       if(class(sE)[1] == "ClusterExperiment") {
         cE <- sE
+        #combine many
         output$combineManyWhichClusters <- renderUI({
-          multipleOptionsInput("cMInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
-                               val = "whichClusters", help = "a numeric or character vector that specifies
-                               which clusters to compare")
+          multipleOptionsInput("cMInputs", sidelabel = "Add detailed whichClusters?",
+                               options = unique(clusterTypes(cE)), val = "whichClusters",
+                               help = "a numeric or character vector that specifies which clusters 
+                               to compare")
         })
-        
+        #make dendrogram
         output$makeDendrogramWhichClusters <- renderUI({
-          singleOptionsInput("mDInputs", sidelabel = "Add detailed whichCluster?", options = unique(clusterTypes(cE)),
-                             val = "whichCluster", help = "an integer index or character string that identifies which
+          singleOptionsInput("mDInputs", sidelabel = "Add detailed whichCluster?", 
+                             options = unique(clusterTypes(cE)), val = "whichCluster", 
+                             help = "an integer index or character string that identifies which
                              cluster should be used to make the dendrogram. Default is primaryCluster.")
         })
         
+        #plot clusters
         output$plotClustersWhichClusters <- renderUI({
-          multipleOptionsInput("pCInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
-                               val = "whichClusters", help = "an integer index or character string that identifies which
+          multipleOptionsInput("pCInputs", sidelabel = "Add detailed whichClusters?", 
+                               options = unique(clusterTypes(cE)), val = "whichClusters", 
+                               help = "an integer index or character string that identifies which
                                cluster should be used to plotCluster.")
         })
       }
+      #the summary that is being returned
       HTML(
         paste(capture.output(show(sE)), collapse = "<br/>")
       )
     }
   })
   
-  
+  #creating Summarized Experiment object from uploaded .csv data
   observeEvent(input$makeObject, {
-    # print("print")
-    # 
-    # 
-    # print(capture.output(show(sE)))
     
     output$isAssay <- renderUI({
       assay <- datafile()
       colData <- colDataFile()
       rowData <- rowDataFile()
+      #appending script:
+      if(makeFile && !is.null(assay)) {
+        cat("\n", 
+            "#loading assay data:",
+            "\n",
+            "assay <- ",
+            csvAssayCode(),
+            file = filePath, append = TRUE)
+      }
+      if(makeFile && !is.null(colData)) {
+        cat("\n", 
+            "#loading column data:",
+            "\n",
+            "colData <- ",
+            csvColCode(),
+            file = filePath, append = TRUE)
+      }
+      if(makeFile && !is.null(rowData)) {
+        cat("\n", 
+            "#loading row data:",
+            "\n",
+            "rowData <- ",
+            csvRowCode(),
+            file = filePath, append = TRUE)
+      }
+      #if statements to add the correct, non-null data frames to sE
       if(!is.null(assay) && !is.null(colData) && !is.null(rowData)) {
         sE <<- SummarizedExperiment(assays = data.matrix(assay), colData = data.matrix(colData),
                                     rowData = data.matrix(rowData))
+        if(makeFile) {
+          cat("\n", 
+              "#creating sE:",
+              "sE <- SummarizedExperiment(assays = data.matrix(assay), colData = data.matrix(colData),
+                                    rowData = data.matrix(rowData))",
+              sep = "\n",
+              file = filePath, append = TRUE)
+        }
       } else if (!is.null(assay) && !is.null(colData) && is.null(rowData)) {
         sE <<- SummarizedExperiment(assays = data.matrix(assay), colData = data.matrix(colData))
+        if(makeFile) {
+          cat("\n", 
+              "#creating sE:",
+              "sE <- SummarizedExperiment(assays = data.matrix(assay), colData = data.matrix(colData))",
+              sep = "\n",
+              file = filePath, append = TRUE)
+        }
       } else if(!is.null(assay) && is.null(colData) && !is.null(rowData)) {
         sE <<- SummarizedExperiment(assays = data.matrix(assay), rowData = data.matrix(rowData))
+        if(makeFile) {
+          cat("\n", 
+              "#creating sE:",
+              "sE <- SummarizedExperiment(assays = data.matrix(assay), rowData = data.matrix(rowData))",
+              sep = "\n",
+              file = filePath, append = TRUE)
+        }
       } else if(!is.null(assay) && is.null(colData) && is.null(rowData)) {
         sE <<- SummarizedExperiment(assays = data.matrix(assay))
+        if(makeFile) {
+          cat("\n", 
+              "#creating sE:",
+              "sE <- SummarizedExperiment(assays = data.matrix(assay))",
+              sep = "\n",
+              file = filePath, append = TRUE)
+        }
       } else {
         return(HTML(paste("Error, need to upload data file")))
       }
+      
       if(input$autoCreateObject) {
         saveRDS(sE, input$objectPath)
       }
@@ -764,7 +833,26 @@ shinyServer(function(input, output, session) {
     })
   })
   
+  #####################################################
+  # Start What Clusters
+  #####################################################
   
+  
+  observeEvent(input$showSummmary, {
+    output$cESummary <- renderTable({
+      if(dim(cE)[1] == 2 && dim(cE)[2] == 1 && dim(sE)[1] == 0 && dim(sE)[2] == 2){
+        return("No uploaded object")
+      } else if(dim(cE)[1] == 2 && dim(cE)[2] == 1) {
+        return(data.frame(c("No work done on object", 
+                            "run clusterMany to create a cluster experiment", 
+                            "Or upload a cluster experiment object"), fix.empty.names = FALSE))
+      } else {
+        return(workflowClusterDetails(cE))
+      }
+      
+    })
+  })
+
 })
 
 
