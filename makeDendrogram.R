@@ -1,3 +1,4 @@
+#make dendrogrm module
 makeDendrogramInput <- function(id, label = "cMInputs") {
   # Create a namespace function using the provided id
   ns <- NS(id)
@@ -51,24 +52,10 @@ makeDendrogramInput <- function(id, label = "cMInputs") {
              helpText("UNFINISHED")
       )
     )
-    #reuse this:
-    # tags$hr(),
-    # fluidRow(
-    #   column(3, checkboxInput(ns("aClusterNames"), value = FALSE, label = "Add clusterNames?")),
-    #   conditionalPanel(condition = paste0("input['", ns("aClusterNames"), "']"),
-    #       column(3, checkboxInput(ns("clusterNames"), label = "clusterNames", value = FALSE)),
-    #       column(2, checkboxInput(ns("hClusterNames"), value = FALSE, label = "Help Text and Instructions")),
-    #       conditionalPanel(condition = paste0("input['", ns("hClusterNames"), "']"),
-    #             column(4, helpText("logical. If leaves='clusters', then clusters will be identified with their 'name' 
-    #                                value in legend; otherwise the 'clusterIds' value will be used.")
-    #             )
-    #       )
-    #   )
-    # )
   )
 }
 
-
+#make code
 makeMakeDendrogramCode <- function(input, output, session, stringsAsFactors) {
   code <- reactive({
     code <- paste("")
@@ -78,17 +65,12 @@ makeMakeDendrogramCode <- function(input, output, session, stringsAsFactors) {
       code <- paste(code, ", ndims = ", input$ndims, sep = "")
     if(input$aIgnoreUnassignedVar)
       code <- paste(code, ", ignoreUnassignedVar = ", input$ignoreUnassignedVar, sep = "")
-    #reuse this
-    # if(input$aClusterNames)
-    #   code <- paste(code, ", clusterNames = ", input$clusterNames)
-    
     code <- paste(code, ")", sep = "")
   })
-  
   return(code)
 }
 
-
+#help text
 makeDendrogramHelpText <- function(id, label = "help title and text") {
   ns <- NS(id)
   tagList(

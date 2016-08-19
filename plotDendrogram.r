@@ -1,4 +1,4 @@
-
+#plot Dendrogram module
 
 plotDendrogramInput <- function(id, label = "plotDendrogram inputs") {
   ns <- NS(id)
@@ -40,6 +40,7 @@ plotDendrogramInput <- function(id, label = "plotDendrogram inputs") {
   )
 }
 
+#make code
 makePlotDendrogramCode <- function(input, output, session, stringsAsFactors) {
   code <- reactive({
     code <- paste("plotDendrogram(cE" )
@@ -58,7 +59,7 @@ makePlotDendrogramCode <- function(input, output, session, stringsAsFactors) {
   return(code)
 }
 
-
+#help text
 plotDendrogramHelpText <- function(id, label = "help title and text") {
   ns <- NS(id)
   tagList(
