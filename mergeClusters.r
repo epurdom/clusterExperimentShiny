@@ -1,3 +1,4 @@
+#module for emerge clusters
 mergeClustersInput <- function(id, label = "cMInputs") {
   # Create a namespace function using the provided id
   ns <- NS(id)
@@ -82,7 +83,7 @@ mergeClustersInput <- function(id, label = "cMInputs") {
     )
   )
 }
-
+#make code
 makeMergeClustersCode <- function(input, output, session, stringsAsFactors) {
   code <- reactive({
     code <- paste("cE <<- mergeClusters(cE")
@@ -99,7 +100,7 @@ makeMergeClustersCode <- function(input, output, session, stringsAsFactors) {
   
   return(code)
 }
-
+#helptext
 mergeClustersHelpText <- function(id, label = "help title and text") {
   ns <- NS(id)
   tagList(

@@ -1,13 +1,9 @@
+#combine many module
 combineManyInput <- function(id, label = "cMInputs") {
   # Create a namespace function using the provided id
   ns <- NS(id)
   
   tagList(
-
-    
-    # multipleOptionsInput(id, sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
-    #                      val = "whichClusters", help = "a numeric or character vector that specifies
-    #                      which clusters to compare"),
     
     tags$hr(),
     fluidRow(
@@ -57,7 +53,7 @@ combineManyInput <- function(id, label = "cMInputs") {
 
 makeCombineManyCode <- function(input, output, session, stringsAsFactors) {
   code <- reactive({
-    code <- paste("")#, whichClusters = 'clusterMany' ")
+    code <- paste("")
     if(input$aProportion)
       code <- paste(code, ", proportion = ", input$proportion)
     if(input$aPropUnassigned)

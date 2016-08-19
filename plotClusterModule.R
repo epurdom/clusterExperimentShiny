@@ -1,7 +1,4 @@
-
-
-
-
+#plot clusters input function
 plotClustersInput <- function(id, label = "plotCluster inputs") {
   ns <- NS(id)
   tagList(
@@ -183,6 +180,7 @@ plotClustersInput <- function(id, label = "plotCluster inputs") {
   )
 }
 
+#creating code
 makePlotClustersCode <- function(input, output, session, stringsAsFactors) {
   code <- reactive({
     code <- paste("")
@@ -246,7 +244,7 @@ makePlotClustersCode <- function(input, output, session, stringsAsFactors) {
   return(code)
   
 }
-
+#helptext
 plotClustersHelpText <- function(id, label = "help title and text") {
   ns <- NS(id)
   tagList(

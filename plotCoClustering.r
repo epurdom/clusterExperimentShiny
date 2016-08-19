@@ -1,4 +1,5 @@
-plotClusterInput <- function(id, label = "plotCluster inputs") {
+#plotCoClustering skeleton
+plotCoClusteringInput <- function(id, label = "plotCluster inputs") {
   ns <- NS(id)
   tagList(
   )

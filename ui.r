@@ -5,7 +5,7 @@ shinyUI(navbarPage("Cluster Experiment",
                    tabPanel("Welcome Page",
                             startPageMessage("startMessage", "")),
                    tabPanel("Getting Started",
-                            navlistPanel(
+                            tabsetPanel(
                               tabPanel( "Setup Working Directory",
                                 setWD("fileInput", ""),
                                 actionButton("createWD", "Create Working Directory"),
@@ -41,10 +41,8 @@ shinyUI(navbarPage("Cluster Experiment",
                                 ),
                                 conditionalPanel(condition = "input.autoCreateObject",
                                                 h4("Please enter file path and name (with extension .rds, see 'saveRDS') in order to create a continuously updated R object:"),
-                                                uiOutput("createObjectInputs")#,
-                                                #actionButton("createReproducibleFile", label = "Create File")
-                                )
-
+                                                uiOutput("createObjectInputs")
+                                                )
                               ),
                               tabPanel("Upload Data",
                                   fluidRow(
@@ -88,7 +86,7 @@ shinyUI(navbarPage("Cluster Experiment",
                                         actionButton("makeObject", 
                                                      "Create Summarized Experiment object from selected data"),
                                         h5("Summary of summarized experiment created from uploaded data:"),
-                                        h3(paste(capture.output(show(sE)),collapse="\n")),
+                                        #h3(paste(capture.output(show(sE)),collapse="\n")),
                                         uiOutput("isAssay")
                                     )
                                     
@@ -98,13 +96,10 @@ shinyUI(navbarPage("Cluster Experiment",
                     ),
                     tabPanel("RSEC"),
                     tabPanel("Cluster Many",
-                                      #sidebarLayout(
-                                        #sidebarPanel(
-                                      fluidRow(
-                                          column(6,
-                                            
-                                            #Displays basic help text for Shiny App and clusterMany
-                                            clusterManyHelpText()
+                            fluidRow(
+                                    column(6,
+                                          #Displays basic help text for Shiny App and clusterMany
+                                          clusterManyHelpText()
                                           ),
                                           column(6,
                                           #textual output of code that is to be run
@@ -142,8 +137,6 @@ shinyUI(navbarPage("Cluster Experiment",
                                                  )
                                             )
                                       )
-                              #)
-                            #)
                               ),
                     tabPanel("Combine Many",
                              fluidRow(
@@ -221,7 +214,6 @@ shinyUI(navbarPage("Cluster Experiment",
                              )
                            ),
                            navlistPanel(
-                             
                              tabPanel("Merge Clusters Input",
                                       h4("Informative Dendrogram for merge cluster inputs:"),
                                       plotOutput("imgInitalMergeClusters"),
@@ -269,7 +261,7 @@ shinyUI(navbarPage("Cluster Experiment",
                              tabPanel("plot CoClustering",
                                       fluidRow(
                                         column(6,
-                                               plotHeatmapHelpText("plotCoClustering",
+                                               plotCoClusteringHelpText("plotCoClustering",
                                                                    "Help Text for plotCoClustering")
                                         ),
                                         column(6,
@@ -312,7 +304,6 @@ shinyUI(navbarPage("Cluster Experiment",
                                                             plotOutput("imgSpecializedPlotDendrogram")
                                                    )
                                       )
-                                      
                              ),
                              tabPanel("Plot Heatmap",
                                       fluidRow(
@@ -331,13 +322,16 @@ shinyUI(navbarPage("Cluster Experiment",
                                         tabPanel("Output Plot")
                                       )
                              )
-                           
                   ),
 									tabPanel("Save Object",
 						            saveObjectMessage("saveObject", ""),
 									      textOutput("saveObjectMessage")
-								  )
-
+								  ),
+									tabPanel("What clusters",
+									         whatClusters("whatClusters", ""),
+									         actionButton("showSummmary", "Show Summary"),
+									         tableOutput("cESummary")
+									)
         )
 )
 
