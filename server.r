@@ -2,6 +2,8 @@ source("global.R")
 options(shiny.maxRequestSize=30*1024^2)
 # sE <- SummarizedExperiment()
 
+
+
 shinyServer(function(input, output, session) {
   #sE is the Summarized/Cluster Experiment initially loaded which will remain unaltered
   #sE <- SummarizedExperiment()
@@ -20,13 +22,13 @@ shinyServer(function(input, output, session) {
   observeEvent(input$createWD, {
     setWD(input[["fileInput-workingDirectory"]])
     output$createScriptInputs <- renderUI({
-      textInput("filePath", label = "eg: 'homeDirectory/subdirectory/fileName.r", 
-                value = input[["fileInput-workingDirectory"]], width = '100%')
+      textInput("scriptPath", label = "eg: 'homeDirectory/subdirectory/fileName.r", 
+                value = makeFileWithDateTag(file="Rscript.R",wd=input[["fileInput-workingDirectory"]]), width = '100%')
     })
     
     output$createObjectInputs <- renderUI({
-      textInput("objectPath", label = "eg: 'homeDirectory/subdirectory/objectName.rda", 
-                value = input[["fileInput-workingDirectory"]], width = '50%')
+      textInput("objectPath", label = "eg: 'homeDirectory/subdirectory/objectName.rds", 
+                value = makeFileWithDateTag(file="clusterObject.rds",wd=input[["fileInput-workingDirectory"]]), width = '50%')
     })
   })
 

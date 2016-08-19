@@ -37,6 +37,15 @@ combineArgs<-function(input, currCode,val,isCharacter=TRUE){
 ##########
 ## Small helper functions
 #########
+
+#change a file like XYZ.abc into XYZ_08132016.abc
+makeFileWithDateTag<-function(file,wd){
+    fileSep<-strsplit(file,"[.]")
+    file<-fileSep[[1]][[1]]
+    ext<-fileSep[[1]][[2]]
+    file.path(wd,paste0(file,"_",format(Sys.Date(),"%m%d%Y"),".",ext,collapse=""))
+}
+
 #from help of tolower/toupper
 capwords <- function(s, strict = FALSE) {
     cap <- function(s) paste(toupper(substring(s, 1, 1)),

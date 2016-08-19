@@ -40,7 +40,7 @@ shinyUI(navbarPage("Cluster Experiment",
                                   )
                                 ),
                                 conditionalPanel(condition = "input.autoCreateObject",
-                                                h4("Please enter file path and name (of type .rda) in order to create a continuously updated R object:"),
+                                                h4("Please enter file path and name (with extension .rds, see 'saveRDS') in order to create a continuously updated R object:"),
                                                 uiOutput("createObjectInputs")#,
                                                 #actionButton("createReproducibleFile", label = "Create File")
                                 )
