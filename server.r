@@ -49,7 +49,7 @@ shinyServer(function(input, output, session) {
     
     cat(paste("\n#", input$fileComments), file = filePath, append = TRUE)
   })
-  #calling functions from namespaces for uploading files
+  #calling functions from namespaces for uploading files and writing scripts
   rdaFile <- callModule(rdaFile, "fileInput",
                         stringsAsFactors = FALSE)
   
@@ -89,11 +89,18 @@ shinyServer(function(input, output, session) {
       #saves object
       if(input$autoCreateObject) {
         saveRDS(sE, input$objectPath)
+        if(makeFile) {
+          cat("\n", 
+              "#Save Object:",
+              "saveRDS(sE, '", input$objectPath,
+              "')", 
+              sep = "\n", file = filePath, append = TRUE)
+        }
       }
       
       #Creating which clusters options in various later tabs, only if object is type cluster experiment
       if(class(sE)[1] == "ClusterExperiment") {
-        cE <- sE
+        cE <<- sE
         #combine many
         output$combineManyWhichClusters <- renderUI({
           multipleOptionsInput("cMInputs", sidelabel = "Add detailed whichClusters?",
@@ -201,17 +208,20 @@ shinyServer(function(input, output, session) {
       
       if(input$autoCreateObject) {
         saveRDS(sE, input$objectPath)
+        if(makeFile) {
+          cat("\n", 
+              "#Save Object:",
+              "saveRDS(cE, '", input$objectPath,
+              "')", 
+              sep = "\n", file = filePath, append = TRUE)
+        }
       }
-      #print(capture.output(show(sE)))
-      #return("xxxxxxxxYxxxxxxxxx")
-      # if (is.null(assay)) {
-      #   return(HTML(paste("No data uploaded yet")))
-      # }
       return(HTML(paste(capture.output(show(sE)), collapse = "<br/>")))
     })
     
   })
   
+  #Outputs to confirm correct uploading of data
   output$csvAssayContents <- renderTable({
     datafile()[1:4, 1:4]
   })
@@ -224,22 +234,6 @@ shinyServer(function(input, output, session) {
     rowDataFile()[1:4, 1:4]
   })
   
-  #inefficient, need insight
-  # output$isColData <- renderText({
-  #    if (is.null(colDataFile()))
-  #      return("")
-  #   sE <<- SummarizedExperiment(data.matrix(datafile()), colData = data.matrix(colDataFile()))
-  #   return(paste("ColData successfully added, colData dimensions are ", dim(colData(sE))[1], " by ", dim(colData(sE))[2],
-  #                "on an sE object with assay of dimensions ",  dim(sE)[1], " by ", dim(sE)[2]))
-  #   
-  # }) 
-  
-  # output$isRowData <- renderText({
-  #   if (is.null(rowDataFile()))
-  #     return("")  
-  #   sE <<- SummarizedExperiment(data.matrix(datafile()), colData = data.matrix(colDataFile()), rowData = data.a)
-  #   
-  #   })
   
   #---------------End read File inputs-----------------
   
@@ -247,19 +241,25 @@ shinyServer(function(input, output, session) {
   #####################################################
   # Begin Save Object Tab
   #####################################################
-
+    #If clicked, object is saved
     observeEvent(input[["saveObject-createObject"]], {
-    
-    objectPath <- input[["saveObject-filePath"]]
-    
-    output$saveObjectMessage <- renderText({
-      if(dim(cE)[1] == 2 && dim(cE)[2] == 1){
-        return("No work completed on uploaded object")
-      }
-      saveRDS(cE, file = objectPath)
-      return(paste("successfully saved internal clusterExperiment object in ", 
-                   objectPath, " via function saveRDS()"))
-    })
+      objectPath <- input[["saveObject-filePath"]]
+      
+      output$saveObjectMessage <- renderText({
+        if(dim(cE)[1] == 2 && dim(cE)[2] == 1){
+          return("No work completed on uploaded object")
+        }
+        saveRDS(cE, file = objectPath)
+        if(makeFile) {
+          cat("\n", 
+              "#Save Object:",
+              "saveRDS(cE, '", input$objectPath,
+              "')", 
+              sep = "\n", file = filePath, append = TRUE)
+        }
+        return(paste("successfully saved internal clusterExperiment object in ", 
+                     objectPath, " via function saveRDS()"))
+      })
 
   })
   
@@ -268,13 +268,14 @@ shinyServer(function(input, output, session) {
   #####################################################
   # Begin Cluster Many Tab
   #####################################################
-  
+  #Calling modular functions
   clusterManyCode <- callModule(makeCode, "parameters",
                                 stringsAsFactors = FALSE)
   
   clusterManyStartPageCode <- callModule(makeCECode, "fileInput",
                                          stringsAsFactors = FALSE)
   
+  #reactive code to be run internally
   output$clusterManyCode <- renderText({
     paste("cE <- clusterMany(sE, isCount = ", input$isCount, clusterManyCode())
   })
@@ -315,19 +316,15 @@ shinyServer(function(input, output, session) {
         "plotClusters(cE)", 
         sep = "\n", file = filePath, append = TRUE)
     }
-    
+    #default plotClusters output from clusterMany
       output$imgCE <- renderPlot({
-      # cE is the clusterExperiment object 
-
-      # innerCode <- sub(strsplit(codeToBeEvaluated, ",")[[1]][1],  "clusterMany(sE", 
-      #                  codeToBeEvaluated, fixed = TRUE)
-      
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
       plotClusters(cE, whichClusters = "clusterMany")
-    }, height = max((40/3) * getSEIterations(), 480))
+    }, height = max((40/3) * getCEIterations(), 480))
       
+      #outfitting proper whichClusters options for futrue widgets
       output$combineManyWhichClusters <- renderUI({
         multipleOptionsInput("cMInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
                              val = "whichClusters", help = "a numeric or character vector that specifies
@@ -347,16 +344,22 @@ shinyServer(function(input, output, session) {
       })
       
       if(input$autoCreateObject) {
-        saveRDS(sE, input$objectPath)
+        saveRDS(cE, input$objectPath)
+        if(makeFile) {
+          cat("\n", 
+              "#Save Object:",
+              "saveRDS(cE, '", input$objectPath,
+              "')", 
+              sep = "\n", file = filePath, append = TRUE)
+        }
       }
   })
   
-  #This function could certainly be refined
+  #This function could certainly be refined, there may be better ways to upload data
   output$downloadDefaultPlotPCCM <- downloadHandler(
     filename = function(){ paste("DefaultPlotFromClusterMany.png")},
     content = function(file){ 
-      #ggsave(fileName(), plot = plotClusters(cE, whichClusters = "clusterMany"), )
-      png(file, height = (40/3) * getSEIterations(), width = 2*480)
+      png(file, height = max((40/3) * getCEIterations(), 480), width = 2*480)
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
@@ -365,15 +368,16 @@ shinyServer(function(input, output, session) {
       }
   )
   
-  # End Cluster Many tab
+  #---------------End cluster Many tab-----------------
   
   #####################################################
   # Start Combine Many Tab
   #####################################################
   
+  #renders the code for the second half of combine many
   combineManyLatterCode <- callModule(makeCombineManyCode, "cMInputs", 
                                 stringsAsFactors = FALSE)
-  
+  #function to render reactive combine many code
   combineManyCode <- function(){
     code <- paste("cE <<- combineMany(cE")
     if(input[["cMInputs-aWhichClusters"]])
@@ -386,11 +390,8 @@ shinyServer(function(input, output, session) {
   output$combineManyCode <- renderText({
     combineManyCode()
   })
-  # output$combineManyWhichClusters <- renderUI({
-  #    multipleOptionsInput("cMInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
-  #                         val = "whichClusters", help = "a numeric or character vector that specifies
-  #                         which clusters to compare")
-  # })
+
+  #run combine many button
   observeEvent(input$runCombineMany, {
     
     if(makeFile) {
@@ -413,24 +414,22 @@ shinyServer(function(input, output, session) {
     
     eval(parse(text = combineManyCode()))
     
+    #default images from combine many
     output$imgCombineManyPC <- renderPlot({
-      # cE is the clusterExperiment object 
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
-      plotClusters(cE, whichClusters = "clusterMany") #??????????????????? CHECK IF NECESSARY ????????????????
-    }, height = (40/3) * getSEIterations())
+      plotClusters(cE, whichClusters = "clusterMany") #??? Unsure if correct default, ???
+                                                      #???crashes without whichClusters specified???
+    }, height = max(length(clusterTypes(cE)) * (40/3), 480))
     
     output$imgCombineManyPCC <- renderPlot({
-      # cE is the clusterExperiment object 
-      #eval(parse(text = combineManyCode()))
+
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
       plotCoClustering(cE)
-      # library(NMF)
-      # mat = matrix(rnorm(1000), ncol = 10, nrow = 100)
-      # aheatmap(mat) # Should throw error... but doesnt
+
     })
     
     output$makeDendrogramWhichClusters <- renderUI({
@@ -446,7 +445,14 @@ shinyServer(function(input, output, session) {
     })
     
     if(input$autoCreateObject) {
-      saveRDS(sE, input$objectPath)
+      saveRDS(cE, input$objectPath)
+      if(makeFile) {
+        cat("\n", 
+            "#Save Object:",
+            "saveRDS(cE, '", input$objectPath,
+            "')", 
+            sep = "\n", file = filePath, append = TRUE)
+      }
     }
     
   })
@@ -455,7 +461,8 @@ shinyServer(function(input, output, session) {
     filename = function(){ paste("defaultPlotFromCombineMany.png")},
     content = function(file){ 
       #ggsave(fileName(), plot = plotClusters(cE, whichClusters = "clusterMany"), )
-      png(file, height = (40/3) * getSEIterations(), width = 2*480)
+      png(file, height = max((40/3) * sum(clusterTypes(cE) %in% input[["cMInputs-whichClusters"]]), 480),
+          width = 2*480)
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
@@ -469,7 +476,10 @@ shinyServer(function(input, output, session) {
     filename = function(){ paste("DefaultPlotCoClustersCombineMany.png")},
     content = function(file){ 
       #ggsave(fileName(), plot = plotClusters(cE, whichClusters = "clusterMany"), )
-      png(file, height = (40/3) * getSEIterations(), width = 2*480)
+      png(file, max((40/3) * sum(clusterTypes(cE) %in% input[["cMInputs-whichClusters"]]), 
+                    length(clusterTypes(cE)),
+                    480),
+          width = 2*480)
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
@@ -481,19 +491,17 @@ shinyServer(function(input, output, session) {
 
   
   
-  # End Combine Many tab
+  #---------------End combine Many tab-----------------
   
   #####################################################
   # Start make Dendrogram Tab
   #####################################################
   
+  #makes the second half of dendrogram code
   makeDendrogramLatterCode <- callModule(makeMakeDendrogramCode, "mDInputs", 
                                 stringsAsFactors = FALSE)
   
-  # output$makeDendrogramCode <- renderText({
-  #   makeDendrogramCode()
-  # })
-  
+  #creates make Dendrogram code
   makeDendrogramCode <- function(){
     code <- paste("cE <<- makeDendrogram(cE")
     if(input[["mDInputs-aWhichCluster"]])
@@ -507,8 +515,9 @@ shinyServer(function(input, output, session) {
     makeDendrogramCode()
   })
   
+  #When clicked runs displayed make dendrogram code
   observeEvent(input$runMakeDendrogram, {
-    
+    #saving script
     if(makeFile) {
       cat("\n", 
         "#Make Dendrogram Tab:",
@@ -530,7 +539,6 @@ shinyServer(function(input, output, session) {
     eval(parse(text = makeDendrogramCode()))
     
     output$imgPlotDendrogram <- renderPlot({
-      # cE is the clusterExperiment object 
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
@@ -538,7 +546,6 @@ shinyServer(function(input, output, session) {
     })
     
     output$imgPlotHeatmapMD <- renderPlot({
-      # cE is the clusterExperiment object 
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
@@ -556,7 +563,14 @@ shinyServer(function(input, output, session) {
     })
     
     if(input$autoCreateObject) {
-      saveRDS(sE, input$objectPath)
+      saveRDS(cE, input$objectPath)
+      if(makeFile) {
+        cat("\n", 
+            "#Save Object:",
+            "saveRDS(cE, '", input$objectPath,
+            "')", 
+            sep = "\n", file = filePath, append = TRUE)
+      }
     }
     
   })
@@ -589,12 +603,13 @@ shinyServer(function(input, output, session) {
     }
   )
   
-  # End make dendrogram tab
+  #---------------End make dendrogram tabe-----------------
   
   #####################################################
   # Start mergeClusters
   #####################################################
   
+  #merge clusters code
   mergeClustersCode <- callModule(makeMergeClustersCode, "mergeCInputs", 
                                    stringsAsFactors = FALSE)
   
@@ -602,6 +617,7 @@ shinyServer(function(input, output, session) {
     mergeClustersCode()
   })
   
+  #button runs merge clusters code
   observeEvent(input$runMergeClusters, {
     
     if(makeFile) {
@@ -629,7 +645,7 @@ shinyServer(function(input, output, session) {
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
       plotClusters(cE)
-    }, height = (40/3) * getCEIterations())
+    }, height = max((40/3) * sum(clusterTypes(cE) %in% input[["mergeCInputs-whichClusters"]]), 480))
     
     output$imgPlotHeatmapMergeClusters <- renderPlot({
       # cE is the clusterExperiment object
@@ -646,7 +662,14 @@ shinyServer(function(input, output, session) {
     })
     
     if(input$autoCreateObject) {
-      saveRDS(sE, input$objectPath)
+      saveRDS(cE, input$objectPath)
+      if(makeFile) {
+        cat("\n", 
+            "#Save Object:",
+            "saveRDS(cE, '", input$objectPath,
+            "')", 
+            sep = "\n", file = filePath, append = TRUE)
+      }
     }
     
   })
@@ -655,7 +678,8 @@ shinyServer(function(input, output, session) {
     filename = function(){ paste("DefaultPlotClustersMergeClusters.png")},
     content = function(file){ 
       #ggsave(fileName(), plot = plotClusters(cE, whichClusters = "clusterMany"), )
-      png(file, height = (40/3) * getCEIterations(), width = 2*480)
+      png(file, height = max((40/3) * sum(clusterTypes(cE) %in% input[["mergeCInputs-whichClusters"]]), 480),
+          width = 2*480)
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
@@ -668,7 +692,7 @@ shinyServer(function(input, output, session) {
     filename = function(){ paste("DefaultPlotHeatmapMergeClusters.png")},
     content = function(file){ 
       #ggsave(fileName(), plot = plotClusters(cE, whichClusters = "clusterMany"), )
-      png(file, height = (40/3) * getCEIterations(), width = 2*480)
+      png(file, height = max((40/3) * getCEIterations(), 480), width = 2*480)
       defaultMar<-par("mar")
       plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       par(mar=plotCMar)
@@ -677,6 +701,9 @@ shinyServer(function(input, output, session) {
     }
   )
 
+  
+  #---------------End merge clusters tab-----------------
+  
   #####################################################
   # Start Personalized  plotClusters
   #####################################################
@@ -718,16 +745,15 @@ shinyServer(function(input, output, session) {
       par(mar=plotCMar)
       eval(parse(text = plotClustersCode()))
     }, 
-    #calculating correct height of image, INCORRECT SYNTAX:
-    height = (40/3) * sum(input[["pCInputs-whichClusters"]] == clusterTypes(cE)) )
+    #calculating correct height of image:
+    height = max((40/3) * sum(clusterTypes(cE) %in% input[["pCInputs-whichClusters"]]), 480))
     
   })
   
   output$downloadSpecializedPlotPCCM <- downloadHandler(
     filename = function(){ paste("specializedPlotFromClusterMany.png")},
     content = function(file){ 
-      #ggsave(fileName(), plot = plotClusters(cE, whichClusters = "clusterMany"), )
-      png(file, height = (40/3) * sum(input[["pCInputs-whichClusters"]] == clusterTypes(cE)))
+      png(file, height = max((40/3) * sum(clusterTypes(cE) %in% input[["pCInputs-whichClusters"]]), 480))
       # defaultMar<-par("mar")
       # plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
       # par(mar=plotCMar)
@@ -735,6 +761,9 @@ shinyServer(function(input, output, session) {
       dev.off()
     }
   )
+  
+  #---------------End personalized plot clusters tab-----------------
+  
   
   #####################################################
   # Start Personalized  plotDendrogram
@@ -766,6 +795,8 @@ shinyServer(function(input, output, session) {
       eval(parse(text = plotDendrogramCode()))
     })
   })
+  
+  #---------------End peronalized plot Dendrogram tab-----------------
   
   
   #####################################################
@@ -800,6 +831,7 @@ shinyServer(function(input, output, session) {
     })
   })
   
+  #---------------End personalized plot heatmap tab-----------------
   
   #####################################################
   # Start Personalized  plotCoClustering
@@ -833,6 +865,9 @@ shinyServer(function(input, output, session) {
     })
   })
   
+  #---------------End personalized plot CoClustering tab-----------------
+  
+  
   #####################################################
   # Start What Clusters
   #####################################################
@@ -852,7 +887,8 @@ shinyServer(function(input, output, session) {
       
     })
   })
-
+  #---------------End What Clusters tab-----------------
+  
 })
 
 
