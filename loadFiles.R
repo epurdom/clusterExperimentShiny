@@ -7,7 +7,7 @@ setWD <- function(id, label = "start message") {
         column(6,
             h3("Please enter a working directory for this Cluster Experiment session"),
             textInput(ns("workingDirectory"), label = "eg: 'homeDirectory/subdirectory/filename.r", 
-                      value = "~/", width = '100%')
+                      value = path.expand("~"), width = '100%')
         )
       )
   )
