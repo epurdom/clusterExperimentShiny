@@ -8,7 +8,7 @@ shinyUI(navbarPage("Cluster Experiment",
                             tabsetPanel(
                               tabPanel( "Setup Working Directory",
                                 setWD("fileInput", ""),
-                                actionButton("createWD", "Create Working Directory"),
+                                actionButton("createWD", "Choose Working Directory"),
                                 fluidRow(
                                   column(4,
                                          h4("Would you like to create a reproducible R script from this work session?")

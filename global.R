@@ -18,6 +18,6 @@ source("plotHeatmap.r")
 source("plotCoClustering.r")
 source("saveObject.r")
 source("whatClusters.r")
-sE <- SummarizedExperiment()
-#Making an arbitrary clusterExperiment object for convenience, want to find a better way!
-cE <- clusterExperiment(matrix(data = c(0,0)), clusters = c(0), transformation = function(x){x})
+# sE <- SummarizedExperiment()
+# #Making an arbitrary clusterExperiment object for convenience, want to find a better way!
+# cE <- clusterExperiment(matrix(data = c(0,0)), clusters = c(0), transformation = function(x){x})

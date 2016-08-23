@@ -10,6 +10,9 @@ options(shiny.maxRequestSize=30*1024^2)
 
 shinyServer(function(input, output, session) {
 
+#  sE <- SummarizedExperiment()
+  #Making an arbitrary clusterExperiment object for convenience, want to find a better way!
+#  cE <- clusterExperiment(matrix(data = c(0,0)), clusters = c(0), transformation = function(x){x})
   
 
   
@@ -37,8 +40,8 @@ shinyServer(function(input, output, session) {
   
   #creates reproducible file if it doens't already exist when clicked
   observeEvent(input$createReproducibleFile, {
-    makeFile <<- TRUE
-    filePath <<- input$filePath
+    makeFile <- TRUE
+    filePath <- input$filePath
     if(!file.exists(filePath)) {
       file.create(filePath)
     }
@@ -85,7 +88,7 @@ shinyServer(function(input, output, session) {
           sep = "\n",
           file = filePath, append = TRUE)
       }
-      sE <<- holder
+      sE <- holder
       #saves object
       if(input$autoCreateObject) {
         saveRDS(sE, input$objectPath)
@@ -100,7 +103,7 @@ shinyServer(function(input, output, session) {
       
       #Creating which clusters options in various later tabs, only if object is type cluster experiment
       if(class(sE)[1] == "ClusterExperiment") {
-        cE <<- sE
+        cE <- sE
         #combine many
         output$combineManyWhichClusters <- renderUI({
           multipleOptionsInput("cMInputs", sidelabel = "Add detailed whichClusters?",
@@ -165,7 +168,7 @@ shinyServer(function(input, output, session) {
       }
       #if statements to add the correct, non-null data frames to sE
       if(!is.null(assay) && !is.null(colData) && !is.null(rowData)) {
-        sE <<- SummarizedExperiment(assays = data.matrix(assay), colData = data.matrix(colData),
+        sE <- SummarizedExperiment(assays = data.matrix(assay), colData = data.matrix(colData),
                                     rowData = data.matrix(rowData))
         if(makeFile) {
           cat("\n", 
@@ -176,7 +179,7 @@ shinyServer(function(input, output, session) {
               file = filePath, append = TRUE)
         }
       } else if (!is.null(assay) && !is.null(colData) && is.null(rowData)) {
-        sE <<- SummarizedExperiment(assays = data.matrix(assay), colData = data.matrix(colData))
+        sE <- SummarizedExperiment(assays = data.matrix(assay), colData = data.matrix(colData))
         if(makeFile) {
           cat("\n", 
               "#creating sE:",
@@ -185,7 +188,7 @@ shinyServer(function(input, output, session) {
               file = filePath, append = TRUE)
         }
       } else if(!is.null(assay) && is.null(colData) && !is.null(rowData)) {
-        sE <<- SummarizedExperiment(assays = data.matrix(assay), rowData = data.matrix(rowData))
+        sE <- SummarizedExperiment(assays = data.matrix(assay), rowData = data.matrix(rowData))
         if(makeFile) {
           cat("\n", 
               "#creating sE:",
@@ -194,7 +197,7 @@ shinyServer(function(input, output, session) {
               file = filePath, append = TRUE)
         }
       } else if(!is.null(assay) && is.null(colData) && is.null(rowData)) {
-        sE <<- SummarizedExperiment(assays = data.matrix(assay))
+        sE <- SummarizedExperiment(assays = data.matrix(assay))
         if(makeFile) {
           cat("\n", 
               "#creating sE:",
@@ -307,7 +310,7 @@ shinyServer(function(input, output, session) {
                                sep = "")
     }
     
-    cE <<- eval(parse(text = codeToBeEvaluated()))
+    cE <- eval(parse(text = codeToBeEvaluated()))
     
     if(makeFile) {
       cat("\n", 
@@ -379,7 +382,7 @@ shinyServer(function(input, output, session) {
                                 stringsAsFactors = FALSE)
   #function to render reactive combine many code
   combineManyCode <- function(){
-    code <- paste("cE <<- combineMany(cE")
+    code <- paste("cE <- combineMany(cE")
     if(input[["cMInputs-aWhichClusters"]])
       code <- paste(code, ", whichClusters = c('", 
                     paste(input[["cMInputs-whichClusters"]], collapse = "','"), "')", sep = "")
@@ -503,7 +506,7 @@ shinyServer(function(input, output, session) {
   
   #creates make Dendrogram code
   makeDendrogramCode <- function(){
-    code <- paste("cE <<- makeDendrogram(cE")
+    code <- paste("cE <- makeDendrogram(cE")
     if(input[["mDInputs-aWhichCluster"]])
       code <- paste(code, ", whichCluster = '", 
                     paste(input[["mDInputs-whichCluster"]]), "'", sep = "")
