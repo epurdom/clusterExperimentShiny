@@ -5,6 +5,32 @@
 #Also make it look up the default values in clusterExperiment and put those in as default in all. Might need to make separate look up for RSEC versus clusterMany.
 
 
+###########
+## Functions dealing with assigning global values to the appGlobal environment
+###########
+assignGlobal<-function(name,value){
+    assign(name,value=value,envir=appGlobal)
+    return(value)
+}
+runCodeAssignGlobal<-function(codeText){
+    #####
+    #make sure updated values
+    sE<-get("sE",envir=appGlobal)
+    cE<-get("cE",envir=appGlobal)
+    filePath<-get("filePath",envir=appGlobal)
+    makeFile<-get("makeFile",envir=appGlobal)
+    ######
+    divString<-strsplit(codeText,"<-")
+    nam<-divString[[1]][1] #may need to make sure remove white space
+    nam<-gsub("[[:space:]]","",nam)
+   # browser()
+    if(!nam %in% c("cE","sE","filePath","makeFile")) stop("invalid global parameter assigned.")
+    command<-divString[[1]][2]
+    command<-gsub("[[:space:]]","",command)
+    assign(nam,value=eval(parse(text = command)),envir=appGlobal)
+    invisible(get(nam,appGlobal))
+}
+
 ##########
 ## Parse whether values have been changed and create new code
 #########

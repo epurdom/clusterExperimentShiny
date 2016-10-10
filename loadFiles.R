@@ -37,7 +37,6 @@ rdaFile <- function(input, output, session, stringsAsFactors) {
   rda <- reactive({
     if(length(input$rdaFile[1]) > 0 && str_sub(input$rdaFile[1], start = -4) == ".rda") {
       holderObject <- readRDS(userFile()$datapath)
-
       if (class(holderObject)[1] == "SummarizedExperiment" || class(holderObject)[1] == "ClusterExperiment") {
 
         return(holderObject)
@@ -53,7 +52,6 @@ rdaFile <- function(input, output, session, stringsAsFactors) {
       return(NULL)
     
     })
-  
   # Return the reactive that yields the data frame
   return(rda)
 } #end of dataframe function
@@ -313,20 +311,3 @@ csvRowCode <- function(input, output, session, stringsAsFactors) {
 }
 
 
-makeCECode <- function(input, output, session, stringsAsFactors) {
-  cECode <- reactive({
-    paste(input$rdaFile[1])
-  
-    if(length(input$file) == 0) {
-      cECode <- paste("ce <- clusterMany(", gsub('[.][A-z ]*', '', input$file[1]), 
-                      ", isCount = ", input$isCount, sep = "")
-    } else {
-      cECode <- paste("ce <- clusterMany(", gsub('[.][A-z ]*', '', input$rdaFile[1]), 
-                      ", isCount = ", input$isCount, sep = "")
-    }
-    cECode
-  })
-
-return(cECode)
-
-} # end of makeCECode function

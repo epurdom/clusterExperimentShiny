@@ -86,7 +86,7 @@ mergeClustersInput <- function(id, label = "cMInputs") {
 #make code
 makeMergeClustersCode <- function(input, output, session, stringsAsFactors) {
   code <- reactive({
-    code <- paste("cE <<- mergeClusters(cE")
+    code <- paste("cE <- mergeClusters(cE")
     if(input$aMergeMethod)
       code <- paste(code, ", mergeMethod = '", input$mergeMethod, "'", sep = "")
     if(input$aCutoff)
