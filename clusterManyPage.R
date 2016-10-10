@@ -225,4 +225,21 @@ clusterManyHelpText <- function() {
   )
 }
 
-
+# ###EAP: What is this code for?? Something to do for when upload existing CE object??? Doesn't seem to be used anywhere...
+# makeCECode <- function(input, output, session, stringsAsFactors) {
+#     cECode <- reactive({
+#         paste(input$rdaFile[1])
+#         
+#         if(length(input$file) == 0) {
+#             cECode <- paste("ce <- clusterMany(", gsub('[.][A-z ]*', '', input$file[1]), 
+#                             ", isCount = ", input$isCount, sep = "")
+#         } else {
+#             cECode <- paste("ce <- clusterMany(", gsub('[.][A-z ]*', '', input$rdaFile[1]), 
+#                             ", isCount = ", input$isCount, sep = "")
+#         }
+#         cECode
+#     })
+#     
+#     return(cECode)
+#     
+# } # end of makeCECode function
