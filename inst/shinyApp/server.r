@@ -284,7 +284,7 @@ shinyServer(function(input, output, session) {
     
     #reactive code to be run internally
     output$clusterManyCode <- renderText({
-        paste("cE <- clusterMany(sE, isCount = ", input$isCount, clusterManyCode())
+        paste("cE <- clusterMany(sE ", clusterManyCode(),")")
     })
     
     getSEIterations <- function(){
@@ -296,13 +296,11 @@ shinyServer(function(input, output, session) {
         makeFile<-get("makeFile",envir=appGlobal)
         ######
         
-        codeToBeEvaluated <- paste("clusterMany(sE, run = FALSE, isCount = ", input$isCount, 
-                                   clusterManyCode(), sep = "")
+        codeToBeEvaluated <- paste("clusterMany(sE, run = FALSE ", clusterManyCode(), ")",sep = "")
         return(nrow(eval(parse(text = codeToBeEvaluated))$paramMatrix))
     }
     output$numClusterIterations <- renderText({
-        codeToBeEvaluated <- paste("clusterMany(sE, run = FALSE, isCount = ", input$isCount, 
-                                   clusterManyCode(), sep = "")
+        codeToBeEvaluated <- paste("clusterMany(sE, run = FALSE ", clusterManyCode(),")", sep = "")
         paste(getSEIterations(), " cluster iterations given these choices.")
     })
     
@@ -317,8 +315,7 @@ shinyServer(function(input, output, session) {
         makeFile<-get("makeFile",envir=appGlobal)
         ######
         
-        codeToBeEvaluated <- paste("clusterMany(cE, run = FALSE, isCount = ", input$isCount, 
-                                   clusterManyCode(), sep = "")
+        codeToBeEvaluated <- paste("clusterMany(cE, run = FALSE ",   clusterManyCode(),")", sep = "")
         return(nrow(eval(parse(text = codeToBeEvaluated))$paramMatrix))
     }
     
@@ -332,10 +329,9 @@ shinyServer(function(input, output, session) {
         makeFile<-get("makeFile",envir=appGlobal)
         
         codeToBeEvaluated <- function() {
-            paste("clusterMany(sE, isCount = ", input$isCount, clusterManyCode(),
-                  sep = "")
+            paste("clusterMany(sE ", clusterManyCode(),")",sep = "")
         }
-        cE <-assignGlobal("cE",eval(parse(text = codeToBeEvaluated()))) # <<- eval(parse(text = codeToBeEvaluated()))
+        cE <-assignGlobal("cE",eval(parse(text = codeToBeEvaluated()))) 
         
         if(makeFile) {
             cat("\n", 

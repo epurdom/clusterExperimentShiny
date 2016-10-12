@@ -164,7 +164,9 @@ makeCode <- function(input, output, session, stringsAsFactors) {
 	#-------
 	#if(testArguments(input,"clusterFunction")) browser()
 	#browser()
-	clusterManyCode<-combineArgs(input, clusterManyCode,"clusterFunction",isCharacter=TRUE)
+    clusterManyCode<-combineArgs(input, clusterManyCode,"isCount",isCharacter=FALSE)
+    #clusterManyCode<-combineArgs(input, clusterManyCode,"transFun",isCharacter=TRUE)
+    clusterManyCode<-combineArgs(input, clusterManyCode,"clusterFunction",isCharacter=TRUE)
 	clusterManyCode<-combineArgs(input, clusterManyCode,"subsample",isCharacter=FALSE)
 	clusterManyCode<-combineArgs(input, clusterManyCode,"sequential",isCharacter=FALSE)
     
@@ -224,7 +226,7 @@ makeCode <- function(input, output, session, stringsAsFactors) {
       	clusterManyCode<-paste0(clusterManyCode,subArgsCode,collapse="")
 	}
       
-    clusterManyCode <- paste(clusterManyCode, ")", sep = "")
+#    clusterManyCode <- paste(clusterManyCode, ")", sep = "")
     
     clusterManyCode
   })

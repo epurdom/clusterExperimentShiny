@@ -2,31 +2,24 @@
 #' @rdname InternalModules
 #' @export
 loadHelpText<-function(){
-    "This tab contains important utilities, such as loading data, controling your default working directory, etc. "
+    p("This tab concerns important utilities, such as loading data, controling your default working directory, etc. ")
 }
-# countInfo<-setWD <- function(id, label = "start message") {
-#     ns <- NS(id)
-#     tagList(
-#         fluidRow(
-#             checkboxInput("isCount", label = NULL, value = FALSE)
-#             
-#             logicalInput(id,sidelabel="Is the input data counts?", defaultValue=FALSE,val="isCount", help="Whether the data are in counts, in which case the default transFun argument is set as log2(x+1).",required=TRUE), 
-#                 conditionalPanel(
-#                 condition = setUpConditionalPanelTest( id, val="dimReduce", allOptions=dimReduceOptions, validOptions="PCA"),
-#                 tags$hr(),
-#                 logicalInput(id,sidelabel="Do you want to transform your data?", val="sequential", help="Whether the data are in counts, in which case the default transFun argument is set as log2(x+1).",required=FALSE, functionName="clusterMany"), 
-#                 
-#             ),
-#             
-#             
-#             column(6,
-#                    h3("Please enter a working directory for this Cluster Experiment session"),
-#                    textInput(ns("workingDirectory"), label = "eg: 'homeDirectory/subdirectory/filename.r", 
-#                              value = path.expand("~"), width = '100%')
-#             )
-#         )
-#     )
-# }
+countInfo<-function(id, label = "count and transformation decisions") {
+    ns <- NS(id)
+    tagList(
+        logicalInput(id,sidelabel="Is the input data counts?", 
+                         defaultValue=FALSE,val="isCount",required=TRUE, multipleAllowed=FALSE,
+                         help="Whether the data are in counts, in which case the data is transformed with log2(x+1)."), 
+#         conditionalPanel( #why doesn't this work? Also doesn't work if make them character values...
+#                 condition = setUpConditionalPanelTest( id, val="isCount", allOptions=c(TRUE,FALSE), validOptions=FALSE),
+#                   vectorInput(id,sidelabel="Do you want to transform your uploaded data? (if not check counts above)", aboveLabel="e.g. function(x){x}",val="transFun", 
+#            help="Give function that should be applied to the uploaded data matrix. Will over-ride choice of counts (above). Can be used to provide different offset in the log, for example.", functionName="clusterMany")
+#              )
+        vectorInput(id,sidelabel="Do you want to transform your uploaded data? (if not check counts above)", aboveLabel="e.g. function(x){x}",val="transFun", 
+                    help="Give function that should be applied to the uploaded data matrix. Will over-ride choice of counts (above). Can be used to provide different offset in the log, for example.", functionName="clusterMany")
+        
+    )
+}
 #Function that sets working directory
 #' @rdname InternalModules
 #' @export

@@ -42,17 +42,14 @@ shinyUI(navbarPage("Cluster Experiment",
                                                 )
                               ),
                               tabPanel("Upload Data",
-                                  fluidRow(
-                                    column(3,
-                                           p("Answer the following question regarding whether the data should be transformed"),
-                                           helpText("Whether the data are in counts, in which case the default transFun argument is set as log2(x+1). 
-                                                    This is simply a convenience to the user."),
-                                           checkboxInput("isCount", label = "Are Data in Counts?", value = FALSE)
-                                    ),
-                                    column(3,
-                                           h3("transform function")
-                                    )
-                                  ),
+                                       fluidRow(
+                                           column(5,h3("Directions")),
+                                           column(7,p("The following choices regarding transformation of the data (will take effect only when run clusterMany/RSEC)"))
+                                           ),
+                                       fluidRow(
+                                           column(5,loadHelpText()),
+                                           column(7,countInfo("parameters"))
+                                       ),
                                    tabsetPanel(
                                      tabPanel("RDS file input",
                                               rdaFileInput("fileInput", "User rds file"),

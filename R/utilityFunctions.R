@@ -245,9 +245,16 @@ vectorInput<-function(id,sidelabel, aboveLabel,val, defaultValue="", help="No he
     
 }
 
+
+
+
 #' @rdname InternalModules
 #' @export
-logicalInput<-function(id,sidelabel, val, help="No help yet available",required=FALSE,checkbox=FALSE,defaultValue=NULL,functionName){
+#' @details logicalInput is for taking TRUE/FALSE values, but is only for if both options are possible (like for clusterMany)
+logicalInput<-function(id,sidelabel, val, help="No help yet available",
+                       required=FALSE,checkbox=FALSE,defaultValue=NULL, 
+                       multipleAllowed=TRUE,
+                       functionName){
     if(is.null(defaultValue)){
         if(missing(functionName)) stop("if not give defaultValue, must provide functionName")
         else defaultValue<-findDefaults(val,functionName)[1]
@@ -258,28 +265,23 @@ logicalInput<-function(id,sidelabel, val, help="No help yet available",required=
     hVal<-paste("h",capwords(val),sep="")
     if(is.logical(defaultValue)) defaultValue<-as.character(defaultValue)
     sidelabel<-convertSideLabel(sidelabel,val)
+    label<-if(multipleAllowed) "Choose all of interest" else "Choose One"
+    ckbox<- if(multipleAllowed) column(3, checkboxGroupInput(ns(val), label =label , choices = c("TRUE", "FALSE"),selected=defaultValue)) 
+            else column(3, checkboxInput(ns(val), label ="", value=as.logical(defaultValue) )) 
     if(!required){
         fluidRow(
             column(3, checkboxInput(ns(aVal), value = checkbox, label = sidelabel)),
-            conditionalPanel(condition = paste0("input['", ns(aVal), "']"),
-                             column(3, checkboxGroupInput(ns(val), label = "Can all of interest", choices = c("TRUE", "FALSE"),selected=defaultValue))
-            ),
-            column(2, checkboxInput(ns(hVal), value = FALSE, 
-                                    label = "Click here for help")
-            ),
-            conditionalPanel(condition = paste0("input['", ns(hVal), "']"),
-                             column(4, helpText(help))
-            )
+            conditionalPanel(condition = paste0("input['", ns(aVal), "']"), ckbox),
+            column(2, checkboxInput(ns(hVal), value = FALSE, label = "Click here for help")),
+            conditionalPanel(condition = paste0("input['", ns(hVal), "']"),column(4, helpText(help)))
         )
     }
     else{
         fluidRow(
             column(3, sidelabel),
-            column(3,checkboxGroupInput(ns(val), label = "Choose all of interest", choices = c("TRUE", "FALSE")),selected=defaultValue),
+            ckbox,
             column(2, checkboxInput(ns(hVal), value = FALSE, label = "Click here for help")),
-            conditionalPanel(condition = paste0("input['", ns(hVal), "']"),
-                             column(4, helpText(help))
-            )
+            conditionalPanel(condition = paste0("input['", ns(hVal), "']"),column(4, helpText(help)))
         )
     }
     
