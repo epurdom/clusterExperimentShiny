@@ -114,10 +114,10 @@ shinyUI(navbarPage("Cluster Experiment",
                                 tabPanel("Dimensional Reduction",
                                          #Allows user to enter all inputs
                                          h3("Choose Dimensionality Reduction Options"),
-                                         dimReduceInput("rsec", "dim inputs")
+                                         dimReduceInput("rsec", "dim inputs",isRSEC=TRUE)
                                 ),
                                 tabPanel("Specialized control",
-                                         specializedInputs("rsec", "specialized inputs")
+                                         specializedInputs("rsec", "specialized inputs",isRSEC=TRUE)
                                 ) #,
                                 #                                 tabPanel("Plot Clusters",
                                 #                                          tabsetPanel(

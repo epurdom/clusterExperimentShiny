@@ -275,7 +275,7 @@ shinyServer(function(input, output, session) {
     # Begin RSEC Many Tab
     #####################################################
     #Calling modular functions
-    RSECCode <- callModule(makeCode, "rsec", stringsAsFactors = FALSE) #function to update code based on users choices.
+    RSECCode <- callModule(makeCode, "rsec", stringsAsFactors = FALSE,isRSEC=TRUE) #function to update code based on users choices.
     
     #   ##What is this code??? Something to do with uploading an existing clusterExperiment object rather than starting at beginning.
     #   ##Go back and figure this out. Seems to never be used...
@@ -284,12 +284,12 @@ shinyServer(function(input, output, session) {
     #reactive code to be run internally
     #can these two be combined??
     output$RSECCode <- renderText({
-        codeList <- getIterations(codeText=clusterManyCode(),isRSEC=TRUE,countIterations=FALSE)
+        codeList <- getIterations(codeText=RSECCode(),isRSEC=TRUE,countIterations=FALSE)
         codeList$fullCodeSE
     })
     output$numRSECIterations <- renderText({
         #codeToBeEvaluated <- paste("clusterMany(sE, run = FALSE ", clusterManyCode(),")", sep = "")
-        codeList <- getIterations(codeText=clusterManyCode(),isRSEC=FALSE)
+        codeList <- getIterations(codeText=RSECCode(),isRSEC=TRUE)
         paste(codeList$nIter, " cluster iterations given these choices.")
     })
     
@@ -299,7 +299,7 @@ shinyServer(function(input, output, session) {
         cE<-get("cE",envir=appGlobal)
         filePath<-get("filePath",envir=appGlobal)
         makeFile<-get("makeFile",envir=appGlobal)
-        codeList <- getIterations(codeText=clusterManyCode(),isRSEC=TRUE,countIterations=FALSE)
+        codeList <- getIterations(codeText=RSECCode(),isRSEC=TRUE,countIterations=FALSE)
         cE <-assignGlobal("cE",eval(parse(text = codeList$fullCodeSE))) #codeToBeEvaluated()))) 
         
         if(makeFile) {
@@ -373,11 +373,7 @@ shinyServer(function(input, output, session) {
     #####################################################
     #Calling modular functions
     clusterManyCode <- callModule(makeCode, "parameters", stringsAsFactors = FALSE) #function to update code based on users choices.
-    
-    #   ##What is this code??? Something to do with uploading an existing clusterExperiment object rather than starting at beginning.
-    #   ##Go back and figure this out. Seems to never be used...
-    #   clusterManyStartPageCode <- callModule(makeCECode, "fileInput", stringsAsFactors = FALSE)
-    
+
     #reactive code to be run internally
     #can these two be combined??
     output$clusterManyCode <- renderText({
@@ -385,7 +381,6 @@ shinyServer(function(input, output, session) {
         codeList$fullCodeSE
         })
     output$numClusterIterations <- renderText({
-        #codeToBeEvaluated <- paste("clusterMany(sE, run = FALSE ", clusterManyCode(),")", sep = "")
         codeList <- getIterations(codeText=clusterManyCode(),isRSEC=FALSE)
         paste(codeList$nIter, " cluster iterations given these choices.")
     })
@@ -396,14 +391,8 @@ shinyServer(function(input, output, session) {
         cE<-get("cE",envir=appGlobal)
         filePath<-get("filePath",envir=appGlobal)
         makeFile<-get("makeFile",envir=appGlobal)
-        #why do we need to run this again?
-#         codeToBeEvaluated <- function() {
-#             paste("clusterMany(sE ", clusterManyCode(),")",sep = "")
-#         }
-#        cE <-assignGlobal("cE",eval(parse(text = codeToBeEvaluated()))) 
         codeList <- getIterations(codeText=clusterManyCode(),isRSEC=FALSE,countIterations=FALSE)
         cE <-assignGlobal("cE",eval(parse(text = codeList$fullCodeSE))) #codeToBeEvaluated()))) 
-        
         if(makeFile) {
             cat("\n", 
                 "#Cluster Many tab:",
