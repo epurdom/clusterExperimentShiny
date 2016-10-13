@@ -40,12 +40,14 @@ runCodeAssignGlobal<-function(codeText){
 #########
 #' @rdname InternalModules
 #' @export
+#' @details addArguments pastes additional arguments for constructing code.
 addArguments<-function(input,currCode,val,isCharacter=TRUE){
     if(isCharacter) paste(currCode, ", ",val,"=c('",paste(input[[val]],sep="",collapse="','"), "')", sep = "")
     else paste(currCode, ", ",val,"=c(",paste(input[[val]],sep="",collapse=","), ")", sep = "")
 }
 #' @rdname InternalModules
 #' @export
+#' @details testArguments tests whether arguments have been checked
 testArguments<-function(input,val){
     aVal<-paste("a",capwords(val),sep="")
     nms<-names(input)
@@ -295,9 +297,6 @@ multipleOptionsInput<-function(id, sidelabel,options,val, help="No help yet avai
         else defaultValue<-findDefaults(val,functionName)
     } 
     ns<-NS(id) #If id argument to NS is missing, returns a function that expects an id string as its only argument and returns that id with the namespace prepended.
-    
-    
-    ##Should be able to do this and not require user define these terms.
     aVal<-paste("a",capwords(val),sep="")
     hVal<-paste("h",capwords(val),sep="")
     sidelabel<-convertSideLabel(sidelabel,val)

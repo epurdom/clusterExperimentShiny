@@ -4,7 +4,7 @@
 loadHelpText<-function(){
     p("This tab concerns important utilities, such as loading data, controling your default working directory, etc. ")
 }
-countInfo<-function(id, label = "count and transformation decisions") {
+countInfo<-function(id, rsecid,label = "count and transformation decisions") {
     ns <- NS(id)
     tagList(
         logicalInput(id,sidelabel="Is the input data counts?", 
