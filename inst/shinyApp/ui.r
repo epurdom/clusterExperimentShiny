@@ -49,7 +49,7 @@ shinyUI(navbarPage("Cluster Experiment",
                                          ),
                                          fluidRow(
                                              column(5,loadHelpText()),
-                                             column(7,countInfo("parameters"))
+                                             column(7,countInfo("trans"))
                                          ),
                                          tabsetPanel(
                                              tabPanel("RDS file input",
@@ -96,15 +96,15 @@ shinyUI(navbarPage("Cluster Experiment",
                                 column(6,
                                        #Displays basic help text for Shiny App and clusterMany
                                        RSECHelpText()
-                                )#,
-#                                 column(6,
-#                                        #textual output of code that is to be run
-#                                        h3("Code to be run internally:"),
-#                                        textOutput("RSECCode"),
-#                                        #Action button that allows one to run above code
-#                                        actionButton("runRSEC", "Run This Code"),
-#                                        textOutput("numRSECIterations")
-#                                 )
+                                ),
+                                column(6,
+                                       #textual output of code that is to be run
+                                       h3("Code to be run internally:"),
+                                       textOutput("RSECCode"),
+                                       #Action button that allows one to run above code
+                                       actionButton("runRSEC", "Run This Code"),
+                                       textOutput("numRSECIterations")
+                                )
                             ),
                             navlistPanel(
                                 tabPanel("Main Options",
@@ -134,15 +134,15 @@ shinyUI(navbarPage("Cluster Experiment",
                                 column(6,
                                        #Displays basic help text for Shiny App and clusterMany
                                        clusterManyHelpText()
-                                )#,
-#                                 column(6,
-#                                        #textual output of code that is to be run
-#                                        h3("Code to be run internally:"),
-#                                        textOutput("clusterManyCode"),
-#                                        #Action button that allows one to run above code
-#                                        actionButton("runCM", "Run This Code"),
-#                                        textOutput("numClusterIterations")
-#                                 )
+                                ),
+                                column(6,
+                                       #textual output of code that is to be run
+                                       h3("Code to be run internally:"),
+                                       textOutput("clusterManyCode"),
+                                       #Action button that allows one to run above code
+                                       actionButton("runCM", "Run This Code"),
+                                       textOutput("numClusterIterations")
+                                )
                             ),
                             navlistPanel(
                                 tabPanel("Main Options",

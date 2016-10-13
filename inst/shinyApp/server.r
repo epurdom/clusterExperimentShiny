@@ -11,6 +11,7 @@ shinyServer(function(input, output, session) {
     #####################################################
     # Begin read file outputs
     #####################################################
+    countModule<-callModule(getIsCount,"trans")
     
     #When the create workign directory button is clicked, WD is set and the defalt inputs for the save
     #script and save object widgets are created
@@ -275,12 +276,8 @@ shinyServer(function(input, output, session) {
     # Begin RSEC Many Tab
     #####################################################
     #Calling modular functions
-    RSECCode <- callModule(makeCode, "rsec", stringsAsFactors = FALSE,isRSEC=TRUE) #function to update code based on users choices.
-    
-    #   ##What is this code??? Something to do with uploading an existing clusterExperiment object rather than starting at beginning.
-    #   ##Go back and figure this out. Seems to never be used...
-    #   clusterManyStartPageCode <- callModule(makeCECode, "fileInput", stringsAsFactors = FALSE)
-    
+    RSECCode <- callModule(makeCode, "rsec", stringsAsFactors = FALSE,isRSEC=TRUE,countModule=countModule) #function to update code based on users choices.
+
     #reactive code to be run internally
     #can these two be combined??
     output$RSECCode <- renderText({
@@ -372,72 +369,72 @@ shinyServer(function(input, output, session) {
     # Begin Cluster Many Tab
     #####################################################
     #Calling modular functions
-#     clusterManyCode <- callModule(makeCode, "parameters", stringsAsFactors = FALSE) #function to update code based on users choices.
-# 
-#     #reactive code to be run internally
-#     #can these two be combined??
-#     output$clusterManyCode <- renderText({
-#         codeList <- getIterations(codeText=clusterManyCode(),isRSEC=FALSE,countIterations=FALSE)
-#         codeList$fullCodeSE
-#         })
-#     output$numClusterIterations <- renderText({
-#         codeList <- getIterations(codeText=clusterManyCode(),isRSEC=FALSE)
-#         paste(codeList$nIter, " cluster iterations given these choices.")
-#     })
-#     
-#     observeEvent(input$runCM, {
-#         #make sure updated values
-#         sE<-get("sE",envir=appGlobal)
-#         cE<-get("cE",envir=appGlobal)
-#         filePath<-get("filePath",envir=appGlobal)
-#         makeFile<-get("makeFile",envir=appGlobal)
-#         codeList <- getIterations(codeText=clusterManyCode(),isRSEC=FALSE,countIterations=FALSE)
-#         cE <-assignGlobal("cE",eval(parse(text = codeList$fullCodeSE))) #codeToBeEvaluated()))) 
-#         if(makeFile) {
-#             cat("\n", 
-#                 "#Cluster Many tab:",
-#                 codeList$fullCodeSE, # codeToBeEvaluated(), 
-#                 "plotClusters(cE)", 
-#                 sep = "\n", file = filePath, append = TRUE)
-#         }
-#         #default plotClusters output from clusterMany
-#         output$imgCE <- renderPlot({
-#             defaultMar<-par("mar")
-#             plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-#             par(mar=plotCMar)
-#             plotClusters(cE, whichClusters = "clusterMany")
-#         }, height = max((40/3) * nClusters(cE), 480))
-#         
-#         #outfitting proper whichClusters options for futrue widgets
-#         output$combineManyWhichClusters <- renderUI({
-#             multipleOptionsInput("cMInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
-#                                  val = "whichClusters", help = "a numeric or character vector that specifies
-#                              which clusters to compare")
-#         })
-#         
-#         output$makeDendrogramWhichClusters <- renderUI({
-#             singleOptionsInput("mDInputs", sidelabel = "Add detailed whichCluster?", options = unique(clusterTypes(cE)),
-#                                val = "whichCluster", help = "an integer index or character string that identifies which
-#                              cluster should be used to make the dendrogram. Default is primaryCluster.")
-#         })
-#         
-#         output$plotClustersWhichClusters <- renderUI({
-#             multipleOptionsInput("pCInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
-#                                  val = "whichClusters", help = "an integer index or character string that identifies which
-#                            cluster should be used to plotCluster.")
-#         })
-#         
-#         if(input$autoCreateObject) {
-#             saveRDS(cE, input$objectPath)
-#             if(makeFile) {
-#                 cat("\n", 
-#                     "#Save Object:",
-#                     "saveRDS(cE, '", input$objectPath,
-#                     "')", 
-#                     sep = "\n", file = filePath, append = TRUE)
-#             }
-#         }
-#     })
+    clusterManyCode <- callModule(makeCode, "parameters", stringsAsFactors = FALSE,countModule=countModule)
+
+    #reactive code to be run internally
+    #can these two be combined??
+    output$clusterManyCode <- renderText({
+        codeList <- getIterations(codeText=clusterManyCode(),isRSEC=FALSE,countIterations=FALSE)
+        codeList$fullCodeSE
+        })
+    output$numClusterIterations <- renderText({
+        codeList <- getIterations(codeText=clusterManyCode(),isRSEC=FALSE)
+        paste(codeList$nIter, " cluster iterations given these choices.")
+    })
+    
+    observeEvent(input$runCM, {
+        #make sure updated values
+        sE<-get("sE",envir=appGlobal)
+        cE<-get("cE",envir=appGlobal)
+        filePath<-get("filePath",envir=appGlobal)
+        makeFile<-get("makeFile",envir=appGlobal)
+        codeList <- getIterations(codeText=clusterManyCode(),isRSEC=FALSE,countIterations=FALSE)
+        cE <-assignGlobal("cE",eval(parse(text = codeList$fullCodeSE))) #codeToBeEvaluated()))) 
+        if(makeFile) {
+            cat("\n", 
+                "#Cluster Many tab:",
+                codeList$fullCodeSE, # codeToBeEvaluated(), 
+                "plotClusters(cE)", 
+                sep = "\n", file = filePath, append = TRUE)
+        }
+        #default plotClusters output from clusterMany
+        output$imgCE <- renderPlot({
+            defaultMar<-par("mar")
+            plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
+            par(mar=plotCMar)
+            plotClusters(cE, whichClusters = "clusterMany")
+        }, height = max((40/3) * nClusters(cE), 480))
+        
+        #outfitting proper whichClusters options for futrue widgets
+        output$combineManyWhichClusters <- renderUI({
+            multipleOptionsInput("cMInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
+                                 val = "whichClusters", help = "a numeric or character vector that specifies
+                             which clusters to compare")
+        })
+        
+        output$makeDendrogramWhichClusters <- renderUI({
+            singleOptionsInput("mDInputs", sidelabel = "Add detailed whichCluster?", options = unique(clusterTypes(cE)),
+                               val = "whichCluster", help = "an integer index or character string that identifies which
+                             cluster should be used to make the dendrogram. Default is primaryCluster.")
+        })
+        
+        output$plotClustersWhichClusters <- renderUI({
+            multipleOptionsInput("pCInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
+                                 val = "whichClusters", help = "an integer index or character string that identifies which
+                           cluster should be used to plotCluster.")
+        })
+        
+        if(input$autoCreateObject) {
+            saveRDS(cE, input$objectPath)
+            if(makeFile) {
+                cat("\n", 
+                    "#Save Object:",
+                    "saveRDS(cE, '", input$objectPath,
+                    "')", 
+                    sep = "\n", file = filePath, append = TRUE)
+            }
+        }
+    })
     
     #This function could certainly be refined, there may be better ways to upload data
     output$downloadDefaultPlotPCCM <- downloadHandler(

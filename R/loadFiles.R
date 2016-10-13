@@ -20,6 +20,23 @@ countInfo<-function(id, rsecid,label = "count and transformation decisions") {
         
     )
 }
+
+#################
+# Capture isCount and transFun
+# good reference on modules using other modules https://www.r-bloggers.com/shiny-module-design-patterns-pass-module-inputs-to-other-modules/
+#################
+#' @rdname InternalModules
+#' @export
+getIsCount <- function(input, output, session) {
+#     result <- reactive({
+#         isCount<-if(testArguments(input,"isCount")) input['isCount'] else FALSE
+#         transFun<-if(testArguments(input,"transFun")) input['transFun'] else NULL
+#         result<-list(isCount=isCount,transFun=transFun)
+#         result
+#     })
+#     result
+    input
+}
 #Function that sets working directory
 #' @rdname InternalModules
 #' @export

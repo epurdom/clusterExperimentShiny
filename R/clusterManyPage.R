@@ -173,6 +173,8 @@ specializedInputs <- function(id, label = "Specializedinputs",isRSEC=FALSE) {
 #I may need to store vectors safely by assigning to variables and then inputting them
 
 
+
+
 #################
 # Capture user inputs and make code
 # Reactive function which builds the code being run by R:
@@ -180,18 +182,19 @@ specializedInputs <- function(id, label = "Specializedinputs",isRSEC=FALSE) {
 #################
 #' @rdname InternalModules
 #' @export
-makeCode <- function(input, output, session, stringsAsFactors, isRSEC=FALSE) {
+makeCode <- function(input, output, session, stringsAsFactors, isRSEC=FALSE,countModule) {
     
     clusterManyCode <- reactive({
-        #browser()
         clusterManyCode <- paste("")
         #-------
         # Core arguments
         #-------
-        #if(testArguments(input,"clusterFunction")) browser()
-        #browser()
-        clusterManyCode<-combineArgs(input, clusterManyCode,"isCount",isCharacter=FALSE)
-        #clusterManyCode<-combineArgs(input, clusterManyCode,"transFun",isCharacter=TRUE)
+        if(testArguments(countModule,"isCount") && countModule[["isCount"]]=="TRUE"){
+            clusterManyCode<-paste(clusterManyCode,", isCount=",countModule[["isCount"]],"")
+        }
+        else{
+            if(testArguments(countModule,"transFun") && !is.null(countModule[["transFun"]])) clusterManyCode<-paste(clusterManyCode,", transFun=",countModule[["transFun"]])
+        }
         clusterManyCode<-combineArgs(input, clusterManyCode,"clusterFunction",isCharacter=TRUE)
         if(!isRSEC){
             clusterManyCode<-combineArgs(input, clusterManyCode,"subsample",isCharacter=FALSE)
