@@ -90,45 +90,45 @@ shinyUI(navbarPage("Cluster Experiment",
                             )
                    ),
                    tabPanel("RSEC",
-                            #                              h3("Core imputs for RSEC")
-                            #                     ),
-                            fluidRow(
-                                column(6,
-                                       #Displays basic help text for Shiny App and clusterMany
-                                       RSECHelpText()
-                                ),
-                                column(6,
-                                       #textual output of code that is to be run
-                                       h3("Code to be run internally:"),
-                                       textOutput("RSECCode"),
-                                       #Action button that allows one to run above code
-                                       actionButton("runRSEC", "Run This Code"),
-                                       textOutput("numRSECIterations")
-                                )
-                            ),
-                            navlistPanel(
-                                tabPanel("Main Options",
-                                         h3("Core imputs for RSEC"),
-                                         clusterFunctionInputs("rsec","clusterInputs",isRSEC=TRUE)
-                                ),
-                                tabPanel("Dimensional Reduction",
-                                         #Allows user to enter all inputs
-                                         h3("Choose Dimensionality Reduction Options"),
-                                         dimReduceInput("rsec", "dim inputs",isRSEC=TRUE)
-                                ),
-                                tabPanel("Specialized control",
-                                         specializedInputs("rsec", "specialized inputs",isRSEC=TRUE)
-                                ) #,
-                                #                                 tabPanel("Plot Clusters",
-                                #                                          tabsetPanel(
-                                #                                              tabPanel("Default Plot",
-                                #                                                       downloadButton("downloadDefaultPlotPCCM", label = "DownLoad this Plot"),
-                                #                                                       plotOutput("imgCE")                                                     
-                                #                                              )
-                                #                                          )
-                                #                                 )
-                            )
-                   ),
+                                                         h3("Core imputs for RSEC")
+                                                ),
+#                             fluidRow(
+#                                 column(6,
+#                                        #Displays basic help text for Shiny App and clusterMany
+#                                        RSECHelpText()
+#                                 ),
+#                                 column(6,
+#                                        #textual output of code that is to be run
+#                                        h3("Code to be run internally:"),
+#                                        textOutput("RSECCode"),
+#                                        #Action button that allows one to run above code
+#                                        actionButton("runRSEC", "Run This Code"),
+#                                        textOutput("numRSECIterations")
+#                                 )
+#                             ),
+#                             navlistPanel(
+#                                 tabPanel("Main Options",
+#                                          h3("Core imputs for RSEC"),
+#                                          clusterFunctionInputs("rsec","clusterInputs",isRSEC=TRUE)
+#                                 ),
+#                                 tabPanel("Dimensional Reduction",
+#                                          #Allows user to enter all inputs
+#                                          h3("Choose Dimensionality Reduction Options"),
+#                                          dimReduceInput("rsec", "dim inputs",isRSEC=TRUE)
+#                                 ),
+#                                 tabPanel("Specialized control",
+#                                          specializedInputs("rsec", "specialized inputs",isRSEC=TRUE)
+#                                 ) #,
+#                                 #                                 tabPanel("Plot Clusters",
+#                                 #                                          tabsetPanel(
+#                                 #                                              tabPanel("Default Plot",
+#                                 #                                                       downloadButton("downloadDefaultPlotPCCM", label = "DownLoad this Plot"),
+#                                 #                                                       plotOutput("imgCE")                                                     
+#                                 #                                              )
+#                                 #                                          )
+#                                 #                                 )
+#                             )
+#                    ),
                    tabPanel("Cluster Many",
                             fluidRow(
                                 column(6,
@@ -156,7 +156,7 @@ shinyUI(navbarPage("Cluster Experiment",
                                 ),
                                 tabPanel("Further clustering options",
                                          h3("Warning!"),
-                                         h4("If you change options on the 'General Options' tab, you should return to this tab to see what options have changed. It is best to complete the 'General Options' before starting this page"),
+                                         h4("If you change options on the 'Main Options' tab, you should return to this tab to see what options have changed. It is best to complete the 'Main Options' before starting this page"),
                                          clusterFunctionInputs("parameters", "cluster function inputs")
                                 ),
                                 tabPanel("Specialized control",
