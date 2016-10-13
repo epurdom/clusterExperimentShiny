@@ -164,10 +164,9 @@ findDefaults<-function(val,functionName){
 ##########
 ## Conditional panels for arguments.
 #########
-
 #' @rdname InternalModules
 #' @export
-singleNumericInput <- function(id, sidelabel, aboveLabel, val, defaultValue=NULL, help="No help yet available", required = FALSE,checkbox=FALSE,functionName) {
+singleCharacterInput <- function(id, sidelabel, aboveLabel, val, defaultValue=NULL, help="No help yet available", required = FALSE,checkbox=FALSE,functionName,...) {
     
     if(is.null(defaultValue)){
         if(missing(functionName)) stop("if not give defaultValue, must provide functionName")
@@ -181,7 +180,44 @@ singleNumericInput <- function(id, sidelabel, aboveLabel, val, defaultValue=NULL
         fluidRow(
             column(3, checkboxInput(ns(aVal), value = checkbox, label = sidelabel)),
             conditionalPanel(condition = paste0("input['", ns(aVal), "']"),
-                             column(3, numericInput(ns(val), label = aboveLabel, value = defaultValue))
+                             column(3, textInput(ns(val), label = aboveLabel, value = defaultValue,...))
+            ),
+            column(2, checkboxInput(ns(hVal), value = FALSE, label = "Click here for help")),
+            conditionalPanel(condition = paste0("input['", ns(hVal), "']"),
+                             column(4, helpText(help))
+            )
+        )
+    } else {
+        fluidRow(
+            column(3, sidelabel), #creates problem here, because need if required=FALSE, the value of ns(aVal) is set to be true in the input list...e.g. input$aDimReduce needs to be set to TRUE to be able to get the code set up to run (under function makeCode)
+            column(3, numericInput(ns(val), label = aboveLabel, value = defaultValue)),
+            column(2, checkboxInput(ns(hVal), value = FALSE, label = "Click here for help")),
+            conditionalPanel(condition = paste0("input['", ns(hVal), "']"),
+                             column(4, helpText(help))
+                             
+            )
+        )
+    }
+    
+}
+
+#' @rdname InternalModules
+#' @export
+singleNumericInput <- function(id, sidelabel, aboveLabel, val, defaultValue=NULL, help="No help yet available", required = FALSE,checkbox=FALSE,functionName,...) {
+    
+    if(is.null(defaultValue)){
+        if(missing(functionName)) stop("if not give defaultValue, must provide functionName")
+        else defaultValue<-findDefaults(val,functionName)[1]
+    } 
+    ns <- NS(id)
+    aVal<-paste("a",capwords(val),sep="")
+    hVal<-paste("h",capwords(val),sep="")
+    sidelabel<-convertSideLabel(sidelabel,val)
+    if(!required) {
+        fluidRow(
+            column(3, checkboxInput(ns(aVal), value = checkbox, label = sidelabel)),
+            conditionalPanel(condition = paste0("input['", ns(aVal), "']"),
+                             column(3, numericInput(ns(val), label = aboveLabel, value = defaultValue,...))
             ),
             column(2, checkboxInput(ns(hVal), value = FALSE, label = "Click here for help")),
             conditionalPanel(condition = paste0("input['", ns(hVal), "']"),
