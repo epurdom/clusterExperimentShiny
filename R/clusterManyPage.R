@@ -40,6 +40,7 @@ dimReduceInput <- function(id, label = "inputs",isRSEC=FALSE){
     functionName<-if(isRSEC) "RSEC" else "clusterMany"
     ns <- NS(id)
     dimReduceOptions<-c("none","PCA", "var","cv", "mad")
+    #if(id=="rsec") browser()
     tagList(
         tags$hr(),
         multipleOptionsInput(id,sidelabel="Select Dimensionality Reduction?", options=dimReduceOptions,val="dimReduce", help="What method(s) of dimensionality reduction to perform before clustering.",required=FALSE, functionName=functionName),
@@ -128,34 +129,46 @@ clusterFunctionInputs <- function(id, label = "inputs",isRSEC=FALSE) {
 #' @export
 specializedInputs <- function(id, label = "Specializedinputs",isRSEC=FALSE) {
     functionName<-if(isRSEC) "RSEC" else "clusterMany"
-    tagList(
+    sharedTags<-tagList(
         singleNumericInput(id,sidelabel="Set # cores for parallel processing", aboveLabel="Enter integer values",val="ncores", help="Enter single integer value to indicate the number of cores that should be used. A value greater than 1 will launch parallel processing of the different clustering combinations on different cores using mclapply.",required=FALSE, functionName=functionName),
-        singleNumericInput(id,sidelabel="Set random seed for reproducability?", aboveLabel="Enter integer values",val="random.seed", help="Enter a single arbitrary value to set the seed. This seed will be set before every clustering combination, including if the clustering is done on parallel cores.",required=FALSE, functionName=functionName),
-        #--------
-        #Specialized arguments
-        #---------
-        tags$hr(),
-        h4("Note: The remaining arguments set here are quite specialized, and most users will not need to set these. Arguments set here will apply globally to all clusterings"),
-        #Sequential clustering arguments, conditional upon sequential clustering choice
-        conditionalPanel(
-            condition = setUpConditionalPanelTest(id, "sequential", allOptions = c("TRUE","FALSE"), validOptions="TRUE"),
-            tags$hr(),
-            h4("Specialized arguments to control sequential clustering."),
-            singleNumericInput(id,sidelabel="Set # samples required to continue sequential?", aboveLabel="(Integer value)",val="remain.n",  help="Should be an integer value. After sequentially finding a cluster, removing samples in the clustering, and iterating, algorithm stops when only this number of samples are remaining",required=FALSE, functionName="seqCluster"),
-            singleNumericInput(id,sidelabel="Set # top clusters considered?", aboveLabel="(Integer value)",val="top.can", help="In the sequential process, k is increased in the subsampling, and a stable cluster is identified when two clusters from different k and k+1 are similar; this argument determines how many of the top clusters will be compared in the pairwise for stability (where clusters are ranked by size, unless 'orderBy' is changed). Making this very big will effectively remove this parameter and all pairwise comparisons of all clusters found will be considered. This might result in smaller clusters being found.",required=FALSE, functionName="seqCluster"),
-            singleNumericInput(id,sidelabel="Set kmin", aboveLabel="(Integer value)",val="kmin", help="each iteration of sequential detection of clustering will decrease the beginning K of subsampling, but not lower than k.min.",required=FALSE, functionName=functionName),
-            singleNumericInput(id,sidelabel="Set kmax", aboveLabel="(Integer value)",val="kmax", help="algorithm will stop if K in iteration is increased beyond this point.",required=FALSE, functionName="seqCluster")
-        ),
-        #Subsampling arguments
-        conditionalPanel(
-            condition = setUpConditionalPanelTest(id, "subsample", allOptions = c("TRUE","FALSE"), validOptions="TRUE"),
-            tags$hr(),
-            h4("Specialized arguments to control clustering of subsampled samples."),
-            singleNumericInput(id,sidelabel="Set number of subsamples to draw", aboveLabel="(Integer value)",val="resamp.num",  help="The number of independent subsamples to draw.",required=FALSE, functionName="subsampleClustering"),
-            singleNumericInput(id,sidelabel="Set the proportion of samples to draw", aboveLabel="(value 0-1)",val="samp.p", help="Should be value in (0,1) identifying the the proportion of samples to subsample for each draw.",required=FALSE, functionName="subsampleClustering"),
-            singleOptionsInput(id, sidelabel="How compute co-occurance?",options=c("All", "OutOfSample", "InSample"),val="classifyMethod", help="Choose one method for determining which samples should be used in calculating the co-occurance matrix for each subsample draw. 'All'= all samples, 'OutOfSample'= only those not subsampled in the draw, and 'InSample'=only those subsampled in the draw. Note if 'All' isn't chosen it is possible to get NAs in resulting D matrix when there are some samples that were either never in-sample or out-of-sample (particularly a danger if not enough subsamples are taken). This can lead to errors.",required=FALSE, functionName="subsampleClustering")
-        )
+        singleNumericInput(id,sidelabel="Set random seed for reproducability?", aboveLabel="Enter integer values",val="random.seed", help="Enter a single arbitrary value to set the seed. This seed will be set before every clustering combination, including if the clustering is done on parallel cores.",required=FALSE, functionName=functionName)
     )
+    seqTags<-tagList(
+        tags$hr(),
+        h4("Specialized arguments to control sequential clustering."),
+        singleNumericInput(id,sidelabel="Set # samples required to continue sequential?", aboveLabel="(Integer value)",val="remain.n",  help="Should be an integer value. After sequentially finding a cluster, removing samples in the clustering, and iterating, algorithm stops when only this number of samples are remaining",required=FALSE, functionName="seqCluster"),
+        singleNumericInput(id,sidelabel="Set # top clusters considered?", aboveLabel="(Integer value)",val="top.can", help="In the sequential process, k is increased in the subsampling, and a stable cluster is identified when two clusters from different k and k+1 are similar; this argument determines how many of the top clusters will be compared in the pairwise for stability (where clusters are ranked by size, unless 'orderBy' is changed). Making this very big will effectively remove this parameter and all pairwise comparisons of all clusters found will be considered. This might result in smaller clusters being found.",required=FALSE, functionName="seqCluster"),
+        singleNumericInput(id,sidelabel="Set kmin", aboveLabel="(Integer value)",val="kmin", help="each iteration of sequential detection of clustering will decrease the beginning K of subsampling, but not lower than k.min.",required=FALSE, functionName=functionName),
+        singleNumericInput(id,sidelabel="Set kmax", aboveLabel="(Integer value)",val="kmax", help="algorithm will stop if K in iteration is increased beyond this point.",required=FALSE, functionName="seqCluster")
+    )
+    subTags<-tagList(
+        tags$hr(),
+        h4("Specialized arguments to control clustering of subsampled samples."),
+        singleNumericInput(id,sidelabel="Set number of subsamples to draw", aboveLabel="(Integer value)",val="resamp.num",  help="The number of independent subsamples to draw.",required=FALSE, functionName="subsampleClustering"),
+        singleNumericInput(id,sidelabel="Set the proportion of samples to draw", aboveLabel="(value 0-1)",val="samp.p", help="Should be value in (0,1) identifying the the proportion of samples to subsample for each draw.",required=FALSE, functionName="subsampleClustering"),
+        singleOptionsInput(id, sidelabel="How compute co-occurance?",options=c("All", "OutOfSample", "InSample"),val="classifyMethod", help="Choose one method for determining which samples should be used in calculating the co-occurance matrix for each subsample draw. 'All'= all samples, 'OutOfSample'= only those not subsampled in the draw, and 'InSample'=only those subsampled in the draw. Note if 'All' isn't chosen it is possible to get NAs in resulting D matrix when there are some samples that were either never in-sample or out-of-sample (particularly a danger if not enough subsamples are taken). This can lead to errors.",required=FALSE, functionName="subsampleClustering")
+    )
+    if(isRSEC){
+        tagList(sharedTags,
+                tags$hr(),
+                h4("Note:"),
+                p("The remaining arguments set here are quite specialized, and most users will not need to set these. Arguments set here will apply globally to all clusterings"),
+                seqTags,subTags)
+    }
+    else{
+        tagList(sharedTags,
+                tags$hr(),
+                h4("Note:"),
+                p("The remaining arguments set here are quite specialized, and most users will not need to set these. Arguments set here will apply globally to all clusterings"),
+                conditionalPanel(
+                    condition = setUpConditionalPanelTest(id, "sequential", allOptions = c("TRUE","FALSE"), validOptions="TRUE"),
+                    seqTags
+                ),
+                conditionalPanel(
+                    condition = setUpConditionalPanelTest(id, "subsample", allOptions = c("TRUE","FALSE"), validOptions="TRUE"),
+                    subTags)
+        )
+    }
 }
 #I may need to store vectors safely by assigning to variables and then inputting them
 
@@ -168,8 +181,9 @@ specializedInputs <- function(id, label = "Specializedinputs",isRSEC=FALSE) {
 #' @rdname InternalModules
 #' @export
 makeCode <- function(input, output, session, stringsAsFactors, isRSEC=FALSE) {
+    
     clusterManyCode <- reactive({
-        
+        #browser()
         clusterManyCode <- paste("")
         #-------
         # Core arguments

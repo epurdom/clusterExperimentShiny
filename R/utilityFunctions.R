@@ -318,10 +318,7 @@ multipleOptionsInput<-function(id, sidelabel,options,val, help="No help yet avai
             column(3, sidelabel), #creates problem here, because need if required=FALSE, the value of ns(aVal) is set to be true in the input list...e.g. input$aDimReduce needs to be set to TRUE to be able to get the code set up to run (under function makeCode)
             column(3,checkboxGroupInput(ns(val), choices = options, label = "Choose all of interest",selected=defaultValue)),
             column(2, checkboxInput(ns(hVal), value = FALSE, label = "Click here for help")),
-            conditionalPanel(condition = paste0("input['", ns(hVal), "']"),
-                             column(4, helpText(help))
-                             
-            )
+            conditionalPanel(condition = paste0("input['", ns(hVal), "']"), column(4, helpText(help)) )
         )
     }
     

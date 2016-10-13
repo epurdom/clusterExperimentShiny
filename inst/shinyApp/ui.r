@@ -90,13 +90,13 @@ shinyUI(navbarPage("Cluster Experiment",
                             )
                    ),
                    tabPanel("RSEC",
-                                                         h3("Core imputs for RSEC")
-                                                ),
-#                             fluidRow(
-#                                 column(6,
-#                                        #Displays basic help text for Shiny App and clusterMany
-#                                        RSECHelpText()
-#                                 ),
+#                                                          h3("Core imputs for RSEC")
+#                                                 ),
+                            fluidRow(
+                                column(6,
+                                       #Displays basic help text for Shiny App and clusterMany
+                                       RSECHelpText()
+                                )#,
 #                                 column(6,
 #                                        #textual output of code that is to be run
 #                                        h3("Code to be run internally:"),
@@ -105,44 +105,44 @@ shinyUI(navbarPage("Cluster Experiment",
 #                                        actionButton("runRSEC", "Run This Code"),
 #                                        textOutput("numRSECIterations")
 #                                 )
-#                             ),
-#                             navlistPanel(
-#                                 tabPanel("Main Options",
-#                                          h3("Core imputs for RSEC"),
-#                                          clusterFunctionInputs("rsec","clusterInputs",isRSEC=TRUE)
-#                                 ),
-#                                 tabPanel("Dimensional Reduction",
-#                                          #Allows user to enter all inputs
-#                                          h3("Choose Dimensionality Reduction Options"),
-#                                          dimReduceInput("rsec", "dim inputs",isRSEC=TRUE)
-#                                 ),
-#                                 tabPanel("Specialized control",
-#                                          specializedInputs("rsec", "specialized inputs",isRSEC=TRUE)
-#                                 ) #,
-#                                 #                                 tabPanel("Plot Clusters",
-#                                 #                                          tabsetPanel(
-#                                 #                                              tabPanel("Default Plot",
-#                                 #                                                       downloadButton("downloadDefaultPlotPCCM", label = "DownLoad this Plot"),
-#                                 #                                                       plotOutput("imgCE")                                                     
-#                                 #                                              )
-#                                 #                                          )
-#                                 #                                 )
-#                             )
-#                    ),
+                            ),
+                            navlistPanel(
+                                tabPanel("Main Options",
+                                         h3("Core imputs for RSEC"),
+                                         clusterFunctionInputs("rsec","clusterInputs",isRSEC=TRUE)
+                                ),
+                                tabPanel("Dimensional Reduction",
+                                         #Allows user to enter all inputs
+                                         h3("Choose Dimensionality Reduction Options"),
+                                         dimReduceInput("rsec", "dim inputs",isRSEC=TRUE)
+                                ),
+                                tabPanel("Specialized control",
+                                         specializedInputs("rsec", "specialized inputs",isRSEC=TRUE)
+                                ) #,
+                                #                                 tabPanel("Plot Clusters",
+                                #                                          tabsetPanel(
+                                #                                              tabPanel("Default Plot",
+                                #                                                       downloadButton("downloadDefaultPlotPCCM", label = "DownLoad this Plot"),
+                                #                                                       plotOutput("imgCE")                                                     
+                                #                                              )
+                                #                                          )
+                                #                                 )
+                            )
+                   ),
                    tabPanel("Cluster Many",
                             fluidRow(
                                 column(6,
                                        #Displays basic help text for Shiny App and clusterMany
                                        clusterManyHelpText()
-                                ),
-                                column(6,
-                                       #textual output of code that is to be run
-                                       h3("Code to be run internally:"),
-                                       textOutput("clusterManyCode"),
-                                       #Action button that allows one to run above code
-                                       actionButton("runCM", "Run This Code"),
-                                       textOutput("numClusterIterations")
-                                )
+                                )#,
+#                                 column(6,
+#                                        #textual output of code that is to be run
+#                                        h3("Code to be run internally:"),
+#                                        textOutput("clusterManyCode"),
+#                                        #Action button that allows one to run above code
+#                                        actionButton("runCM", "Run This Code"),
+#                                        textOutput("numClusterIterations")
+#                                 )
                             ),
                             navlistPanel(
                                 tabPanel("Main Options",
