@@ -14,6 +14,7 @@
 \alias{combineManyHelpText}
 \alias{combineManyInput}
 \alias{convertSideLabel}
+\alias{countInfo}
 \alias{csvAssay}
 \alias{csvAssayCode}
 \alias{csvColCode}
@@ -24,6 +25,9 @@
 \alias{dimReduceInput}
 \alias{findDefaults}
 \alias{getAdditionalDefaults}
+\alias{getIsCount}
+\alias{getIterations}
+\alias{loadHelpText}
 \alias{logicalInput}
 \alias{makeCode}
 \alias{makeCombineManyCode}
@@ -68,17 +72,20 @@
 \usage{
 sSBInputs(id, label = "SSB inputs")
 
-dimReduceInput(id, label = "inputs")
+dimReduceInput(id, label = "inputs", isRSEC = FALSE)
 
 clusterFunctionChoices
 
-clusterFunctionInputs(id, label = "inputs")
+clusterFunctionInputs(id, label = "inputs", isRSEC = FALSE)
 
-specializedInputs(id, label = "Specializedinputs")
+specializedInputs(id, label = "Specializedinputs", isRSEC = FALSE)
 
-makeCode(input, output, session, stringsAsFactors)
+makeCode(input, output, session, stringsAsFactors, isRSEC = FALSE,
+  countModule)
 
 clusterManyHelpText()
+
+getIterations(codeText, isRSEC = FALSE, countIterations = TRUE)
 
 combineManyInput(id, label = "cMInputs")
 
@@ -86,9 +93,15 @@ makeCombineManyCode(input, output, session, stringsAsFactors)
 
 combineManyHelpText(id, label = "help title and text")
 
+loadHelpText()
+
+countInfo(id, rsecid, label = "count and transformation decisions")
+
+getIsCount(input, output, session)
+
 setWD(id, label = "start message")
 
-rdaFileInput(id, label = "upload rda file")
+rdaFileInput(id, label = "upload rds file")
 
 rdaFile(input, output, session, stringsAsFactors)
 
@@ -181,7 +194,8 @@ vectorInput(id, sidelabel, aboveLabel, val, defaultValue = "",
   functionName)
 
 logicalInput(id, sidelabel, val, help = "No help yet available",
-  required = FALSE, checkbox = FALSE, defaultValue = NULL, functionName)
+  required = FALSE, checkbox = FALSE, defaultValue = NULL,
+  multipleAllowed = TRUE, functionName)
 
 multipleOptionsInput(id, sidelabel, options, val,
   help = "No help yet available", required = FALSE, checkbox = FALSE,
@@ -194,6 +208,13 @@ singleOptionsInput(id, sidelabel, options, val,
 setUpConditionalPanelTest(id, val, allOptions, validOptions)
 
 whatClusters(id, label = "What Clusters Text")
+}
+\details{
+addArguments pastes additional arguments for constructing code.
+
+testArguments tests whether arguments have been checked
+
+logicalInput is for taking TRUE/FALSE values, but is only for if both options are possible (like for clusterMany)
 }
 \keyword{datasets}
 

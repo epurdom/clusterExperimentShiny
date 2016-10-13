@@ -44,12 +44,10 @@ shinyUI(navbarPage("Cluster Experiment",
                                 
                                 tabPanel("Upload Data",
                                          fluidRow(
-                                             column(5,h3("Directions")),
-                                             column(7,p("The following choices regarding transformation of the data (will take effect only when run clusterMany/RSEC)"))
+                                             column(12,p("The following choices regarding transformation of the data (will take effect only when run clusterMany/RSEC)"))
                                          ),
                                          fluidRow(
-                                             column(5,loadHelpText()),
-                                             column(7,countInfo("trans"))
+                                             column(12,countInfo("trans"))
                                          ),
                                          tabsetPanel(
                                              tabPanel("RDS file input",

@@ -4,7 +4,9 @@
 loadHelpText<-function(){
     p("This tab concerns important utilities, such as loading data, controling your default working directory, etc. ")
 }
-countInfo<-function(id, rsecid,label = "count and transformation decisions") {
+#' @rdname InternalModules
+#' @export
+countInfo<-function(id, label = "count and transformation decisions") {
     ns <- NS(id)
     tagList(
         logicalInput(id,sidelabel="Is the input data counts?", 
@@ -12,10 +14,10 @@ countInfo<-function(id, rsecid,label = "count and transformation decisions") {
                          help="Whether the data are in counts, in which case the data is transformed with log2(x+1)."), 
 #         conditionalPanel( #why doesn't this work? Also doesn't work if make them character values...
 #                 condition = setUpConditionalPanelTest( id, val="isCount", allOptions=c(TRUE,FALSE), validOptions=FALSE),
-#                   vectorInput(id,sidelabel="Do you want to transform your uploaded data? (if not check counts above)", aboveLabel="e.g. function(x){x}",val="transFun", 
+#                   vectorInput(id,sidelabel="Do you want to specify a transformation?", aboveLabel="e.g. function(x){x}",val="transFun", 
 #            help="Give function that should be applied to the uploaded data matrix. Will over-ride choice of counts (above). Can be used to provide different offset in the log, for example.", functionName="clusterMany")
 #              )
-        vectorInput(id,sidelabel="Do you want to transform your uploaded data? (if not check counts above)", aboveLabel="e.g. function(x){x}",val="transFun", 
+        vectorInput(id,sidelabel="Do you want to specify a transformation?", aboveLabel="e.g. function(x){x}",val="transFun", 
                     help="Give function that should be applied to the uploaded data matrix. Will over-ride choice of counts (above). Can be used to provide different offset in the log, for example.", functionName="clusterMany")
         
     )

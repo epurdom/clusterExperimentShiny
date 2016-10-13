@@ -1,5 +1,5 @@
-Package: clusterExperimentShinyApp
-Title: Shiny App to accompany clusterExperiment
+Package: clusterExperimentShiny
+Title: A Shiny App to accompany clusterExperiment
 Version: 0.0.1
 Description: This package is a shiny app that implements the functions in clusterExperiment.
 Authors@R: c(person("Elizabeth", "Purdom", email = "epurdom@stat.berkeley.edu",
