@@ -6,34 +6,44 @@ makeDendrogramInput <- function(id, label = "cMInputs") {
   ns <- NS(id)
   
   tagList(
-    tags$hr(),
-    fluidRow(
-      column(3, checkboxInput(ns("aDimReduce"), value = FALSE, label = "Add Dimensionailty Reduction?")),
-      conditionalPanel(condition = paste0("input['", ns("aDimReduce"), "']"),
-          column(3, radioButtons(ns("dimReduce"), choices = c("none","PCA", "var","cv", "mad"), label = "dimReduce")),
-          column(2, checkboxInput(ns("hDimReduce"), value = FALSE, label = "Help Text and Instructions")),
-          conditionalPanel(condition = paste0("input['", ns("hDimReduce"), "']"),
-              column(4, helpText("character A character identifying what type of dimensionality reduction to perform
-                                 before clustering. Options are 'none','PCA', 'var','cv', and 'mad'. See transform for
-                                 more details.")
-              )
-          )
-      )
+    
+    multipleOptionsInput(id,sidelabel="Select Dimensionality Reduction?", options=dimReduceOptions,val="dimReduce", help="What method(s) of dimensionality reduction to perform before clustering.",required=FALSE),
+    conditionalPanel(
+        condition = setUpConditionalPanelTest( id, val="dimReduce", allOptions=dimReduceOptions, validOptions=allOptions),
+        singleNumericInput(id,sidelabel="# dims", aboveLabel="e.g. 5",val="ndims",help="An integer identifying how many dimensions to reduce to in the reduction specified by dimReduce",required=FALSE)
     ),
-    tags$hr(),
-    fluidRow(
-      column(3, checkboxInput(ns("andims"), value = FALSE, label = "Add ndims?")),
-      conditionalPanel(condition = paste0("input['", ns("andims"), "']"),
-          column(3, numericInput(ns("ndims"), label = "ndims", value = 5)),
-          column(2, checkboxInput(ns("hndims"), value = FALSE, label = "Help Text and Instructions")),
-          conditionalPanel(condition = paste0("input['", ns("hndims"), "']"),
-              column(4, helpText("integer An integer identifying how many dimensions to reduce
-                                 to in the reduction specified by dimReduce")
-              )
-           )
-      )
+    conditionalPanel(
+        condition = setUpConditionalPanelTest( id, val="dimReduce", allOptions=dimReduceOptions, validOptions=allOptions),
+        logicalInput(id,"Add ignoreUnassignedVar?",val="ignoreUnassignedVar")
     ),
-    tags$hr(),
+    
+    #     tags$hr(),
+#     fluidRow(
+#       column(3, checkboxInput(ns("aDimReduce"), value = FALSE, label = "Add Dimensionailty Reduction?")),
+#       conditionalPanel(condition = paste0("input['", ns("aDimReduce"), "']"),
+#           column(3, radioButtons(ns("dimReduce"), choices = c("none","PCA", "var","cv", "mad"), label = "dimReduce")),
+#           column(2, checkboxInput(ns("hDimReduce"), value = FALSE, label = "Help Text and Instructions")),
+#           conditionalPanel(condition = paste0("input['", ns("hDimReduce"), "']"),
+#               column(4, helpText("character A character identifying what type of dimensionality reduction to perform
+#                                  before clustering. Options are 'none','PCA', 'var','cv', and 'mad'. See transform for
+#                                  more details.")
+#               )
+#           )
+#       )
+#     ),
+#     tags$hr(),
+#     fluidRow(
+#       column(3, checkboxInput(ns("andims"), value = FALSE, label = "Add ndims?")),
+#       conditionalPanel(condition = paste0("input['", ns("andims"), "']"),
+#           column(3, numericInput(ns("ndims"), label = "ndims", value = 5)),
+#           column(2, checkboxInput(ns("hndims"), value = FALSE, label = "Help Text and Instructions")),
+#           conditionalPanel(condition = paste0("input['", ns("hndims"), "']"),
+#               column(4, helpText("integer An integer identifying how many dimensions to reduce to in the reduction specified by dimReduce")
+#               )
+#            )
+#       )
+#     ),
+#     tags$hr(),
     fluidRow(
       column(3, checkboxInput(ns("aIgnoreUnassignedVar"), value = FALSE, label = "Add ignoreUnassignedVar?")),
       conditionalPanel(condition = paste0("input['", ns("aIgnoreUnassignedVar"), "']"),
