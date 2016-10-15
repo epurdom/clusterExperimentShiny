@@ -268,23 +268,25 @@ logicalInput<-function(id,sidelabel, val, help="No help yet available",
     if(is.logical(defaultValue)) defaultValue<-as.character(defaultValue)
     sidelabel<-convertSideLabel(sidelabel,val)
     label<-if(multipleAllowed) "Choose all of interest" else "Choose One"
-    ckbox<- if(multipleAllowed) column(3, checkboxGroupInput(ns(val), label =label , choices = c("TRUE", "FALSE"),selected=defaultValue)) 
-            else column(3, checkboxInput(ns(val), label ="", value=as.logical(defaultValue) )) 
+    if(multipleAllowed) ckbox<- column(3, checkboxGroupInput(ns(val), label =label , choices = c("TRUE", "FALSE"),selected=defaultValue)) 
+    else{
+        if(!required) ckbox<- column(3, checkboxInput(ns(val), label ="", value=as.logical(defaultValue) )) 
+        else ckbox<- column(3, checkboxInput(ns(val), label =sidelabel, value=as.logical(defaultValue) )) 
+    }
+    clickForHelp<-tagList(
+        column(2, checkboxInput(ns(hVal), value = FALSE, label = "Click here for help")),
+        conditionalPanel(condition = paste0("input['", ns(hVal), "']"),column(4, helpText(help)))
+    )
     if(!required){
         fluidRow(
             column(3, checkboxInput(ns(aVal), value = checkbox, label = sidelabel)),
             conditionalPanel(condition = paste0("input['", ns(aVal), "']"), ckbox),
-            column(2, checkboxInput(ns(hVal), value = FALSE, label = "Click here for help")),
-            conditionalPanel(condition = paste0("input['", ns(hVal), "']"),column(4, helpText(help)))
+            clickForHelp
         )
     }
     else{
-        fluidRow(
-            column(3, sidelabel),
-            ckbox,
-            column(2, checkboxInput(ns(hVal), value = FALSE, label = "Click here for help")),
-            conditionalPanel(condition = paste0("input['", ns(hVal), "']"),column(4, helpText(help)))
-        )
+            if(!required) fluidRow(column(3, sidelabel), ckbox,clickForHelp) 
+            else fluidRow(ckbox,clickForHelp)
     }
     
 }
