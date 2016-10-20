@@ -518,11 +518,11 @@ shinyServer(function(input, output, session) {
             
         })
         
-        output$makeDendrogramWhichClusters <- renderUI({
-            singleOptionsInput("mDInputs", sidelabel = "Add detailed whichCluster?", options = unique(clusterTypes(cE)),
-                               val = "whichCluster", help = "an integer index or character string that identifies which
-                           cluster should be used to make the dendrogram. Default is primaryCluster.")
-        })
+#         output$makeDendrogramWhichClusters <- renderUI({
+#             singleOptionsInput("mDInputs", sidelabel = "Add detailed whichCluster?", options = unique(clusterTypes(cE)),
+#                                val = "whichCluster", help = "an integer index or character string that identifies which
+#                            cluster should be used to make the dendrogram. Default is primaryCluster.")
+#         })
         
         output$plotClustersWhichClusters <- renderUI({
             multipleOptionsInput("pCInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
@@ -605,10 +605,10 @@ shinyServer(function(input, output, session) {
     #creates make Dendrogram code
     makeDendrogramCode <- function(){
         code <- paste("cE <- makeDendrogram(cE")
-        if(input[["mDInputs-aWhichCluster"]])
-            code <- paste(code, ", whichCluster = '", 
-                          paste(input[["mDInputs-whichCluster"]]), "'", sep = "")
-        code <- paste(code, makeDendrogramLatterCode(), sep = "")
+#         if(input[["mDInputs-aWhichCluster"]])
+#             code <- paste(code, ", whichCluster = '", 
+#                           paste(input[["mDInputs-whichCluster"]]), "'", sep = "")
+        code <- paste(code, makeDendrogramLatterCode(), ")",sep = "")
         return(code)
     }
     

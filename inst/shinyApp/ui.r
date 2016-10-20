@@ -107,7 +107,8 @@ shinyUI(navbarPage("Cluster Experiment",
                             navlistPanel(
                                 tabPanel("Main Options",
                                          h3("Core imputs for RSEC"),
-                                         clusterFunctionInputs("rsec","clusterInputs",isRSEC=TRUE)
+                                         RSECInputs("rsec")
+                                          
                                 ),
                                 tabPanel("Dimensional Reduction",
                                          #Allows user to enter all inputs
@@ -217,8 +218,8 @@ shinyUI(navbarPage("Cluster Experiment",
                             navlistPanel(
                                 tabPanel("Make Dendrogram",
                                          h2("Inputs for Make Dendrogram"),
-                                         uiOutput("makeDendrogramWhichClusters"),
-                                         makeDendrogramInput("mDInputs", "")
+                                         makeDendrogramInput("mDInputs", "")#,
+                                         #uiOutput("makeDendrogramWhichClusters")
                                 ),
                                 tabPanel("Plot Dendrogram",
                                          downloadButton("downloadDefaultPlotPDMD", label = "DownLoad this Plot"),

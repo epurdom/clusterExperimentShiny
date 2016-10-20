@@ -35,28 +35,54 @@ sSBInputs <- function(id, label = "SSB inputs") {
 #################
 #' @rdname InternalModules
 #' @export
-dimReduceInput <- function(id, label = "inputs",isRSEC=FALSE){
+dimReduceOptions<-c("none","PCA", "var","cv", "mad")
+dimReduceInput <- function(id, label = "inputs",isRSEC=FALSE,singleChoice=FALSE,functionName=NULL){
     # Create a namespace function using the provided id
-    functionName<-if(isRSEC) "RSEC" else "clusterMany"
+    if(is.null(functionName)) functionName<-if(isRSEC) "RSEC" else "clusterMany"
     ns <- NS(id)
-    dimReduceOptions<-c("none","PCA", "var","cv", "mad")
-    #if(id=="rsec") browser()
-    tagList(
-        tags$hr(),
-        multipleOptionsInput(id,sidelabel="Select Dimensionality Reduction?", options=dimReduceOptions,val="dimReduce", help="What method(s) of dimensionality reduction to perform before clustering.",required=FALSE, functionName=functionName),
+    #if(functionName=="makeDendrogram") browser()
+    if(!singleChoice){
+        dimBox<-multipleOptionsInput(id,sidelabel="Select Dimensionality Reduction?", options=dimReduceOptions,val="dimReduce", help="What method(s) of dimensionality reduction to perform before clustering.",required=FALSE, functionName=functionName)
         ###Conditional: nPCADims if PCA
-        conditionalPanel(
+        pcaDimBox<-conditionalPanel(
             condition = setUpConditionalPanelTest( id, val="dimReduce", allOptions=dimReduceOptions, validOptions="PCA"),
             tags$hr(),
             vectorInput(id,sidelabel="# PCA dims", aboveLabel="e.g. 5,25,50",val="nPCADims",help="Please enter a list (separated by commas) of the number of PCA dimensions to keep. Used when 'PCA' is identified as choice in dimensionality reduction. If NA is included, then the full dataset will also be included.",required=FALSE,checkbox=TRUE, functionName=functionName)
-        ),
+        )
         ###Conditional: nVarDims if mad/cv/var
-        conditionalPanel(
+        varDimBox<-conditionalPanel(
             condition =  setUpConditionalPanelTest( id, val="dimReduce", allOptions=dimReduceOptions, validOptions=c("mad","var","cv")),
             tags$hr(),
             vectorInput(id,sidelabel="# variable dimensions:", aboveLabel="e.g. 100,500,1000",val="nVarDims", help="A list (separated by commas) of the number of the most variable features to keep. Used when any of 'var', 'cv', or 'mad' is identified as a choice in dimensionality reduction (the same set of values is used for all). If NA is included, then the full dataset will also be included.",required=FALSE,checkbox=TRUE, functionName=functionName)
         )
-        
+    }
+    else{
+        #for some reason the single input option is not working...
+        dimBox<-multipleOptionsInput(id,sidelabel="Select Dimensionality Reduction?", options=dimReduceOptions,val="dimReduce", help="What method of dimensionality reduction to perform before clustering.",required=FALSE, functionName=functionName)
+        #dimBox<-singleOptionsInput(id,sidelabel="Select Dimensionality Reduction?", options=dimReduceOptions,val="dimReduce", help="What method of dimensionality reduction to perform before clustering.",required=FALSE, functionName=functionName)
+        pcaDimBox<-conditionalPanel(
+            condition = setUpConditionalPanelTest( id, val="dimReduce", allOptions=dimReduceOptions, validOptions="PCA"),
+            tags$hr(),
+            singleNumericInput(id, sidelabel="# PCA dims", aboveLabel="e.g. 5", val="ndims", defaultValue=NULL, help="Please enter a integer value of the number of PCA dimensions to keep. Used when 'PCA' is identified as choice in dimensionality reduction", required = TRUE,functionName=functionName) 
+        )
+        #if(functionName=="makeDendrogram") browser()
+#        pcaDimBox<-singleNumericInput(id, sidelabel="# PCA dims", aboveLabel="e.g. 5", val="ndims", defaultValue=NULL, help="Please enter a integer value of the number of PCA dimensions to keep. Used when 'PCA' is identified as choice in dimensionality reduction", required = TRUE,functionName=functionName) 
+        ###Conditional: if pca
+#         pcaDimBox<-conditionalPanel(
+#             condition = setUpConditionalPanelTest( id, val="dimReduce", allOptions=dimReduceOptions, validOptions="PCA"),
+#             singleNumericInput(id, sidelabel="# PCA dims", aboveLabel="e.g. 5", val="ndims", defaultValue=NULL, help="Please enter a integer value of the number of PCA dimensions to keep. Used when 'PCA' is identified as choice in dimensionality reduction", required = TRUE,functionName=functionName) 
+#         )
+        ###Conditional: if mad/cv/var
+        varDimBox<-conditionalPanel(
+            condition =  setUpConditionalPanelTest( id, val="dimReduce", allOptions=dimReduceOptions, validOptions=c("mad","var","cv")),
+            singleNumericInput(id, sidelabel="# variable dimensions:", aboveLabel="e.g. 100", val="ndims", defaultValue=NULL, help="Please enter a integer value of the number of PCA dimensions to keep. Used when 'PCA' is identified as choice in dimensionality reduction", required = TRUE,functionName=functionName) 
+        )
+    }
+    tagList(
+        tags$hr(),
+        dimBox,
+        pcaDimBox,
+        varDimBox
     )
 }
 
