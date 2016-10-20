@@ -104,14 +104,14 @@ shinyServer(function(input, output, session) {
                 #combine many
                 output$combineManyWhichClusters <- renderUI({
                     multipleOptionsInput("cMInputs", sidelabel = "Add detailed whichClusters?",
-                                         options = unique(clusterTypes(cE)), val = "whichClusters",
+                                         options = unique(clusterTypes(cE)), val = "whichClusters",functionName="combineMany",
                                          help = "a numeric or character vector that specifies which clusters 
                                to compare")
                 })
                 #make dendrogram
                 output$makeDendrogramWhichClusters <- renderUI({
                     singleOptionsInput("mDInputs", sidelabel = "Add detailed whichCluster?", 
-                                       options = unique(clusterTypes(cE)), val = "whichCluster", 
+                                       options = unique(clusterTypes(cE)), val = "whichCluster", functionName="makeDendrogram",
                                        help = "an integer index or character string that identifies which
                              cluster should be used to make the dendrogram. Default is primaryCluster.")
                 })
@@ -119,7 +119,7 @@ shinyServer(function(input, output, session) {
                 #plot clusters
                 output$plotClustersWhichClusters <- renderUI({
                     multipleOptionsInput("pCInputs", sidelabel = "Add detailed whichClusters?", 
-                                         options = unique(clusterTypes(cE)), val = "whichClusters", 
+                                         options = unique(clusterTypes(cE)), val = "whichClusters", functionName="plotClusters",
                                          help = "an integer index or character string that identifies which
                                cluster should be used to plotCluster.")
                 })
@@ -408,19 +408,19 @@ shinyServer(function(input, output, session) {
         #outfitting proper whichClusters options for futrue widgets
         output$combineManyWhichClusters <- renderUI({
             multipleOptionsInput("cMInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
-                                 val = "whichClusters", help = "a numeric or character vector that specifies
+                                 val = "whichClusters", functionName="combineMany",help = "a numeric or character vector that specifies
                              which clusters to compare")
         })
         
         output$makeDendrogramWhichClusters <- renderUI({
             singleOptionsInput("mDInputs", sidelabel = "Add detailed whichCluster?", options = unique(clusterTypes(cE)),
-                               val = "whichCluster", help = "an integer index or character string that identifies which
+                               val = "whichCluster", functionName="makeDendrogram",help = "an integer index or character string that identifies which
                              cluster should be used to make the dendrogram. Default is primaryCluster.")
         })
         
         output$plotClustersWhichClusters <- renderUI({
             multipleOptionsInput("pCInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
-                                 val = "whichClusters", help = "an integer index or character string that identifies which
+                                 val = "whichClusters", functionName="plotClusters",help = "an integer index or character string that identifies which
                            cluster should be used to plotCluster.")
         })
         
@@ -461,18 +461,13 @@ shinyServer(function(input, output, session) {
     #####################################################
     
     #renders the code for the second half of combine many
-    combineManyLatterCode <- callModule(makeCombineManyCode, "cMInputs", 
-                                        stringsAsFactors = FALSE)
+    combineManyLatterCode <- callModule(makeCombineManyCode, "cMInputs", stringsAsFactors = FALSE)
     #function to render reactive combine many code
     combineManyCode <- function(){
         code <- paste("cE <- combineMany(cE")
-        if(input[["cMInputs-aWhichClusters"]])
-            code <- paste(code, ", whichClusters = c('", 
-                          paste(input[["cMInputs-whichClusters"]], collapse = "','"), "')", sep = "")
-        code <- paste(code, combineManyLatterCode(), sep = "")
+        code <- paste(code, combineManyLatterCode(), ")",sep = "")
         return(code)
     }
-    
     output$combineManyCode <- renderText({
         combineManyCode()
     })
