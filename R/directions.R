@@ -1,3 +1,9 @@
+#################
+##Description####
+#This file, contains the directions text. Saved in one place to help make uniform formating choices, etc.
+#################
+
+
 #' @rdname InternalModules
 #' @export
 RSECHelpText<-function(){ "This is RSEC... more to come"}

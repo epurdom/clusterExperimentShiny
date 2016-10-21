@@ -1,6 +1,6 @@
 #################
 # Capture user inputs and make code
-# Reactive function which builds the code being run by R:
+# Reactive functions which builds the code being run by R (and supporting functions called on server side):
 # Naming convention: for options 'abc', input$aAbc describes a logical as to whether it was added, and input$abc is the actual values that were chosen.
 #################
 
@@ -89,6 +89,26 @@ makeClusterManyCode <- function(input, output, session, stringsAsFactors, isRSEC
         clusterManyCode
     })
     return(clusterManyCode)
+}
+
+#' @rdname InternalModules
+#' @export
+getIterations <- function(codeText,isRSEC=FALSE,countIterations=TRUE){
+    functionName<-if(isRSEC) "RSEC" else "clusterMany"
+    #####
+    #make sure updated values
+    sE<-get("sE",envir=appGlobal)
+    cE<-get("cE",envir=appGlobal)
+    filePath<-get("filePath",envir=appGlobal)
+    makeFile<-get("makeFile",envir=appGlobal)
+    ######
+    
+    codeToBeNotRun <- paste(functionName,"(sE, run = FALSE ", codeText, ")",sep = "")
+    codeToBeRunSE <- paste(functionName,"(sE", codeText, ")",sep = "")
+    codeToBeRunCE <- paste(functionName,"(sE", codeText, ")",sep = "")
+    nIter<-if(countIterations) nrow(eval(parse(text = codeToBeNotRun))$paramMatrix) else NULL
+    return(list(nIter=nIter,fullCodeSE=codeToBeRunSE,fullCodeCE=codeToBeRunCE))
+    
 }
 
 #' @rdname InternalModules

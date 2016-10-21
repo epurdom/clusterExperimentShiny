@@ -1,12 +1,6 @@
 #################
 ##Description####
-#This file, clusterManyPage.R, contains the functions, inputs, and server-side computations of the clusterMany tab.
-#This userFile input is a very large function that recieves all of the inputs for clusterMany from the user
-#################
-
-
-#################
-# First Setup Page
+#This file, clusterManyPage.R, sets up the ui side of clusterMany
 #################
 #' @name InternalModules
 #' @title Internal modules used by shiny app
@@ -189,77 +183,3 @@ specializedInputs <- function(id, label = "Specializedinputs",isRSEC=FALSE) {
         )
     }
 }
-#I may need to store vectors safely by assigning to variables and then inputting them
-
-
-
-
-
-
-
-
-
-#' @rdname InternalModules
-#' @export
-getIterations <- function(codeText,isRSEC=FALSE,countIterations=TRUE){
-    functionName<-if(isRSEC) "RSEC" else "clusterMany"
-    #####
-    #make sure updated values
-    sE<-get("sE",envir=appGlobal)
-    cE<-get("cE",envir=appGlobal)
-    filePath<-get("filePath",envir=appGlobal)
-    makeFile<-get("makeFile",envir=appGlobal)
-    ######
-    
-    codeToBeNotRun <- paste(functionName,"(sE, run = FALSE ", codeText, ")",sep = "")
-    codeToBeRunSE <- paste(functionName,"(sE", codeText, ")",sep = "")
-    codeToBeRunCE <- paste(functionName,"(sE", codeText, ")",sep = "")
-    nIter<-if(countIterations) nrow(eval(parse(text = codeToBeNotRun))$paramMatrix) else NULL
-    return(list(nIter=nIter,fullCodeSE=codeToBeRunSE,fullCodeCE=codeToBeRunCE))
-    
-}
-
-#     getSEIterations <- function(){
-#         #####
-#         #make sure updated values
-#         sE<-get("sE",envir=appGlobal)
-#         cE<-get("cE",envir=appGlobal)
-#         filePath<-get("filePath",envir=appGlobal)
-#         makeFile<-get("makeFile",envir=appGlobal)
-#         ######
-#         
-#         codeToBeEvaluated <- paste("clusterMany(sE, run = FALSE ", clusterManyCode(), ")",sep = "")
-#         return(nrow(eval(parse(text = codeToBeEvaluated))$paramMatrix))
-#     }
-##EAP: Why are there two of these? CE version is used by plotting, because then cE is defined and needs to be the one used
-###However, shouldn't be able to use cE object to get this??? Go back to see if need actually 'getCEIterations' or can get it from the cE object
-#     getCEIterations <- function(){
-#         #####
-#         #make sure updated values
-#         sE<-get("sE",envir=appGlobal)
-#         cE<-get("cE",envir=appGlobal)
-#         filePath<-get("filePath",envir=appGlobal)
-#         makeFile<-get("makeFile",envir=appGlobal)
-#         ######
-#         
-#         codeToBeEvaluated <- paste("clusterMany(cE, run = FALSE ",   clusterManyCode(),")", sep = "")
-#         return(nrow(eval(parse(text = codeToBeEvaluated))$paramMatrix))
-#     }
-# ###EAP: What is this code for?? Something to do for when upload existing CE object??? Doesn't seem to be used anywhere...
-# makeCECode <- function(input, output, session, stringsAsFactors) {
-#     cECode <- reactive({
-#         paste(input$rdaFile[1])
-#         
-#         if(length(input$file) == 0) {
-#             cECode <- paste("ce <- clusterMany(", gsub('[.][A-z ]*', '', input$file[1]), 
-#                             ", isCount = ", input$isCount, sep = "")
-#         } else {
-#             cECode <- paste("ce <- clusterMany(", gsub('[.][A-z ]*', '', input$rdaFile[1]), 
-#                             ", isCount = ", input$isCount, sep = "")
-#         }
-#         cECode
-#     })
-#     
-#     return(cECode)
-#     
-# } # end of makeCECode function
