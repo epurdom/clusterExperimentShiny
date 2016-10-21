@@ -8,7 +8,7 @@
 ###########
 ## Functions dealing with assigning global values to the appGlobal environment
 ###########
-#' @rdname InternalModules
+#' @name InternalModules
 #' @export
 assignGlobal<-function(name,value){
     assign(name,value=value,envir=appGlobal)

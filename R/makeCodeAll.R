@@ -4,7 +4,7 @@
 # Naming convention: for options 'abc', input$aAbc describes a logical as to whether it was added, and input$abc is the actual values that were chosen.
 #################
 
-#' @rdname InternalModules
+#' @name makeCodeModules
 #' @export
 makeClusterManyCode <- function(input, output, session, stringsAsFactors, isRSEC=FALSE,countModule) {
     
@@ -91,7 +91,7 @@ makeClusterManyCode <- function(input, output, session, stringsAsFactors, isRSEC
     return(clusterManyCode)
 }
 
-#' @rdname InternalModules
+#' @rdname makeCodeModules
 #' @export
 getIterations <- function(codeText,isRSEC=FALSE,countIterations=TRUE){
     functionName<-if(isRSEC) "RSEC" else "clusterMany"
@@ -111,7 +111,7 @@ getIterations <- function(codeText,isRSEC=FALSE,countIterations=TRUE){
     
 }
 
-#' @rdname InternalModules
+#' @rdname makeCodeModules
 #' @export
 makeMakeDendrogramCode <- function(input, output, session, stringsAsFactors) {
     code <- reactive({
@@ -126,7 +126,7 @@ makeMakeDendrogramCode <- function(input, output, session, stringsAsFactors) {
     return(code)
 }
 
-#' @rdname InternalModules
+#' @rdname makeCodeModules
 #' @export
 makeCombineManyCode <- function(input, output, session, stringsAsFactors) {
     code <- reactive({
@@ -143,7 +143,7 @@ makeCombineManyCode <- function(input, output, session, stringsAsFactors) {
 }
 
 #make code
-#' @rdname InternalModules
+#' @rdname makeCodeModules
 #' @export
 makeMergeClustersCode <- function(input, output, session, stringsAsFactors) {
     code <- reactive({
@@ -157,4 +157,71 @@ makeMergeClustersCode <- function(input, output, session, stringsAsFactors) {
     })
     
     return(code)
+}
+
+#creating code
+#' @rdname makeCodeModules
+#' @export
+makePlotClustersCode <- function(input, output, session, stringsAsFactors) {
+    code <- reactive({
+        code <- paste("")
+        if(input$aSampleData) {
+            if(input$sampleData != 'NULL') {
+                code <- paste(code, ", sampleData = c(", input$sampleData, ")", sep = "")
+            } else {
+                code <- paste(code, ", sampleData = ", input$sampleData, sep = "")
+            }
+        }
+        
+        if(input$aReuseColors) {
+            code <- paste(code, ", reuseColors = ", input$reuseColors, sep = "")
+        }
+        
+        if(input$aMatchToTop) {
+            code <- paste(code, ", matchToTop = ", input$matchToTop, sep = "")
+        }
+        
+        if(input$aUnassignedColor) {
+            code <- paste(code, ", unassignedColor = '", input$unassignedColor, "'", sep = "")
+        }
+        
+        if(input$aMissingColor) {
+            code <- paste(code, ", missingColor = '", input$missingColor, "'", sep = "")
+        }
+        
+        if(input$aMinRequireColor) {
+            if(!is.na(input$minRequireColor) && (input$minRequireColor <= 100 && input$minRequireColor > 0)) {
+                code <- paste(code, ", minRequireColor = ", input$minRequireColor)
+            }
+        }
+        
+        if(input$aStartNewColors) {
+            code <- paste(code, ", startNewColors = ", input$startNewColors, sep = "")
+        }
+        
+        if(input$aTick) {
+            code <- paste(code, ", tick = ", input$tick, sep = "")
+        }
+        
+        if(input$aYlab) {
+            code <- paste(code, ", ylab = '", input$ylab, "'", sep = "")
+        }
+        
+        if(input$aXlab) {
+            code <- paste(code, ", xlab = '", input$xlab, "'", sep = "")
+        }
+        
+        if(input$aAxisLine) {
+            code <- paste(code, ", axisLine = ", input$axisLine, sep = "")
+        }
+        
+        if(input$aBox) {
+            code <- paste(code, ", box = ", input$box, sep = "")
+        }
+        
+        code <- paste(code, ")", sep = "")
+    })
+    
+    return(code)
+    
 }

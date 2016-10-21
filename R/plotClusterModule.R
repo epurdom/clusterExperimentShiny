@@ -1,5 +1,5 @@
 #plot clusters input function
-#' @rdname InternalModules
+#' @rdname InputModules
 #' @export
 plotClustersInput <- function(id, label = "plotCluster inputs") {
   ns <- NS(id)
@@ -182,80 +182,6 @@ plotClustersInput <- function(id, label = "plotCluster inputs") {
   )
 }
 
-#creating code
-#' @rdname InternalModules
-#' @export
-makePlotClustersCode <- function(input, output, session, stringsAsFactors) {
-  code <- reactive({
-    code <- paste("")
-    if(input$aSampleData) {
-      if(input$sampleData != 'NULL') {
-        code <- paste(code, ", sampleData = c(", input$sampleData, ")", sep = "")
-      } else {
-        code <- paste(code, ", sampleData = ", input$sampleData, sep = "")
-      }
-    }
-    
-    if(input$aReuseColors) {
-      code <- paste(code, ", reuseColors = ", input$reuseColors, sep = "")
-    }
-    
-    if(input$aMatchToTop) {
-      code <- paste(code, ", matchToTop = ", input$matchToTop, sep = "")
-    }
-    
-    if(input$aUnassignedColor) {
-      code <- paste(code, ", unassignedColor = '", input$unassignedColor, "'", sep = "")
-    }
-    
-    if(input$aMissingColor) {
-      code <- paste(code, ", missingColor = '", input$missingColor, "'", sep = "")
-    }
-    
-    if(input$aMinRequireColor) {
-      if(!is.na(input$minRequireColor) && (input$minRequireColor <= 100 && input$minRequireColor > 0)) {
-        code <- paste(code, ", minRequireColor = ", input$minRequireColor)
-      }
-    }
-    
-    if(input$aStartNewColors) {
-      code <- paste(code, ", startNewColors = ", input$startNewColors, sep = "")
-    }
-    
-    if(input$aTick) {
-      code <- paste(code, ", tick = ", input$tick, sep = "")
-    }
-    
-    if(input$aYlab) {
-      code <- paste(code, ", ylab = '", input$ylab, "'", sep = "")
-    }
-    
-    if(input$aXlab) {
-      code <- paste(code, ", xlab = '", input$xlab, "'", sep = "")
-    }
-    
-    if(input$aAxisLine) {
-      code <- paste(code, ", axisLine = ", input$axisLine, sep = "")
-    }
-    
-    if(input$aBox) {
-      code <- paste(code, ", box = ", input$box, sep = "")
-    }
-    
-    code <- paste(code, ")", sep = "")
-  })
-  
-  return(code)
-  
-}
-#helptext
-#' @rdname InternalModules
-#' @export
-plotClustersHelpText <- function(id, label = "help title and text") {
-  ns <- NS(id)
-  tagList(
-    h3("Specialized Inputs for plotClusters()"),
-    helpText("helptext here")
-  )
-}
+
+
 

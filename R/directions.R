@@ -3,13 +3,12 @@
 #This file, contains the directions text. Saved in one place to help make uniform formating choices, etc.
 #################
 
-
-#' @rdname InternalModules
+#' @name directionsModules
 #' @export
 RSECHelpText<-function(){ "This is RSEC... more to come"}
 
 
-#' @rdname InternalModules
+#' @rdname directionsModules
 #' @export
 clusterManyHelpText <- function() {
     paste(
@@ -18,7 +17,7 @@ clusterManyHelpText <- function() {
     )
 }
 
-#' @rdname InternalModules
+#' @rdname directionsModules
 #' @export
 combineManyHelpText <- function(id, label = "help title and text") {
     ns <- NS(id)
@@ -29,7 +28,7 @@ combineManyHelpText <- function(id, label = "help title and text") {
 }
 
 #help text
-#' @rdname InternalModules
+#' @rdname directionsModules
 #' @export
 makeDendrogramHelpText <- function(id, label = "help title and text") {
     ns <- NS(id)
@@ -40,7 +39,7 @@ makeDendrogramHelpText <- function(id, label = "help title and text") {
 }
 
 #helptext
-#' @rdname InternalModules
+#' @rdname directionsModules
 #' @export
 mergeClustersHelpText <- function(id, label = "help title and text") {
     ns <- NS(id)
@@ -50,4 +49,13 @@ mergeClustersHelpText <- function(id, label = "help title and text") {
     )
 }
 
-
+#helptext
+#' @rdname directionsModules
+#' @export
+plotClustersHelpText <- function(id, label = "help title and text") {
+    ns <- NS(id)
+    tagList(
+        h3("Specialized Inputs for plotClusters()"),
+        helpText("helptext here")
+    )
+}
