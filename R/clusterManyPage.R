@@ -31,13 +31,13 @@ sSBInputs <- function(id, label = "SSB inputs") {
 #' @rdname InputModules
 #' @export
 dimReduceOptions<-c("none","PCA", "var","cv", "mad")
-dimReduceInput <- function(id, label = "inputs",isRSEC=FALSE,singleChoice=FALSE,dimVal="dimReduce",ndimVal="ndims",functionName=NULL){
+dimReduceInput <- function(id, label = "inputs",sidelabel="Select Dimensionality Reduction?",isRSEC=FALSE,singleChoice=FALSE,dimVal="dimReduce",ndimVal="ndims",functionName=NULL){
     # Create a namespace function using the provided id
     if(is.null(functionName)) functionName<-if(isRSEC) "RSEC" else "clusterMany"
     ns <- NS(id)
     #if(functionName=="makeDendrogram") browser()
     if(!singleChoice){
-        dimBox<-multipleOptionsInput(id,sidelabel="Select Dimensionality Reduction?", options=dimReduceOptions,val=dimVal, help="What method(s) of dimensionality reduction to perform before clustering.",required=FALSE, functionName=functionName)
+        dimBox<-multipleOptionsInput(id,sidelabel=sidelabel, options=dimReduceOptions,val=dimVal, help="What method(s) of dimensionality reduction to perform before clustering.",required=FALSE, functionName=functionName)
         ###Conditional: nPCADims if PCA
         pcaDimBox<-conditionalPanel(
             condition = setUpConditionalPanelTest( id, val=dimVal, allOptions=dimReduceOptions, validOptions="PCA"),
@@ -53,8 +53,8 @@ dimReduceInput <- function(id, label = "inputs",isRSEC=FALSE,singleChoice=FALSE,
     }
     else{
         #for some reason the single input option is not working in setting up conditional panel... can't figure out why
-        dimBox<-multipleOptionsInput(id,sidelabel="Select Dimensionality Reduction?", options=dimReduceOptions,val=dimVal, help="What method of dimensionality reduction to perform before clustering.",required=FALSE, functionName=functionName)
-        #dimBox<-singleOptionsInput(id,sidelabel="Select Dimensionality Reduction?", options=dimReduceOptions,val=dimVal, help="What method of dimensionality reduction to perform before clustering.",required=FALSE, functionName=functionName)
+        dimBox<-multipleOptionsInput(id,sidelabel=sidelabel, options=dimReduceOptions,val=dimVal, help="What method of dimensionality reduction to perform before clustering.",required=FALSE, functionName=functionName)
+        #dimBox<-singleOptionsInput(id,sidelabel=sidelabel, options=dimReduceOptions,val=dimVal, help="What method of dimensionality reduction to perform before clustering.",required=FALSE, functionName=functionName)
         pcaDimBox<-conditionalPanel(
             condition = setUpConditionalPanelTest( id, val=dimVal, allOptions=dimReduceOptions, validOptions="PCA"),
             singleNumericInput(id, sidelabel="# PCA dims", aboveLabel="e.g. 5", val=ndimVal, defaultValue=NULL, help="Please enter a integer value of the number of PCA dimensions to keep. Used when 'PCA' is identified as choice in dimensionality reduction", required = TRUE,functionName=functionName) 

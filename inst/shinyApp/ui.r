@@ -106,13 +106,14 @@ shinyUI(navbarPage("Cluster Experiment",
                             ),
                             navlistPanel(
                                 tabPanel("Main Options",
-                                         h3("Core imputs for RSEC"),
                                          RSECInputs("rsec")
                                 ),
                                 tabPanel("Dimensional Reduction",
                                          #Allows user to enter all inputs
                                          h3("Choose Dimensionality Reduction Options"),
-                                         dimReduceInput("rsec", "dim inputs",isRSEC=TRUE)
+                                         dimReduceInput("rsec", "dim inputs",isRSEC=TRUE,sidelabel="Set dimensionality reduction for clustering?"),
+                                         dimReduceInput("rsec", isRSEC=TRUE,singleChoice=TRUE,sidelabel="Set dimensionality reduction for making dendrogram?",dimVal="dendroReduce",ndimVal="dendroNDims")
+                                         
                                 ),
                                 tabPanel("Specialized control",
                                          specializedInputs("rsec", "specialized inputs",isRSEC=TRUE)
