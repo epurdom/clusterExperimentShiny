@@ -16,29 +16,29 @@ combineManyInput <- function(id, label = "cMInputs") {
   ns <- NS(id)
   
   tagList(
-    
     tags$hr(),
-    singleNumericInput(id=id,sidelabel="Set Proportion?",aboveLabel="e.g. 0.7", val="proportion", min = 0, max = 1, step = .1, help="The proportion of times that two sets of samples should be together in order to be 
-                                 grouped into a cluster (if <1, passed to clusterD via alpha = 1 - proportion)" , functionName="combineMany"),
-    singleNumericInput(id=id,sidelabel="Set Proportion Unassigned?",aboveLabel="e.g. 0.7", val="propUnassigned", min = 0, max = 1, step = .1,help="samples with greater than this proportion of assignments equal to '-1' are assigned 
-                                   a '-1' cluster value as a last step (only if proportion < 1)" , functionName="combineMany"),
-    singleNumericInput(id=id,sidelabel="Set Minimum Size?",aboveLabel="e.g. 10", val="minSize",help="minimum size required for a set of samples to be considered in a cluster because of 
-                                 shared clustering, passed to clusterD" , functionName="combineMany"),
-    vectorInput(id=id,sidelabel="Give Result a label?",aboveLabel="e.g. My Favorite Cluster", val="clusterLabel",
-        help="This allows you to give a label to the result of combine many. This is useful if you will rerun combineMany with different parameters. You do not need to put quotes around it." , functionName="combineMany")
-
-#     fluidRow(
-#       column(3, checkboxInput(ns("aProportion"), value = FALSE, label = "Add Proportion?")),
+    singleNumericInput(id, sidelabel="Add Proportion Coherence?", aboveLabel="e.g. 0.5", val="proportion", defaultValue=0.5,min = 0, max = 1, step = .01 ,help="The proportion of times that two sets of samples should be together in order to be 
+                                 grouped into a cluster (if <1, passed to clusterD via alpha = 1 - proportion)", required = FALSE,checkbox=FALSE,functionName="combineMany"),
+    singleNumericInput(id, sidelabel="Add Proportion Unassigned?", aboveLabel="e.g. 0.5", val="propUnassigned", min = 0, max = 1, step = .01 ,help="samples with greater than this proportion of assignments equal to '-1' are assigned 
+                                   a '-1' cluster value as a last step (only if proportion < 1)", required = FALSE,checkbox=FALSE,functionName="combineMany"),
+    singleNumericInput(id, sidelabel="Set minimum size?", aboveLabel="e.g. 10", val="minSize", help="minimum size required for a set of samples to be considered in a cluster because of 
+                                 shared clustering; samples in clusters below this size are unassigned", required = FALSE,checkbox=FALSE,functionName="combineMany"),
+    singleCharacterInput(id, sidelabel="Give cluster Label?", aboveLabel="e.g. 'myFavorite'", val="clusterLabel", help="gives label to resulting cluster to keep track of it, useful if rerun with different parameters many times", required = FALSE,checkbox=FALSE,functionName="combineMany")
+    
+  )
+}
+#    fluidRow(
+#       column(3, checkboxInput(ns("aProportion"), value = FALSE, label = )),
 #       conditionalPanel(condition = paste0("input['", ns("aProportion"), "']"),
-#           column(3, numericInput(ns("proportion"), value = .5, min = 0, max = 1, step = .001, label = "Proportion")),
+#           column(3, numericInput(ns("proportion"), value = .5, , label = "Proportion")),
 #           column(2, checkboxInput(ns("hProportion"), value = FALSE, label = "Help Text and Instructions")),
 #           conditionalPanel(condition = paste0("input['", ns("hProportion"), "']"),
-#               column(4, helpText()
+#               column(4, helpText("The proportion of times that two sets of samples should be together in order to be 
+#                                  grouped into a cluster (if <1, passed to clusterD via alpha = 1 - proportion)")
 #               )
 #           )
 #       )
-#     ),
-#     tags$hr(),
+#    ),
 #     fluidRow(
 #       column(3, checkboxInput(ns("aPropUnassigned"), value = FALSE, label = "Add Proportion Unassigned?")),
 #       conditionalPanel(condition = paste0("input['", ns("aPropUnassigned"), "']"),
@@ -51,7 +51,7 @@ combineManyInput <- function(id, label = "cMInputs") {
 #           )
 #       )
 #     ),
-#     tags$hr(),
+#    tags$hr(),
 #     fluidRow(
 #       column(3, checkboxInput(ns("aMinSize"), value = FALSE, label = "Add Minimun Size?")),
 #       conditionalPanel(condition = paste0("input['", ns("aMinSize"), "']"),
@@ -64,10 +64,9 @@ combineManyInput <- function(id, label = "cMInputs") {
 #           )
 #         )
 #       ),
-#     tags$hr(),
-    
-  )
-}
+#    tags$hr(),
+#    fluidRow(h4("clusterLabel"), helpText("Need more info"))
+
 
 
 #' @rdname InternalModules

@@ -60,6 +60,7 @@
 \alias{saveObjectMessage}
 \alias{setUpConditionalPanelTest}
 \alias{setWD}
+\alias{singleCharacterInput}
 \alias{singleNumericInput}
 \alias{singleOptionsInput}
 \alias{specializedInputs}
@@ -95,7 +96,7 @@ combineManyHelpText(id, label = "help title and text")
 
 loadHelpText()
 
-countInfo(id, rsecid, label = "count and transformation decisions")
+countInfo(id, label = "count and transformation decisions")
 
 getIsCount(input, output, session)
 
@@ -185,9 +186,13 @@ getAdditionalDefaults(class, functionName, ceDefaults)
 
 findDefaults(val, functionName)
 
+singleCharacterInput(id, sidelabel, aboveLabel, val, defaultValue = NULL,
+  help = "No help yet available", required = FALSE, checkbox = FALSE,
+  functionName, ...)
+
 singleNumericInput(id, sidelabel, aboveLabel, val, defaultValue = NULL,
   help = "No help yet available", required = FALSE, checkbox = FALSE,
-  functionName)
+  functionName, ...)
 
 vectorInput(id, sidelabel, aboveLabel, val, defaultValue = "",
   help = "No help yet available", required = FALSE, checkbox = FALSE,

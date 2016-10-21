@@ -108,7 +108,6 @@ shinyUI(navbarPage("Cluster Experiment",
                                 tabPanel("Main Options",
                                          h3("Core imputs for RSEC"),
                                          RSECInputs("rsec")
-                                          
                                 ),
                                 tabPanel("Dimensional Reduction",
                                          #Allows user to enter all inputs
