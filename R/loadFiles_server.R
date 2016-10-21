@@ -1,17 +1,11 @@
-#################
-# Capture isCount and transFun
+#----------------
+# Function to capture isCount and transFun
+# this is just simple module that gets the input so that another module can use it
 # good reference on modules using other modules https://www.r-bloggers.com/shiny-module-design-patterns-pass-module-inputs-to-other-modules/
-#################
+#----------------
 #' @rdname InternalModules
 #' @export
 getIsCount <- function(input, output, session) {
-    #     result <- reactive({
-    #         isCount<-if(testArguments(input,"isCount")) input['isCount'] else FALSE
-    #         transFun<-if(testArguments(input,"transFun")) input['transFun'] else NULL
-    #         result<-list(isCount=isCount,transFun=transFun)
-    #         result
-    #     })
-    #     result
     input
 }
 

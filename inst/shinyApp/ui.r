@@ -108,7 +108,7 @@ shinyUI(navbarPage("Cluster Experiment",
                                 tabPanel("Main Options",
                                          RSECInputs("rsec")
                                 ),
-                                tabPanel("Dimensional Reduction",
+                                tabPanel("Dimensionality Reduction",
                                          #Allows user to enter all inputs
                                          h3("Choose Dimensionality Reduction Options"),
                                          dimReduceInput("rsec", "dim inputs",isRSEC=TRUE,sidelabel="Set dimensionality reduction for clustering?"),
@@ -117,15 +117,15 @@ shinyUI(navbarPage("Cluster Experiment",
                                 ),
                                 tabPanel("Specialized control",
                                          specializedInputs("rsec", "specialized inputs",isRSEC=TRUE)
-                                ) #,
-                                #                                 tabPanel("Plot Clusters",
-                                #                                          tabsetPanel(
-                                #                                              tabPanel("Default Plot",
-                                #                                                       downloadButton("downloadDefaultPlotPCCM", label = "DownLoad this Plot"),
-                                #                                                       plotOutput("imgCE")                                                     
-                                #                                              )
-                                #                                          )
-                                #                                 )
+                                ),
+                                tabPanel("Plot Clusters",
+                                         tabsetPanel(
+                                             tabPanel("Default Plot",
+                                                      downloadButton("downloadDefaultPlotPCCM", label = "DownLoad this Plot"),
+                                                      plotOutput("imgRSEC")                                                     
+                                             )
+                                         )
+                                )
                             )
                    ),
                    tabPanel("Cluster Many",
@@ -148,7 +148,7 @@ shinyUI(navbarPage("Cluster Experiment",
                                          h3("Core imputs for clusterMany"),
                                          sSBInputs("parameters", "SSB inputs")
                                 ),
-                                tabPanel("Dimensional Reduction",
+                                tabPanel("Dimensionality Reduction",
                                          #Allows user to enter all inputs
                                          h3("Choose Dimensionality Reduction Options"),
                                          dimReduceInput("parameters", "dim inputs")

@@ -306,13 +306,13 @@ shinyServer(function(input, output, session) {
                 "plotClusters(cE)", 
                 sep = "\n", file = filePath, append = TRUE)
         }
-#         #default plotClusters output from clusterMany
-#         output$imgCE <- renderPlot({
-#             defaultMar<-par("mar")
-#             plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-#             par(mar=plotCMar)
-#             plotClusters(cE, whichClusters = "clusterMany")
-#         }, height = max((40/3) * nClusters(cE), 480))
+        #default plotClusters output from RSEC
+        output$imgRSEC <- renderPlot({
+            defaultMar<-par("mar")
+            plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
+            par(mar=plotCMar)
+            plotClusters(cE, whichClusters = "workflow") #note this means will change if update cE later...
+        }, height = max((40/3) * nClusters(cE), 480))
 #         
 #         #outfitting proper whichClusters options for futrue widgets
 #         output$combineManyWhichClusters <- renderUI({
