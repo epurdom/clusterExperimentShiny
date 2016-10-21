@@ -121,12 +121,12 @@ shinyUI(navbarPage("Cluster Experiment",
                                 tabPanel("Plot Clusters",
                                          tabsetPanel(
                                              tabPanel("Default Plot",
-                                                      downloadButton("downloadDefaultPlotPCCM", label = "DownLoad this Plot"),
+                                                      downloadButton("downloadDefaultPlotPCRSEC", label = "DownLoad this Plot"),
                                                       plotOutput("imgRSEC")                                                     
                                              )
                                          )
                                 )
-                            )
+                        )
                    ),
                    tabPanel("Cluster Many",
                             fluidRow(

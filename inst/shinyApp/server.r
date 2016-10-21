@@ -306,13 +306,6 @@ shinyServer(function(input, output, session) {
                 "plotClusters(cE)", 
                 sep = "\n", file = filePath, append = TRUE)
         }
-        #default plotClusters output from RSEC
-        output$imgRSEC <- renderPlot({
-            defaultMar<-par("mar")
-            plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-            par(mar=plotCMar)
-            plotClusters(cE, whichClusters = "workflow") #note this means will change if update cE later...
-        }, height = max((40/3) * nClusters(cE), 480))
 #         
 #         #outfitting proper whichClusters options for futrue widgets
 #         output$combineManyWhichClusters <- renderUI({
@@ -345,23 +338,30 @@ shinyServer(function(input, output, session) {
 #         }
          })
 #     
-#     #This function could certainly be refined, there may be better ways to upload data
-#     output$downloadDefaultPlotPCCM <- downloadHandler(
-#         filename = function(){ paste("DefaultPlotFromClusterMany.png")},
-#         content = function(file){ 
-#             #make sure updated values
-#             sE<-get("sE",envir=appGlobal)
-#             cE<-get("cE",envir=appGlobal)
-#             filePath<-get("filePath",envir=appGlobal)
-#             makeFile<-get("makeFile",envir=appGlobal)
-#             png(file, height = max((40/3) * getCEIterations(), 480), width = 2*480)
-#             defaultMar<-par("mar")
-#             plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-#             par(mar=plotCMar)
-#             plotClusters(cE, whichClusters = "clusterMany")
-#             dev.off()
-#         }
-#     )
+#default plotClusters output from RSEC
+        output$imgRSEC <- renderPlot({
+            defaultMar<-par("mar")
+            plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
+            par(mar=plotCMar)
+            plotClusters(cE, whichClusters = "workflow") #note this means will change if update cE later...
+        }, height = max((40/3) * nClusters(cE), 480))
+    #This function could certainly be refined, there may be better ways to upload data
+    output$downloadDefaultPlotPCRSEC <- downloadHandler(
+        filename = function(){ paste("DefaultPlotFromRSEC.png")},
+        content = function(file){ 
+            #make sure updated values
+            sE<-get("sE",envir=appGlobal)
+            cE<-get("cE",envir=appGlobal)
+            filePath<-get("filePath",envir=appGlobal)
+            makeFile<-get("makeFile",envir=appGlobal)
+            png(file, height = max((40/3) * getCEIterations(), 480), width = 2*480)
+            defaultMar<-par("mar")
+            plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
+            par(mar=plotCMar)
+            plotClusters(cE, whichClusters = "workflow")
+            dev.off()
+        }
+    )
     
     #---------------End RSEC tab-----------------
     
