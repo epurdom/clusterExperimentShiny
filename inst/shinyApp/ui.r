@@ -246,9 +246,11 @@ shinyUI(navbarPage("Cluster Experiment",
                                 )
                             ),
                             navlistPanel(
-                                tabPanel("Merge Clusters Input",
-                                         h4("Informative Dendrogram for merge cluster inputs:"),
-                                         plotOutput("imgInitalMergeClusters"),
+                                tabPanel("Initial Dendrogram",
+                                         p("Informative Dendrogram for merge cluster inputs:"),
+                                         plotOutput("imgInitalMergeClusters")
+                                ),
+                                tabPanel("Set Parameters",
                                          mergeClustersInput("mergeCInputs", "")
                                 ),
                                 tabPanel("Plot Clusters",

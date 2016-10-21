@@ -276,7 +276,7 @@ shinyServer(function(input, output, session) {
     # Begin RSEC Many Tab
     #####################################################
     #Calling modular functions
-    RSECCode <- callModule(makeCode, "rsec", stringsAsFactors = FALSE,isRSEC=TRUE,countModule=countModule) #function to update code based on users choices.
+    RSECCode <- callModule(makeClusterManyCode, "rsec", stringsAsFactors = FALSE,isRSEC=TRUE,countModule=countModule) #function to update code based on users choices.
 
     #reactive code to be run internally
     #can these two be combined??
@@ -369,7 +369,7 @@ shinyServer(function(input, output, session) {
     # Begin Cluster Many Tab
     #####################################################
     #Calling modular functions
-    clusterManyCode <- callModule(makeCode, "parameters", stringsAsFactors = FALSE,countModule=countModule)
+    clusterManyCode <- callModule(makeClusterManyCode, "parameters", stringsAsFactors = FALSE,countModule=countModule)
 
     #reactive code to be run internally
     #can these two be combined??

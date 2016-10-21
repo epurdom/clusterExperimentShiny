@@ -57,21 +57,14 @@ dimReduceInput <- function(id, label = "inputs",isRSEC=FALSE,singleChoice=FALSE,
         )
     }
     else{
-        #for some reason the single input option is not working...
+        #for some reason the single input option is not working in setting up conditional panel... can't figure out why
         dimBox<-multipleOptionsInput(id,sidelabel="Select Dimensionality Reduction?", options=dimReduceOptions,val="dimReduce", help="What method of dimensionality reduction to perform before clustering.",required=FALSE, functionName=functionName)
         #dimBox<-singleOptionsInput(id,sidelabel="Select Dimensionality Reduction?", options=dimReduceOptions,val="dimReduce", help="What method of dimensionality reduction to perform before clustering.",required=FALSE, functionName=functionName)
         pcaDimBox<-conditionalPanel(
             condition = setUpConditionalPanelTest( id, val="dimReduce", allOptions=dimReduceOptions, validOptions="PCA"),
-            tags$hr(),
             singleNumericInput(id, sidelabel="# PCA dims", aboveLabel="e.g. 5", val="ndims", defaultValue=NULL, help="Please enter a integer value of the number of PCA dimensions to keep. Used when 'PCA' is identified as choice in dimensionality reduction", required = TRUE,functionName=functionName) 
         )
-        #if(functionName=="makeDendrogram") browser()
 #        pcaDimBox<-singleNumericInput(id, sidelabel="# PCA dims", aboveLabel="e.g. 5", val="ndims", defaultValue=NULL, help="Please enter a integer value of the number of PCA dimensions to keep. Used when 'PCA' is identified as choice in dimensionality reduction", required = TRUE,functionName=functionName) 
-        ###Conditional: if pca
-#         pcaDimBox<-conditionalPanel(
-#             condition = setUpConditionalPanelTest( id, val="dimReduce", allOptions=dimReduceOptions, validOptions="PCA"),
-#             singleNumericInput(id, sidelabel="# PCA dims", aboveLabel="e.g. 5", val="ndims", defaultValue=NULL, help="Please enter a integer value of the number of PCA dimensions to keep. Used when 'PCA' is identified as choice in dimensionality reduction", required = TRUE,functionName=functionName) 
-#         )
         ###Conditional: if mad/cv/var
         varDimBox<-conditionalPanel(
             condition =  setUpConditionalPanelTest( id, val="dimReduce", allOptions=dimReduceOptions, validOptions=c("mad","var","cv")),
@@ -201,106 +194,9 @@ specializedInputs <- function(id, label = "Specializedinputs",isRSEC=FALSE) {
 
 
 
-#################
-# Capture user inputs and make code
-# Reactive function which builds the code being run by R:
-# Naming convention: for options 'abc', input$aAbc describes a logical as to whether it was added, and input$abc is the actual values that were chosen.
-#################
-#' @rdname InternalModules
-#' @export
-makeCode <- function(input, output, session, stringsAsFactors, isRSEC=FALSE,countModule) {
-    
-    clusterManyCode <- reactive({
-        clusterManyCode <- paste("")
-        #-------
-        # Core arguments
-        #-------
-        if(testArguments(countModule,"isCount") && countModule[["isCount"]]=="TRUE"){
-            clusterManyCode<-paste(clusterManyCode,", isCount=",countModule[["isCount"]],"")
-        }
-        else{
-            if(testArguments(countModule,"transFun") && !is.null(countModule[["transFun"]])) clusterManyCode<-paste(clusterManyCode,", transFun=",countModule[["transFun"]])
-        }
-        clusterManyCode<-combineArgs(input, clusterManyCode,"clusterFunction",isCharacter=TRUE)
-        if(!isRSEC){
-            clusterManyCode<-combineArgs(input, clusterManyCode,"subsample",isCharacter=FALSE)
-            clusterManyCode<-combineArgs(input, clusterManyCode,"sequential",isCharacter=FALSE)
-        }
-        #-------
-        # Dimensionality Reduction
-        #-------	
-        clusterManyCode<-combineArgs(input, clusterManyCode,"dimReduce",isCharacter=TRUE)
-        clusterManyCode<-combineArgs(input, clusterManyCode,"nVarDims",isCharacter=FALSE)
-        clusterManyCode<-combineArgs(input, clusterManyCode,"nPCADims",isCharacter=FALSE)
-        
-        #-------
-        # Other Arguments
-        #-------
-        clusterManyCode<-combineArgs(input, clusterManyCode,"alphas",isCharacter=FALSE)
-        clusterManyCode<-combineArgs(input, clusterManyCode,"betas",isCharacter=FALSE)
-        clusterManyCode<-combineArgs(input, clusterManyCode,"minSizes",isCharacter=FALSE)
-        if(!isRSEC){
-            clusterManyCode<-combineArgs(input, clusterManyCode,"ks",isCharacter=FALSE)
-            clusterManyCode<-combineArgs(input, clusterManyCode,"findBestK",isCharacter=FALSE)
-            clusterManyCode<-combineArgs(input, clusterManyCode,"removeSil",isCharacter=FALSE)
-            clusterManyCode<-combineArgs(input, clusterManyCode,"silCutoff",isCharacter=FALSE)
-        }
-        else clusterManyCode<-combineArgs(input, clusterManyCode,"k0s",isCharacter=FALSE)
-        
-        # not yet implemented
-        #	clusterManyCode<-combineArgs(input, clusterManyCode,"distFunction",isCharacter=TRUE)
-        
-        #-------
-        # utility arguments
-        #-------
-        clusterManyCode<-combineArgs(input, clusterManyCode,"ncores",isCharacter=FALSE)
-        clusterManyCode<-combineArgs(input, clusterManyCode,"random.seed",isCharacter=FALSE)
-        
-        #-------
-        # Specialized options for sequential:
-        #-------
-        seqArgsCode<-":"
-        #if(testArguments(input,"remain.n")) browser()
-        seqArgsCode<-combineArgs(input,seqArgsCode,"remain.n",isCharacter=FALSE)
-        seqArgsCode<-combineArgs(input,seqArgsCode,"top.can",isCharacter=FALSE)
-        seqArgsCode<-combineArgs(input,seqArgsCode,"kmin",isCharacter=FALSE)
-        seqArgsCode<-combineArgs(input,seqArgsCode,"kmax",isCharacter=FALSE)
-        
-        if(seqArgsCode!=":"){#then add it
-            seqArgsCode<-gsub(":,","",seqArgsCode)
-            seqArgsCode<-paste(", seqArgs=list(",seqArgsCode,")")
-            clusterManyCode<-paste0(clusterManyCode,seqArgsCode,collapse="")
-        }
-        #-------
-        # Specialized options for subsampling:
-        #-------
-        subArgsCode<-":"
-        #if(testArguments(input,"resamp.num")) browser()
-        subArgsCode<-combineArgs(input,subArgsCode,"resamp.num",isCharacter=FALSE)
-        subArgsCode<-combineArgs(input,subArgsCode,"samp.p",isCharacter=FALSE)
-        subArgsCode<-combineArgs(input,subArgsCode,"classifyMethod",isCharacter=TRUE)
-        
-        if(subArgsCode!=":"){#then add it
-            subArgsCode<-gsub(":,","",subArgsCode)
-            subArgsCode<-paste(", subsampleArgs=list(",subArgsCode,")")
-            clusterManyCode<-paste0(clusterManyCode,subArgsCode,collapse="")
-        }
-        
-        #    clusterManyCode <- paste(clusterManyCode, ")", sep = "")
-        
-        clusterManyCode
-    })
-    return(clusterManyCode)
-}
 
-#' @rdname InternalModules
-#' @export
-clusterManyHelpText <- function() {
-    paste(
-        # "Summary: The clusterMany function runs many clusterings at once. The user picks options that should be tried, and the clusterMany function will take all combinations of these options, and run the corresponding clustering for each. No clusterings will be calculated until you press 'Run This Code' to the right.",
-        "Directions: The user should first set the the core imputs on the starting page. After this, the user can choose to navigate to other tabs to find different options to vary. For all these inputs choosing multiple values means that clusterings with all these values will be tried in combination with all of the other values also already chosen (except some global, esoteric ones under 'Specialized options'). If you do not choose the option, the (single) default will be run. No clusterings will be calculated until you press 'Run This Code' to the right. Under the 'Run This Code' button , you can see how many clusterings will be run based on the options you have chosen so far. "
-    )
-}
+
+
 
 
 #' @rdname InternalModules

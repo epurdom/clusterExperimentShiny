@@ -1,5 +1,5 @@
-RSECHelpText<-function(){ "This is RSEC... more to come"}
-
+#' @rdname InternalModules
+#' @export
 RSECInputs<-function(id){
     tagList(
         tabPanel("Main Options",
