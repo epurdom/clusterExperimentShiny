@@ -1,8 +1,6 @@
 #This line allows large file uploads
 options(shiny.maxRequestSize=30*1024^2)
 shinyServer(function(input, output, session) {
-    
-    
     #make sure updated values
     sE<-get("sE",envir=appGlobal)
     cE<-get("cE",envir=appGlobal)
@@ -470,22 +468,12 @@ shinyServer(function(input, output, session) {
     #####################################################
     
     #makes the second half of dendrogram code
-    makeDendrogramLatterCode <- callModule(makeMakeDendrogramCode, "mDInputs")
-    
-    #creates make Dendrogram code
-    makeDendrogramCode <- function(){
-        code <- paste("cE <- makeDendrogram(cE")
-#         if(input[["mDInputs-aWhichCluster"]])
-#             code <- paste(code, ", whichCluster = '", 
-#                           paste(input[["mDInputs-whichCluster"]]), "'", sep = "")
-        code <- paste(code, makeDendrogramLatterCode(), ")",sep = "")
-        return(code)
-    }
-    
+    makeDendrogramCode <- callModule(makeMakeDendrogramCode, "mDInputs")
+    makeDendrogramPDCode <- callModule(makePlotDendrogramCode, "mDInputs",setParameters=FALSE) #function to update code based on users choices.
+    makeDendrogramPHCode <- callModule(makePlotHeatmapCode, "mDInputs",setParameters=FALSE) #function to update code based on users choices.
     output$makeDendrogramCode <- renderText({
         makeDendrogramCode()
     })
-    
     #When clicked runs displayed make dendrogram code
     observeEvent(input$runMakeDendrogram, {
         #####
@@ -495,41 +483,10 @@ shinyServer(function(input, output, session) {
         filePath<-get("filePath",envir=appGlobal)
         makeFile<-get("makeFile",envir=appGlobal)
         ######
+        cE<-runCodeAssignGlobal(makeDendrogramCode(),recordCode=makeFile,recordTag="Make Dendrogram")
+        output$imgPlotDendrogram <-plotClustersServer(makeDendrogramPDCode(),fileName=NULL,recordCode=makeFile,type="plotDendrogram")
+        output$imgPlotHeatmapMD <-plotClustersServer(makeDendrogramPHCode(),fileName=NULL,recordCode=makeFile,type="plotHeatmap")
         
-        #saving script
-        if(makeFile) {
-            cat("\n", 
-                "#Make Dendrogram Tab:",
-                makeDendrogramCode(), 
-                "#Plotting Dendrogram",
-                "defaultMar<-par('mar')",
-                "plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)",
-                "par(mar=plotCMar)",
-                "plotDendrogram(cE)",
-                "\n",
-                "#Plotting Heatmap",
-                "defaultMar<-par('mar')",
-                "plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)",
-                "par(mar=plotCMar)",
-                "plotHeatmap(cE)",
-                sep = "\n", file = filePath, append = TRUE)
-        }
-        
-        cE<-runCodeAssignGlobal(makeDendrogramCode())
-        
-        output$imgPlotDendrogram <- renderPlot({
-            defaultMar<-par("mar")
-            plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-            par(mar=plotCMar)
-            plotDendrogram(cE)
-        })
-        
-        output$imgPlotHeatmapMD <- renderPlot({
-            defaultMar<-par("mar")
-            plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-            par(mar=plotCMar)
-            plotHeatmap(cE)
-        })
         
         #**************************************************
         ##This image is output in Merge Clusters Input Page:
@@ -553,48 +510,16 @@ shinyServer(function(input, output, session) {
         }
         
     })
-    
+    ###Save the default plots at user's request
     output$downloadDefaultPlotPDMD <- downloadHandler(
-        filename = function(){ paste("DefaultPlotDendrogramFromMakeDendrogram.png")},
-        content = function(file){ 
-            #####
-            #make sure updated values
-            sE<-get("sE",envir=appGlobal)
-            cE<-get("cE",envir=appGlobal)
-            filePath<-get("filePath",envir=appGlobal)
-            makeFile<-get("makeFile",envir=appGlobal)
-            ######
-            #ggsave(fileName(), plot = plotClusters(cE, whichClusters = "clusterMany"), )
-            png(file, height = 480, width = 2*480)
-            defaultMar<-par("mar")
-            plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-            par(mar=plotCMar)
-            eval(parse(text = makeDendrogramCode()))
-            plotDendrogram(cE)
-            dev.off()
-        }
+        filename = "defaultPlotDendrogramFromMakeDendrogram.png",
+        content=function(file){plotClustersServer(code= makeDendrogramPDCode(),fileName=file,type="plotDendrogram")}
     )
-    
-    
     output$downloadDefaultPlotPHMD <- downloadHandler(
-        filename = function(){ paste("DefaultPlotHeatmapFromMakeDendrogram.png")},
-        content = function(file){ 
-            #ggsave(fileName(), plot = plotClusters(cE, whichClusters = "clusterMany"), )
-            #####
-            #make sure updated values
-            sE<-get("sE",envir=appGlobal)
-            cE<-get("cE",envir=appGlobal)
-            filePath<-get("filePath",envir=appGlobal)
-            makeFile<-get("makeFile",envir=appGlobal)
-            ######
-            png(file, height = 480, width = 2*480)
-            defaultMar<-par("mar")
-            plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-            par(mar=plotCMar)
-            plotHeatmap(cE)
-            dev.off()
-        }
+        filename = "defaultHeatmapFromMakeDendrogram.png",
+        content=function(file){plotClustersServer(code= makeDendrogramPHCode(),fileName=file,type="plotHeatmap")}
     )
+
     
     #---------------End make dendrogram tabe-----------------
     
@@ -604,6 +529,8 @@ shinyServer(function(input, output, session) {
     
     #merge clusters code
     mergeClustersCode <- callModule(makeMergeClustersCode, "mergeCInputs")
+    mergeClustersPCCode <- callModule(makePlotClustersCode, "mergeCInputs",setParameters=FALSE,whichClusters=c("mergeClusters","combineMany","clusterMany")) #function to update code based on users choices.
+    mergeClustersPHCode <- callModule(makePlotHeatmapCode, "mergeCInputs",setParameters=FALSE) #function to update code based on users choices.
     
     output$mergeClustersCode <- renderText({
         mergeClustersCode()
@@ -618,41 +545,9 @@ shinyServer(function(input, output, session) {
         filePath<-get("filePath",envir=appGlobal)
         makeFile<-get("makeFile",envir=appGlobal)
         ######
-        
-        if(makeFile) {
-            cat("\n", 
-                "#Merge Clusters Tab:",
-                mergeClustersCode(), 
-                "#Plotting Clusters after call to merge clusters",
-                "defaultMar<-par('mar')",
-                "plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)",
-                "par(mar=plotCMar)",
-                "plotClusters(cE)",
-                "\n",
-                "#Plotting Heatmap after call to merge clusters",
-                "defaultMar<-par('mar')",
-                "plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)",
-                "par(mar=plotCMar)",
-                "plotHeatmap(cE)",
-                sep = "\n", file = filePath, append = TRUE)
-        }
-        cE<-runCodeAssignGlobal(mergeClustersCode())
-        
-        output$imgPlotClustersMergeClusters <- renderPlot({
-            # cE is the clusterExperiment object 
-            defaultMar<-par("mar")
-            plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-            par(mar=plotCMar)
-            plotClusters(cE)
-        }, height = max((40/3) * sum(clusterTypes(cE) %in% input[["mergeCInputs-whichClusters"]]), 480))
-        
-        output$imgPlotHeatmapMergeClusters <- renderPlot({
-            # cE is the clusterExperiment object
-            defaultMar<-par("mar")
-            plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-            par(mar=plotCMar)
-            plotHeatmap(cE)
-        })
+        cE<-runCodeAssignGlobal(mergeClustersCode(),recordCode=makeFile,recordTag="Merge Clusters based on dendrogram")
+        output$imgPlotClustersMergeClusters <-plotClustersServer(mergeClustersPCCode(),fileName=NULL,recordCode=makeFile,type="plotClusters")
+        output$imgPlotHeatmapMergeClusters <-plotClustersServer(mergeClustersPHCode(),fileName=NULL,recordCode=makeFile,type="plotHeatmap")
         
         output$plotClustersWhichClusters <- renderUI({
             multipleOptionsInput("pCInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
@@ -672,49 +567,17 @@ shinyServer(function(input, output, session) {
         }
         
     })
-    
+    ###Save the default plots at user's request
     output$downloadDefaultPlotClustersMergeClusters <- downloadHandler(
-        filename = function(){ paste("DefaultPlotClustersMergeClusters.png")},
-        content = function(file){ 
-            #####
-            #make sure updated values
-            sE<-get("sE",envir=appGlobal)
-            cE<-get("cE",envir=appGlobal)
-            filePath<-get("filePath",envir=appGlobal)
-            makeFile<-get("makeFile",envir=appGlobal)
-            ######
-            #ggsave(fileName(), plot = plotClusters(cE, whichClusters = "clusterMany"), )
-            png(file, height = max((40/3) * sum(clusterTypes(cE) %in% input[["mergeCInputs-whichClusters"]]), 480),
-                width = 2*480)
-            defaultMar<-par("mar")
-            plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-            par(mar=plotCMar)
-            plotClusters(cE)
-            dev.off()
-        }
+        filename = "defaultPlotClustersFromMergeClusters.png",
+        content=function(file){plotClustersServer(code= mergeClustersPCCode(),fileName=file,type="plotClusters")}
     )
-    
     output$downloadDefaultPlotHeatmapMergeClusters <- downloadHandler(
-        filename = function(){ paste("DefaultPlotHeatmapMergeClusters.png")},
-        content = function(file){ 
-            #####
-            #make sure updated values
-            sE<-get("sE",envir=appGlobal)
-            cE<-get("cE",envir=appGlobal)
-            filePath<-get("filePath",envir=appGlobal)
-            makeFile<-get("makeFile",envir=appGlobal)
-            ######
-            #ggsave(fileName(), plot = plotClusters(cE, whichClusters = "clusterMany"), )
-            png(file, height = max((40/3) * getCEIterations(), 480), width = 2*480)
-            defaultMar<-par("mar")
-            plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-            par(mar=plotCMar)
-            plotHeatmap(cE)
-            dev.off()
-        }
+        filename = "defaultHeatmapFromMergeClusters.png",
+        content=function(file){plotClustersServer(code= mergeClustersPHCode(),fileName=file,type="plotHeatmap")}
     )
     
-    
+
     #---------------End merge clusters tab-----------------
     
     #####################################################

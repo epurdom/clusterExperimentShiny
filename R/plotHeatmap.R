@@ -11,16 +11,7 @@ plotClusterInput <- function(id, label = "plotCluster inputs") {
 
 
 
-#' @rdname InternalModules
-#' @export
-makePlotHeatmapCode <- function(input, output, session, stringsAsFactors) {
-  code <- reactive({
-    code <- paste("plotHeatmap(cE")
-    
-    code <- paste(code, ")")
-  })
-  return(code)
-}
+
 
 
 #' @rdname InternalModules

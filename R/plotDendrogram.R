@@ -42,26 +42,7 @@ plotDendrogramInput <- function(id, label = "plotDendrogram inputs") {
   )
 }
 
-#make code
-#' @rdname InternalModules
-#' @export
-makePlotDendrogramCode <- function(input, output, session, stringsAsFactors) {
-  code <- reactive({
-    code <- paste("plotDendrogram(cE" )
-    
-    if(input$aLeaves) {
-      code <- paste(code, ", leaves = '", input$leaves, "'", sep = "")
-    }
-    
-    if(input$aClusterNames) {
-      code <- paste(code, ", clusterNames = ", input$clusterNames, sep = "")
-    }
-    
-    code <- paste(code, ")", sep = "")
-  })
-  
-  return(code)
-}
+
 
 #help text
 #' @rdname InternalModules

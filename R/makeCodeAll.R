@@ -111,12 +111,16 @@ getIterations <- function(codeText,isRSEC=FALSE,countIterations=TRUE){
 #' @export
 makeMakeDendrogramCode <- function(input, output, session) {
     code <- reactive({
-        code <- paste("")
+        code <- paste("cE <- makeDendrogram(cE")
         #if(testArguments(input,"dimReduce")) browser()
         code<-combineArgs(input, code,"dimReduce",isCharacter=TRUE)
         code<-combineArgs(input, code,"ndims",isCharacter=FALSE)
         code<-combineArgs(input, code,"ignoreUnassignedVar",isCharacter=FALSE)
         code<-combineArgs(input,code,"whichClusters",isCharacter=TRUE)
+        #         if(input[["mDInputs-aWhichCluster"]])
+        #             code <- paste(code, ", whichCluster = '", 
+        #                           paste(input[["mDInputs-whichCluster"]]), "'", sep = "")
+        code <- paste(code, ")",sep = "")
         code    
     })
     return(code)
@@ -214,3 +218,29 @@ makePlotCoClusteringCode <- function(input, output, session, setParameters=TRUE)
     return(code)
 }
 
+#make code
+#' @rdname InternalModules
+#' @export
+makePlotDendrogramCode <- function(input, output, session, setParameters=TRUE) {
+    code <- reactive({
+        code <- paste("plotDendrogram(cE" )
+        if(setParameters){
+            code<-combineArgs(input,code,"leaves",isCharacter=TRUE)
+            code<-combineArgs(input,code,"clusterNames",isCharacter=FALSE)
+        }
+        code <- paste(code, ")", sep = "")
+    })
+    
+    return(code)
+}
+
+#' @rdname InternalModules
+#' @export
+makePlotHeatmapCode <- function(input, output, session, setParameters=TRUE) {
+    code <- reactive({
+        code <- paste("plotHeatmap(cE")
+        
+        code <- paste(code, ")")
+    })
+    return(code)
+}
