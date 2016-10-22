@@ -6,7 +6,7 @@
 
 #' @name makeCodeModules
 #' @export
-makeClusterManyCode <- function(input, output, session, stringsAsFactors, isRSEC=FALSE,countModule) {
+makeClusterManyCode <- function(input, output, session, isRSEC=FALSE,countModule) {
     
     clusterManyCode <- reactive({
         clusterManyCode <- paste("")
@@ -91,6 +91,7 @@ makeClusterManyCode <- function(input, output, session, stringsAsFactors, isRSEC
     return(clusterManyCode)
 }
 
+# runs clusterMany/RSEC to see how many iterations it implies...
 #' @rdname makeCodeModules
 #' @export
 getIterations <- function(codeText,isRSEC=FALSE,countIterations=TRUE){
@@ -98,22 +99,17 @@ getIterations <- function(codeText,isRSEC=FALSE,countIterations=TRUE){
     #####
     #make sure updated values
     sE<-get("sE",envir=appGlobal)
-    cE<-get("cE",envir=appGlobal)
-    filePath<-get("filePath",envir=appGlobal)
-    makeFile<-get("makeFile",envir=appGlobal)
-    ######
-    
     codeToBeNotRun <- paste(functionName,"(sE, run = FALSE ", codeText, ")",sep = "")
-    codeToBeRunSE <- paste(functionName,"(sE", codeText, ")",sep = "")
-    codeToBeRunCE <- paste(functionName,"(sE", codeText, ")",sep = "")
+    codeToBeRunSE <- paste("cE<-",functionName,"(sE", codeText, ")",sep = "")
+#    codeToBeRunCE <- paste("cE<-",functionName,"(cE", codeText, ")",sep = "") #not sure any more that really need this!
     nIter<-if(countIterations) nrow(eval(parse(text = codeToBeNotRun))$paramMatrix) else NULL
-    return(list(nIter=nIter,fullCodeSE=codeToBeRunSE,fullCodeCE=codeToBeRunCE))
+    return(list(nIter=nIter,fullCodeSE=codeToBeRunSE))#,fullCodeCE=codeToBeRunCE))
     
 }
 
 #' @rdname makeCodeModules
 #' @export
-makeMakeDendrogramCode <- function(input, output, session, stringsAsFactors) {
+makeMakeDendrogramCode <- function(input, output, session) {
     code <- reactive({
         code <- paste("")
         #if(testArguments(input,"dimReduce")) browser()
@@ -128,15 +124,16 @@ makeMakeDendrogramCode <- function(input, output, session, stringsAsFactors) {
 
 #' @rdname makeCodeModules
 #' @export
-makeCombineManyCode <- function(input, output, session, stringsAsFactors) {
+makeCombineManyCode <- function(input, output, session) {
     code <- reactive({
         # browser()
-        code <- paste("")
+        code <- paste("cE<-combineMany(cE")
         code<-combineArgs(input, code,"proportion",isCharacter=FALSE)
         code<-combineArgs(input, code,"propUnassigned",isCharacter=FALSE)
         code<-combineArgs(input, code,"minSize",isCharacter=FALSE)
         code<-combineArgs(input,code,"clusterLabel",isCharacter=TRUE)
         code<-combineArgs(input,code,"whichClusters",isCharacter=TRUE)
+        code<-paste(code,")")
     })
     
     return(code)
@@ -145,7 +142,7 @@ makeCombineManyCode <- function(input, output, session, stringsAsFactors) {
 #make code
 #' @rdname makeCodeModules
 #' @export
-makeMergeClustersCode <- function(input, output, session, stringsAsFactors) {
+makeMergeClustersCode <- function(input, output, session) {
     code <- reactive({
         code <- paste("cE <- mergeClusters(cE")
         code<-combineArgs(input, code,"mergeMethod",isCharacter=TRUE)
@@ -162,7 +159,7 @@ makeMergeClustersCode <- function(input, output, session, stringsAsFactors) {
 #creating code
 #' @rdname makeCodeModules
 #' @export
-makePlotClustersCode <- function(input, output, session, stringsAsFactors,setParameters=TRUE,whichClusters) {
+makePlotClustersCode <- function(input, output, session, setParameters=TRUE,whichClusters) {
     code <- reactive({
         code <- paste("plotClusters(cE")
         if(setParameters){
@@ -182,6 +179,7 @@ makePlotClustersCode <- function(input, output, session, stringsAsFactors,setPar
         else{
             paste(code,"whichClusters=c(",paste(whichClusters,collapse=","),")")
         }
+        ###Note: must always put 'whichClusters=' last to be plotted correctly!
 
         code <- paste(code, ")", sep = "")
     })
@@ -202,3 +200,17 @@ makePlotClustersCode <- function(input, output, session, stringsAsFactors,setPar
 #                 code <- paste(code, ", minRequireColor = ", input$minRequireColor)
 #             }
 #         }
+
+#' @rdname InternalModules
+#' @export
+makePlotCoClusteringCode <- function(input, output, session, setParameters=TRUE) {
+    code <- reactive({
+        code <- paste("plotCoClustering( cE")
+        if(setParameters){
+            
+        }
+        code <- paste(code,")")
+    })
+    return(code)
+}
+

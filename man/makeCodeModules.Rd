@@ -20,6 +20,7 @@ makeCombineManyCode(input, output, session, stringsAsFactors)
 
 makeMergeClustersCode(input, output, session, stringsAsFactors)
 
-makePlotClustersCode(input, output, session, stringsAsFactors)
+makePlotClustersCode(input, output, session, stringsAsFactors,
+  setParameters = TRUE, whichClusters)
 }
 

@@ -276,8 +276,9 @@ shinyServer(function(input, output, session) {
     # Begin RSEC Many Tab
     #####################################################
     #Calling modular functions
-    RSECCode <- callModule(makeClusterManyCode, "rsec", stringsAsFactors = FALSE,isRSEC=TRUE,countModule=countModule) #function to update code based on users choices.
-
+    RSECCode <- callModule(makeClusterManyCode, "rsec",isRSEC=TRUE,countModule=countModule) #function to update code based on users choices.
+    RSECPCCode <- callModule(makePlotClustersCode, "rsec",setParameters=FALSE,whichClusters="workflow") #function to update plotClusters (not really update, because doesn't change)
+    
     #reactive code to be run internally
     #can these two be combined??
     output$RSECCode <- renderText({
@@ -297,15 +298,10 @@ shinyServer(function(input, output, session) {
         filePath<-get("filePath",envir=appGlobal)
         makeFile<-get("makeFile",envir=appGlobal)
         codeList <- getIterations(codeText=RSECCode(),isRSEC=TRUE,countIterations=FALSE)
-        cE <-assignGlobal("cE",eval(parse(text = codeList$fullCodeSE))) #codeToBeEvaluated()))) 
-        
-        if(makeFile) {
-            cat("\n", 
-                "#RSEC tab:",
-                codeList$fullCodeSE, # codeToBeEvaluated(), 
-                "plotClusters(cE)", 
-                sep = "\n", file = filePath, append = TRUE)
-        }
+        cE<-runCodeAssignGlobal(codeList$fullCodeSE,recordCode=makeFile,recordTag="RSEC:")
+        #default plotClusters output from clusterMany
+        output$imgCE <-plotClustersServer(RSECPCCode,fileName=NULL,recordCode=makeFile)
+    
 #         
 #         #outfitting proper whichClusters options for futrue widgets
 #         output$combineManyWhichClusters <- renderUI({
@@ -340,31 +336,11 @@ shinyServer(function(input, output, session) {
 #     
 #default plotClusters output from RSEC
 
-    RSECPCCode <- callModule(makePlotClustersCode, "rsec",setParameters=FALSE,whichClusters="workflow") #function to update code based on users choices.
-#    callModule(plotClustersModule, "rsec", ) #function to update code based on users choices.
-    
-    output$imgRSEC <- renderPlot({
-            defaultMar<-par("mar")
-            par(mar=plotCMar)
-            eval(parse(text = RSECPCCode() ))#plotClusters(cE, whichClusters = "workflow") #note this means will change if update cE later...
-        }, height = max((40/3) * nClusters(cE), 480))
-    #This function could certainly be refined, there may be better ways to upload data
-    output$downloadDefaultPlotPCRSEC <- downloadHandler(
-        filename = function(){ paste("DefaultPlotFromRSEC.png")},
-        content = function(file){ 
-            #make sure updated values
-            sE<-get("sE",envir=appGlobal)
-            cE<-get("cE",envir=appGlobal)
-            filePath<-get("filePath",envir=appGlobal)
-            makeFile<-get("makeFile",envir=appGlobal)
-            png(file, height = max((40/3) * getCEIterations(), 480), width = 2*480)
-            defaultMar<-par("mar")
-            plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-            par(mar=plotCMar)
-            plotClusters(cE, whichClusters = "workflow")
-            dev.off()
-        }
+    output$downloadDefaultPCRSEC <- downloadHandler(
+        filename = "DefaultPlotClustersFromRSEC.png",
+        content=function(file){plotClustersServer(code= RSECPCCode(),fileName=file,recordCode=FALSE)}
     )
+
     
     #---------------End RSEC tab-----------------
     
@@ -372,8 +348,9 @@ shinyServer(function(input, output, session) {
     # Begin Cluster Many Tab
     #####################################################
     #Calling modular functions
-    clusterManyCode <- callModule(makeClusterManyCode, "parameters", stringsAsFactors = FALSE,countModule=countModule)
-
+    clusterManyCode <- callModule(makeClusterManyCode, "parameters",countModule=countModule)
+    CMPCCode <- callModule(makePlotClustersCode, "parameters",setParameters=FALSE,whichClusters="clusterMany") #function to update code based on users choices.
+    
     #reactive code to be run internally
     #can these two be combined??
     output$clusterManyCode <- renderText({
@@ -384,8 +361,6 @@ shinyServer(function(input, output, session) {
         codeList <- getIterations(codeText=clusterManyCode(),isRSEC=FALSE)
         paste(codeList$nIter, " cluster iterations given these choices.")
     })
-    CMPCCode <- callModule(makePlotClustersCode, "parameters",setParameters=FALSE,whichClusters="clusterMany") #function to update code based on users choices.
-    #output$CMPCCode<-CMPCCode()
     observeEvent(input$runCM, {
         #make sure updated values
         sE<-get("sE",envir=appGlobal)
@@ -393,22 +368,11 @@ shinyServer(function(input, output, session) {
         filePath<-get("filePath",envir=appGlobal)
         makeFile<-get("makeFile",envir=appGlobal)
         codeList <- getIterations(codeText=clusterManyCode(),isRSEC=FALSE,countIterations=FALSE)
-        cE <-assignGlobal("cE",eval(parse(text = codeList$fullCodeSE))) #codeToBeEvaluated()))) 
-        if(makeFile) {
-            cat("\n", 
-                "#Cluster Many tab:",
-                codeList$fullCodeSE, # codeToBeEvaluated(), 
-                CMPCCode(), 
-                sep = "\n", file = filePath, append = TRUE)
-        }
+        cE<-runCodeAssignGlobal(codeList$fullCodeSE,recordCode=makeFile,recordTag="Cluster Many:")
         #default plotClusters output from clusterMany
-        #output$imgCE <-plotClustersServer(CMPCCode())
-        output$imgCE <- renderPlot({
-            par(mar=plotCMar)
-            eval(parse(text = CMPCCode() ))
-        }, height = max((40/3) * nClusters(cE), 480))
-        
-        #outfitting proper whichClusters options for futrue widgets
+        output$imgCE <-plotClustersServer(CMPCCode(),fileName=NULL,recordCode=makeFile)
+
+        #outfitting proper whichClusters options for future widgets
         output$combineManyWhichClusters <- renderUI({
             multipleOptionsInput("cMInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
                                  val = "whichClusters", functionName="combineMany",help = "a numeric or character vector that specifies
@@ -438,24 +402,27 @@ shinyServer(function(input, output, session) {
             }
         }
     })
-    
-    #This function could certainly be refined, there may be better ways to upload data
     output$downloadDefaultPlotPCCM <- downloadHandler(
-        filename = function(){ paste("DefaultPlotFromClusterMany.png")},
-        content = function(file){ 
-            #make sure updated values
-            sE<-get("sE",envir=appGlobal)
-            cE<-get("cE",envir=appGlobal)
-            filePath<-get("filePath",envir=appGlobal)
-            makeFile<-get("makeFile",envir=appGlobal)
-            png(file, height = max((40/3) * nClusters(cE), 480), width = 2*480)
-            defaultMar<-par("mar")
-            plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-            par(mar=plotCMar)
-            plotClusters(cE, whichClusters = "clusterMany")
-            dev.off()
-        }
+                 filename = "DefaultPlotClustersFromClusterMany.png",
+                 content=function(file){plotClustersServer(code= CMPCCode(),fileName=file)}
     )
+        
+#     output$downloadDefaultPlotPCCM <- downloadHandler(
+#         filename = function(){ paste("DefaultPlotFromClusterMany.png")},
+#         content = function(file){ 
+#             #make sure updated values
+#             sE<-get("sE",envir=appGlobal)
+#             cE<-get("cE",envir=appGlobal)
+#             filePath<-get("filePath",envir=appGlobal)
+#             makeFile<-get("makeFile",envir=appGlobal)
+#             png(file, height = max((40/3) * nClusters(cE), 480), width = 2*480)
+#             defaultMar<-par("mar")
+#             plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
+#             par(mar=plotCMar)
+#             CMPCCode()
+#             dev.off()
+#         }
+#     )
     
     #---------------End cluster Many tab-----------------
     
@@ -464,17 +431,10 @@ shinyServer(function(input, output, session) {
     #####################################################
     
     #renders the code for the second half of combine many
-    combineManyLatterCode <- callModule(makeCombineManyCode, "cMInputs", stringsAsFactors = FALSE)
-    #function to render reactive combine many code
-    combineManyCode <- function(){
-        code <- paste("cE <- combineMany(cE")
-        code <- paste(code, combineManyLatterCode(), ")",sep = "")
-        return(code)
-    }
-    output$combineManyCode <- renderText({
-        combineManyCode()
-    })
-    
+    combineManyCode <- callModule(makeCombineManyCode, "cMInputs")
+    combineManyPCCode <- callModule(makePlotClustersCode, "cMInputs",setParameters=FALSE,whichClusters=c("combineMany","clusterMany")) #function to update code based on users choices.
+    combineManyCCCode <-callModule(makePlotCoClusteringCode,"cMInputs",setParameters=FALSE) #function to update code based on users choices.
+    output$combineManyCode <- renderText({combineManyCode()})
     #run combine many button
     observeEvent(input$runCombineMany, {
         #make sure updated values
@@ -482,44 +442,9 @@ shinyServer(function(input, output, session) {
         cE<-get("cE",envir=appGlobal)
         filePath<-get("filePath",envir=appGlobal)
         makeFile<-get("makeFile",envir=appGlobal)
-        
-        if(makeFile) {
-            cat("\n", 
-                "#Combine Many Tab",
-                combineManyCode(), 
-                "#Plotting Clusters:",
-                "defaultMar<-par('mar')", 
-                "plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)", 
-                "par(mar=plotCMar)", 
-                "plotClusters(cE, whichClusters = 'clusterMany')", 
-                "\n",
-                "#Plotting CoClusters:",
-                "defaultMar<-par('mar')",
-                "plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)",
-                "par(mar=plotCMar)",
-                "plotCoClustering(cE)",
-                sep = "\n", file = filePath, append = TRUE)
-        }
-        
-        cE<-runCodeAssignGlobal(combineManyCode())
-        
-        #default images from combine many
-        output$imgCombineManyPC <- renderPlot({
-            defaultMar<-par("mar")
-            plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-            par(mar=plotCMar)
-            plotClusters(cE, whichClusters = "clusterMany") #??? Unsure if correct default, ???
-            #???crashes without whichClusters specified???
-        }, height = max(length(clusterTypes(cE)) * (40/3), 480))
-        
-        output$imgCombineManyPCC <- renderPlot({
-            
-            defaultMar<-par("mar")
-            plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-            par(mar=plotCMar)
-            plotCoClustering(cE)
-            
-        })
+        cE<-runCodeAssignGlobal(combineManyCode(),recordCode=makeFile,recordTag="Combine Many Code")
+        output$imgCombineManyPC <-plotClustersServer(combineManyPCCode(),fileName=NULL,recordCode=makeFile)
+        output$imgCombineManyPCC <-plotClustersServer(combineManyCCCode(),fileName=NULL,recordCode=makeFile,type="plotCoClustering")
         
 #         output$makeDendrogramWhichClusters <- renderUI({
 #             singleOptionsInput("mDInputs", sidelabel = "Add detailed whichCluster?", options = unique(clusterTypes(cE)),
@@ -546,55 +471,16 @@ shinyServer(function(input, output, session) {
         
     })
     
-    ###Save the default plots
-    output$downloadDefaultPlotPCCombineMany <- downloadHandler(
-        filename = function(){ paste("defaultPlotFromCombineMany.png")},
-        content = function(file){ 
-            #make sure updated values
-            sE<-get("sE",envir=appGlobal)
-            cE<-get("cE",envir=appGlobal)
-            filePath<-get("filePath",envir=appGlobal)
-            makeFile<-get("makeFile",envir=appGlobal)
-            
-            #ggsave(fileName(), plot = plotClusters(cE, whichClusters = "clusterMany"), )
-            png(file, height = max((40/3) * sum(clusterTypes(cE) %in% input[["cMInputs-whichClusters"]]), 480),
-                width = 2*480)
-            defaultMar<-par("mar")
-            plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-            par(mar=plotCMar)
-            #Need Help here!
-            plotClusters(cE, whichClusters = "clusterMany")
-            dev.off()
-        }
+    ###Save the default plots at user's request
+    output$downloadDefaultPlotPCCM <- downloadHandler(
+        filename = "defaultPlotClusterFromCombineMany.png",
+        content=function(file){plotClustersServer(code= combineManyPCCode(),fileName=file)}
     )
-    
     output$downloadDefaultPlotCoClustersCombineMany <- downloadHandler(
-        filename = function(){ paste("DefaultPlotCoClustersCombineMany.png")},
-        content = function(file){ 
-            #####
-            #make sure updated values
-            sE<-get("sE",envir=appGlobal)
-            cE<-get("cE",envir=appGlobal)
-            filePath<-get("filePath",envir=appGlobal)
-            makeFile<-get("makeFile",envir=appGlobal)
-            ######
-            
-            #ggsave(fileName(), plot = plotClusters(cE, whichClusters = "clusterMany"), )
-            png(file, max((40/3) * sum(clusterTypes(cE) %in% input[["cMInputs-whichClusters"]]), 
-                          length(clusterTypes(cE)),
-                          480),
-                width = 2*480)
-            defaultMar<-par("mar")
-            plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-            par(mar=plotCMar)
-            #Need Help here!
-            plotClusters(cE, whichClusters = "clusterMany")
-            dev.off()
-        }
+        filename = "defaultCoClusterFromCombineMany.png",
+        content=function(file){plotClustersServer(code= combineManyCCCode(),fileName=file,type="plotCoClustering")}
     )
-    
-    
-    
+
     #---------------End combine Many tab-----------------
     
     #####################################################
@@ -602,8 +488,7 @@ shinyServer(function(input, output, session) {
     #####################################################
     
     #makes the second half of dendrogram code
-    makeDendrogramLatterCode <- callModule(makeMakeDendrogramCode, "mDInputs", 
-                                           stringsAsFactors = FALSE)
+    makeDendrogramLatterCode <- callModule(makeMakeDendrogramCode, "mDInputs")
     
     #creates make Dendrogram code
     makeDendrogramCode <- function(){
@@ -736,8 +621,7 @@ shinyServer(function(input, output, session) {
     #####################################################
     
     #merge clusters code
-    mergeClustersCode <- callModule(makeMergeClustersCode, "mergeCInputs", 
-                                    stringsAsFactors = FALSE)
+    mergeClustersCode <- callModule(makeMergeClustersCode, "mergeCInputs")
     
     output$mergeClustersCode <- renderText({
         mergeClustersCode()
@@ -856,8 +740,7 @@ shinyServer(function(input, output, session) {
     #####################################################
     
     
-    plotClustersLatterCode <- callModule(makePlotClustersCode, "pCInputs",
-                                         stringsAsFactors = FALSE)
+    plotClustersLatterCode <- callModule(makePlotClustersCode, "pCInputs")
     
     plotClustersCode <- function() {
         code <- paste("plotClusters(cE")
@@ -929,8 +812,7 @@ shinyServer(function(input, output, session) {
     #####################################################
     # Start Personalized  plotDendrogram
     #####################################################
-    plotDendrogramCode <- callModule(makePlotDendrogramCode, "plotDendrogram",
-                                     stringsAsFactors = FALSE)
+    plotDendrogramCode <- callModule(makePlotDendrogramCode, "plotDendrogram")
     
     output$plotDendrogramCode <- renderText({
         plotDendrogramCode()
@@ -971,8 +853,7 @@ shinyServer(function(input, output, session) {
     # Start Personalized  plotHeatmap
     #####################################################
     
-    plotHeatmapCode <- callModule(makePlotHeatmapCode, "plotHeatmap",
-                                  stringsAsFactors = FALSE)
+    plotHeatmapCode <- callModule(makePlotHeatmapCode, "plotHeatmap")
     
     output$plotHeatmapCode <- renderText({
         plotHeatmapCode()
@@ -1012,8 +893,7 @@ shinyServer(function(input, output, session) {
     # Start Personalized  plotCoClustering
     #####################################################
     
-    plotCoClusteringCode <- callModule(makePlotCoClusteringCode, "plotCoClustering",
-                                       stringsAsFactors = FALSE)
+    plotCoClusteringCode <- callModule(makePlotCoClusteringCode, "plotCoClustering")
     
     output$plotCoClusteringCode <- renderText({
         plotCoClusteringCode()

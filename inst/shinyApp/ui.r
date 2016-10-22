@@ -188,7 +188,7 @@ shinyUI(navbarPage("Cluster Experiment",
                             navlistPanel(
                                 tabPanel("Combine Many Inputs",
                                          h2("Inputs for Combine Many"),
-                                         uiOutput("combineManyWhichClusters"),
+                                         #uiOutput("combineManyWhichClusters"),
                                          combineManyInput("cMInputs", "")
                                 ),
                                 tabPanel("Plot Clusters",

@@ -10,13 +10,13 @@
 ###########
 #' @name InternalModules
 #' @export
-assignGlobal<-function(name,value){
+assignGlobal<-function(name,value,recordCode=FALSE){
     assign(name,value=value,envir=appGlobal)
     return(value)
 }
 #' @rdname InternalModules
 #' @export
-runCodeAssignGlobal<-function(codeText){
+runCodeAssignGlobal<-function(codeText,recordCode,recordTag){
     #####
     #make sure updated values
     sE<-get("sE",envir=appGlobal)
@@ -28,11 +28,18 @@ runCodeAssignGlobal<-function(codeText){
     nam<-divString[[1]][1] #may need to make sure remove white space
     nam<-gsub("[[:space:]]","",nam)
     # browser()
-    if(!nam %in% c("cE","sE","filePath","makeFile")) stop("invalid global parameter assigned.")
+    if(!nam %in% c("cE","sE","filePath","makeFile")){
+        browser()
+        stop("invalid global parameter assigned.")
+    }
     command<-divString[[1]][2]
     command<-gsub("[[:space:]]","",command)
     assign(nam,value=eval(parse(text = command)),envir=appGlobal)
     invisible(get(nam,appGlobal))
+    if(recordCode){
+        filePath<-get("filePath",envir=appGlobal)
+        cat("\n", "#############",paste("##",recordTag),"#############",codeText, sep="\n", file = filePath, append = TRUE)
+    }
 }
 
 ##########

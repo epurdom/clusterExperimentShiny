@@ -8,15 +8,6 @@ plotCoClusteringInput <- function(id, label = "plotCluster inputs") {
 }
 
 
-#' @rdname InternalModules
-#' @export
-makePlotCoClusteringCode <- function(input, output, session, stringsAsFactors) {
-  code <- reactive({
-    code <- paste("plotCoClustering(cE")
-    code <- paste(")")
-  })
-  return(code)
-}
 
 #' @rdname InternalModules
 #' @export
