@@ -339,11 +339,14 @@ shinyServer(function(input, output, session) {
          })
 #     
 #default plotClusters output from RSEC
-        output$imgRSEC <- renderPlot({
+
+    RSECPCCode <- callModule(makePlotClustersCode, "rsec",setParameters=FALSE,whichClusters="workflow") #function to update code based on users choices.
+#    callModule(plotClustersModule, "rsec", ) #function to update code based on users choices.
+    
+    output$imgRSEC <- renderPlot({
             defaultMar<-par("mar")
-            plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
             par(mar=plotCMar)
-            plotClusters(cE, whichClusters = "workflow") #note this means will change if update cE later...
+            eval(parse(text = RSECPCCode() ))#plotClusters(cE, whichClusters = "workflow") #note this means will change if update cE later...
         }, height = max((40/3) * nClusters(cE), 480))
     #This function could certainly be refined, there may be better ways to upload data
     output$downloadDefaultPlotPCRSEC <- downloadHandler(
@@ -381,7 +384,8 @@ shinyServer(function(input, output, session) {
         codeList <- getIterations(codeText=clusterManyCode(),isRSEC=FALSE)
         paste(codeList$nIter, " cluster iterations given these choices.")
     })
-    
+    CMPCCode <- callModule(makePlotClustersCode, "parameters",setParameters=FALSE,whichClusters="clusterMany") #function to update code based on users choices.
+    #output$CMPCCode<-CMPCCode()
     observeEvent(input$runCM, {
         #make sure updated values
         sE<-get("sE",envir=appGlobal)
@@ -394,15 +398,14 @@ shinyServer(function(input, output, session) {
             cat("\n", 
                 "#Cluster Many tab:",
                 codeList$fullCodeSE, # codeToBeEvaluated(), 
-                "plotClusters(cE)", 
+                CMPCCode(), 
                 sep = "\n", file = filePath, append = TRUE)
         }
         #default plotClusters output from clusterMany
+        #output$imgCE <-plotClustersServer(CMPCCode())
         output$imgCE <- renderPlot({
-            defaultMar<-par("mar")
-            plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
             par(mar=plotCMar)
-            plotClusters(cE, whichClusters = "clusterMany")
+            eval(parse(text = CMPCCode() ))
         }, height = max((40/3) * nClusters(cE), 480))
         
         #outfitting proper whichClusters options for futrue widgets
@@ -445,7 +448,7 @@ shinyServer(function(input, output, session) {
             cE<-get("cE",envir=appGlobal)
             filePath<-get("filePath",envir=appGlobal)
             makeFile<-get("makeFile",envir=appGlobal)
-            png(file, height = max((40/3) * getCEIterations(), 480), width = 2*480)
+            png(file, height = max((40/3) * nClusters(cE), 480), width = 2*480)
             defaultMar<-par("mar")
             plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
             par(mar=plotCMar)

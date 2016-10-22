@@ -162,66 +162,43 @@ makeMergeClustersCode <- function(input, output, session, stringsAsFactors) {
 #creating code
 #' @rdname makeCodeModules
 #' @export
-makePlotClustersCode <- function(input, output, session, stringsAsFactors) {
+makePlotClustersCode <- function(input, output, session, stringsAsFactors,setParameters=TRUE,whichClusters) {
     code <- reactive({
-        code <- paste("")
-        if(input$aSampleData) {
-            if(input$sampleData != 'NULL') {
-                code <- paste(code, ", sampleData = c(", input$sampleData, ")", sep = "")
-            } else {
-                code <- paste(code, ", sampleData = ", input$sampleData, sep = "")
-            }
+        code <- paste("plotClusters(cE")
+        if(setParameters){
+            code<-combineArgs(input,code,"sampleData",isCharacter=FALSE)
+            code<-combineArgs(input,code,"reuseColors",isCharacter=FALSE)
+            code<-combineArgs(input,code,"matchToTop",isCharacter=FALSE)
+            code<-combineArgs(input,code,"unassignedColor",isCharacter=TRUE)
+            code<-combineArgs(input,code,"missingColor",isCharacter=TRUE)
+            code<-combineArgs(input,code,"isCharacter",isCharacter=FALSE)
+            code<-combineArgs(input,code,"startNewColors",isCharacter=FALSE)
+            code<-combineArgs(input,code,"tick",isCharacter=FALSE)
+            code<-combineArgs(input,code,"xlab",isCharacter=FALSE)
+            code<-combineArgs(input,code,"ylab",isCharacter=FALSE)
+            code<-combineArgs(input,code,"axisLine",isCharacter=FALSE)
+            code<-combineArgs(input,code,"box",isCharacter=FALSE)
         }
-        
-        if(input$aReuseColors) {
-            code <- paste(code, ", reuseColors = ", input$reuseColors, sep = "")
+        else{
+            paste(code,"whichClusters=c(",paste(whichClusters,collapse=","),")")
         }
-        
-        if(input$aMatchToTop) {
-            code <- paste(code, ", matchToTop = ", input$matchToTop, sep = "")
-        }
-        
-        if(input$aUnassignedColor) {
-            code <- paste(code, ", unassignedColor = '", input$unassignedColor, "'", sep = "")
-        }
-        
-        if(input$aMissingColor) {
-            code <- paste(code, ", missingColor = '", input$missingColor, "'", sep = "")
-        }
-        
-        if(input$aMinRequireColor) {
-            if(!is.na(input$minRequireColor) && (input$minRequireColor <= 100 && input$minRequireColor > 0)) {
-                code <- paste(code, ", minRequireColor = ", input$minRequireColor)
-            }
-        }
-        
-        if(input$aStartNewColors) {
-            code <- paste(code, ", startNewColors = ", input$startNewColors, sep = "")
-        }
-        
-        if(input$aTick) {
-            code <- paste(code, ", tick = ", input$tick, sep = "")
-        }
-        
-        if(input$aYlab) {
-            code <- paste(code, ", ylab = '", input$ylab, "'", sep = "")
-        }
-        
-        if(input$aXlab) {
-            code <- paste(code, ", xlab = '", input$xlab, "'", sep = "")
-        }
-        
-        if(input$aAxisLine) {
-            code <- paste(code, ", axisLine = ", input$axisLine, sep = "")
-        }
-        
-        if(input$aBox) {
-            code <- paste(code, ", box = ", input$box, sep = "")
-        }
-        
+
         code <- paste(code, ")", sep = "")
     })
     
     return(code)
     
 }
+        #         if(input$aSampleData) {
+#             if(input$sampleData != 'NULL') {
+#                 code <- paste(code, ", sampleData = c(", input$sampleData, ")", sep = "")
+#             } else {
+#                 code <- paste(code, ", sampleData = ", input$sampleData, sep = "")
+#             }
+#         }
+#      
+#         if(input$aMinRequireColor) {
+#             if(!is.na(input$minRequireColor) && (input$minRequireColor <= 100 && input$minRequireColor > 0)) {
+#                 code <- paste(code, ", minRequireColor = ", input$minRequireColor)
+#             }
+#         }
