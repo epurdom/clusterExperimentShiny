@@ -16,25 +16,19 @@ shinyServer(function(input, output, session) {
     #When the create workign directory button is clicked, WD is set and the defalt inputs for the save
     #script and save object widgets are created
     observeEvent(input$createWD, {
-        #####
-        #make sure updated values
-        sE<-get("sE",envir=appGlobal)
-        cE<-get("cE",envir=appGlobal)
-        filePath<-get("filePath",envir=appGlobal)
-        makeFile<-get("makeFile",envir=appGlobal)
-        ######
         setWD(input[["fileInput-workingDirectory"]])
-        output$createScriptInputs <- renderUI({
-            textInput("filePath", label = "eg: 'homeDirectory/subdirectory/fileName.r", 
-                      value = input[["fileInput-workingDirectory"]], width = '100%')
-        })
-        
         output$createObjectInputs <- renderUI({
             textInput("objectPath", label = "eg: 'homeDirectory/subdirectory/objectName.rds", 
                       value = input[["fileInput-workingDirectory"]], width = '50%')
         })
     })
-    
+    observeEvent(input$makeScript, {
+        output$createScriptInputs <- renderUI({
+            defaultValue<-if(!is.null(input[["fileInput-workingDirectory"]])) input[["fileInput-workingDirectory"]] else ""
+            textInput("filePath", label = "eg: 'homeDirectory/subdirectory/fileName.r", 
+                      value = defaultValue, width = '100%')
+        })
+    })
     #creates reproducible file if it doens't already exist when clicked
     observeEvent(input$createReproducibleFile, {
         makeFile<-assignGlobal("makeFile",value=TRUE) 
@@ -49,27 +43,15 @@ shinyServer(function(input, output, session) {
         
         cat(paste("\n#", input$fileComments), file = filePath, append = TRUE)
     })
+    
     #calling functions from namespaces for uploading files and writing scripts
-    rdaFile <- callModule(rdaFile, "fileInput",
-                          stringsAsFactors = FALSE)
-    
-    datafile <- callModule(dataFile, "fileInput",
-                           stringsAsFactors = FALSE)
-    
-    csvAssayCode <- callModule(csvAssayCode, "fileInput", 
-                               stringsAsFactors = FALSE)
-    
-    colDataFile <- callModule(colDataFile, "fileInput",
-                              stringsAsFactors = FALSE)
-    
-    csvColCode <- callModule(csvColCode, "fileInput", 
-                             stringsAsFactors = FALSE)
-    
-    rowDataFile <- callModule(rowDataFile, "fileInput",
-                              stringsAsFactors = FALSE)  
-    
-    csvRowCode <- callModule(csvRowCode, "fileInput", 
-                             stringsAsFactors = FALSE)
+    rdaFile <- callModule(rdaFile, "fileInput",stringsAsFactors = FALSE)
+    datafile <- callModule(dataFile, "fileInput",stringsAsFactors = FALSE)
+    csvAssayCode <- callModule(csvAssayCode, "fileInput", stringsAsFactors = FALSE)
+    colDataFile <- callModule(colDataFile, "fileInput",stringsAsFactors = FALSE)
+    csvColCode <- callModule(csvColCode, "fileInput", stringsAsFactors = FALSE)
+    rowDataFile <- callModule(rowDataFile, "fileInput",stringsAsFactors = FALSE)  
+    csvRowCode <- callModule(csvRowCode, "fileInput", stringsAsFactors = FALSE)
     
     #This outputs a summary of sE created from the uploaded rda file 
     output$isRda <- renderUI({
