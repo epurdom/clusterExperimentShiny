@@ -3,7 +3,7 @@
 
 #' @rdname InternalModules
 #' @export
-plotClusterInput <- function(id, label = "plotCluster inputs") {
+plotHeatmapInput <- function(id, label = "plotCluster inputs") {
   ns <- NS(id)
   tagList(
   )

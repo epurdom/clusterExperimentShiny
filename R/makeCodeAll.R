@@ -179,9 +179,10 @@ makePlotClustersCode <- function(input, output, session, setParameters=TRUE,whic
             code<-combineArgs(input,code,"ylab",isCharacter=FALSE)
             code<-combineArgs(input,code,"axisLine",isCharacter=FALSE)
             code<-combineArgs(input,code,"box",isCharacter=FALSE)
+            code<-combineArgs(input,code,"whichClusters",isCharacter=TRUE)
         }
         else{
-            paste(code,"whichClusters=c(",paste(whichClusters,collapse=","),")")
+            paste(code,"whichClusters=c('",paste(whichClusters,collapse="','"),"')")
         }
         ###Note: must always put 'whichClusters=' last to be plotted correctly!
 

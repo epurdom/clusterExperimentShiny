@@ -583,72 +583,21 @@ shinyServer(function(input, output, session) {
     #####################################################
     # Start Personalized  plotClusters
     #####################################################
-    
-    
-    plotClustersLatterCode <- callModule(makePlotClustersCode, "pCInputs")
-    
-    plotClustersCode <- function() {
-        code <- paste("plotClusters(cE")
-        if(input[["pCInputs-aWhichClusters"]]) {
-            code <- paste(code, ", whichClusters = c('",
-                          paste(input[["pCInputs-whichClusters"]], collapse = "', '"), "')", sep = "")
-        }
-        code <- paste(code, plotClustersLatterCode(), sep = "")
-        return(code)
-    }
-    
+    plotClustersCode <- callModule(makePlotClustersCode, "pCInputs")
+
     output$plotClustersCode <- renderText({
         plotClustersCode()
     })
     
     observeEvent(input$runPCCM, {
-        #####
         #make sure updated values
-        sE<-get("sE",envir=appGlobal)
-        cE<-get("cE",envir=appGlobal)
-        filePath<-get("filePath",envir=appGlobal)
         makeFile<-get("makeFile",envir=appGlobal)
-        ######
-        
-        if(makeFile) {
-            cat("\n", 
-                "#Specialized call to plotClusters:",
-                "#Plotting Clusters",
-                "defaultMar<-par('mar')",
-                "plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)",
-                "par(mar=plotCMar)",
-                plotClustersCode(), 
-                sep = "\n", file = filePath, append = TRUE)
-        }
-        
-        output$imgPC <- renderPlot({
-            defaultMar<-par("mar")
-            plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-            par(mar=plotCMar)
-            eval(parse(text = plotClustersCode()))
-        }, 
-        #calculating correct height of image:
-        height = max((40/3) * sum(clusterTypes(cE) %in% input[["pCInputs-whichClusters"]]), 480))
-        
+        output$imgPC <- plotClustersServer(plotClustersCode(),fileName=NULL,recordCode=makeFile,type="plotClusters")
     })
     
     output$downloadSpecializedPlotPCCM <- downloadHandler(
-        filename = function(){ paste("specializedPlotFromClusterMany.png")},
-        content = function(file){ 
-            #####
-            #make sure updated values
-            sE<-get("sE",envir=appGlobal)
-            cE<-get("cE",envir=appGlobal)
-            filePath<-get("filePath",envir=appGlobal)
-            makeFile<-get("makeFile",envir=appGlobal)
-            ######
-            png(file, height = max((40/3) * sum(clusterTypes(cE) %in% input[["pCInputs-whichClusters"]]), 480))
-            # defaultMar<-par("mar")
-            # plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-            # par(mar=plotCMar)
-            eval(parse(text = plotClustersCode()))
-            dev.off()
-        }
+        filename = function(){ paste("specializedPlotClustersPlot.png")},
+        content = function(file){plotClustersServer(code= plotClustersCode(),fileName=file,type="plotClusters")}
     )
     
     #---------------End personalized plot clusters tab-----------------
@@ -666,31 +615,13 @@ shinyServer(function(input, output, session) {
     observeEvent(input$runPlotDendrogram, {
         #####
         #make sure updated values
-        sE<-get("sE",envir=appGlobal)
-        cE<-get("cE",envir=appGlobal)
-        filePath<-get("filePath",envir=appGlobal)
         makeFile<-get("makeFile",envir=appGlobal)
-        ######
-        
-        if(makeFile) {
-            cat("\n", 
-                "#Specialized call to plotDendrogram:",
-                "#Plotting dendrogram",
-                "defaultMar<-par('mar')",
-                "plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)",
-                "par(mar=plotCMar)",
-                plotDendrogramCode(), 
-                sep = "\n", file = filePath, append = TRUE)
-        }
-        
-        output$imgSpecializedPlotDendrogram <- renderPlot({
-            defaultMar<-par("mar")
-            plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-            par(mar=plotCMar)
-            eval(parse(text = plotDendrogramCode()))
-        })
+        output$imgSpecializedPlotDendrogram <- plotClustersServer(plotDendrogramCode(),fileName=NULL,recordCode=makeFile,type="plotDendrogram")
     })
-    
+    output$downloadSpecializedPlotDendrogram <- downloadHandler(
+        filename = function(){ paste("specializedDendrogramPlot.png")},
+        content = function(file){plotClustersServer(code= plotDendrogramCode(),fileName=file,type="plotDendrogram")}
+    )
     #---------------End peronalized plot Dendrogram tab-----------------
     
     
@@ -707,30 +638,13 @@ shinyServer(function(input, output, session) {
     observeEvent(input$runPlotHeatmap, {
         #####
         #make sure updated values
-        sE<-get("sE",envir=appGlobal)
-        cE<-get("cE",envir=appGlobal)
-        filePath<-get("filePath",envir=appGlobal)
         makeFile<-get("makeFile",envir=appGlobal)
-        ######
-        
-        if(makeFile) {
-            cat("\n", 
-                "#Specialized call to plotDendrogram:",
-                "#Plotting dendrogram",
-                "defaultMar<-par('mar')",
-                "plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)",
-                "par(mar=plotCMar)",
-                plotHeatmapCode(), 
-                sep = "\n", file = filePath, append = TRUE)
-        }
-        
-        output$imgSpecializedPlotHeatmap <- renderPlot({
-            defaultMar<-par("mar")
-            plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-            par(mar=plotCMar)
-            eval(parse(text = plotHeatmapCode()))
-        })
+        output$imgSpecializedPlotHeatmap <- plotClustersServer(plotHeatmapCode(),fileName=NULL,recordCode=makeFile,type="plotHeatmap")
     })
+    output$downloadSpecializedPlotHeatmap <- downloadHandler(
+        filename = function(){ paste("specializedHeatmapPlot.png")},
+        content = function(file){plotClustersServer(code= plotHeatmapCode(),fileName=file,type="plotHeatmap")}
+    )
     
     #---------------End personalized plot heatmap tab-----------------
     
@@ -747,23 +661,9 @@ shinyServer(function(input, output, session) {
     observeEvent(input$runPlotCoClustering, {
         #####
         #make sure updated values
-        sE<-get("sE",envir=appGlobal)
-        cE<-get("cE",envir=appGlobal)
-        filePath<-get("filePath",envir=appGlobal)
         makeFile<-get("makeFile",envir=appGlobal)
-        ######
-        
-        if(makeFile) {
-            cat("\n", 
-                "#Specialized call to plotDendrogram:",
-                "#Plotting dendrogram",
-                "defaultMar<-par('mar')",
-                "plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)",
-                "par(mar=plotCMar)",
-                plotCoClusteringCode(), 
-                sep = "\n", file = filePath, append = TRUE)
-        }
-        
+        output$imgSpecializedPlotCoClustering <- plotClustersServer(plotCoClusteringCode(),fileName=NULL,recordCode=makeFile,type="plotCoClustering")
+
         output$imgSpecializedPlotCoClustering <- renderPlot({
             defaultMar<-par("mar")
             plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
@@ -771,7 +671,10 @@ shinyServer(function(input, output, session) {
             eval(parse(text = plotCoClusteringCode()))
         })
     })
-    
+    output$downloadSpecializedPlotCoClustering <- downloadHandler(
+        filename = function(){ paste("specializedCoClusteringPlot.png")},
+        content = function(file){plotClustersServer(code= plotCoClusteringCode(),fileName=file,type="plotCoClustering")}
+    )
     #---------------End personalized plot CoClustering tab-----------------
     
     

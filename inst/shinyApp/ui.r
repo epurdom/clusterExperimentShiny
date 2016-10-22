@@ -305,9 +305,15 @@ shinyUI(navbarPage("Cluster Experiment",
                                                   actionButton("runPlotCoClustering", "Run Plot CoClustering Code")
                                            )
                                        ),
-                                       navlistPanel(
-                                           tabPanel("Specialized Inputs"),
-                                           tabPanel("Output Plot")
+                                       navlistPanel(tabPanel("Specialized Inputs",
+                                                             plotCoClusteringInput("plotCoClustering", 
+                                                                                 "inputs for plotCoClustering")
+                                                    ),
+                                                    tabPanel("Output Plot",
+                                                             downloadButton("downloadSpecializedPlotCoClustering",
+                                                                            label = "DownLoad this Plot"),
+                                                             plotOutput("imgSpecializedPlotCoClustering")
+                                                    )
                                        )
                               ),
                               tabPanel("PCA Plot",
@@ -353,8 +359,15 @@ shinyUI(navbarPage("Cluster Experiment",
                                            )
                                        ),
                                        navlistPanel(
-                                           tabPanel("Specialized Inputs"),
-                                           tabPanel("Output Plot")
+                                           tabPanel("Specialized Inputs",
+                                                    plotHeatmapInput("plotHeatmap", 
+                                                                        "inputs for plotHeatmap")
+                                           ),
+                                           tabPanel("Output Plot",
+                                                    downloadButton("downloadSpecializedPlotHeatmap",
+                                                                   label = "DownLoad this Plot"),
+                                                    plotOutput("imgSpecializedPlotHeatmap")
+                                           )
                                        )
                               )
                    ),
