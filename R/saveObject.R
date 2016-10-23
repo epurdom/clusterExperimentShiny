@@ -17,3 +17,19 @@ saveObjectMessage <- function(id, label = "start message") {
     actionButton(ns("createObject"), label = "Save Object")
   )
 }
+
+#function to be called by UI to save object if autosave on
+saveObjects<-function(path,type=c("sE","cE"),recordCode=FALSE){
+    type<-match.arg(type)
+    sE<-get("sE",envir=appGlobal)
+    cE<-get("cE",envir=appGlobal)
+    filePath<-get("filePath",envir=appGlobal)
+    if(type=="sE") saveRDS(sE, path)
+    if(type=="cE") saveRDS(cE, path)
+    if(recordCode) {
+        cat("\n", 
+            "#Save Object:",
+            paste("saveRDS(",type,", '",path,"')",sep=""), 
+            sep = "\n", file = filePath, append = TRUE)
+    }
+}

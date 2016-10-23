@@ -66,18 +66,11 @@ shinyServer(function(input, output, session) {
                     file = filePath, append = TRUE)
             }
             sE <- assignGlobal("sE",holder) 
-            #saves object
-            if(input$autoCreateObject) {
-                saveRDS(sE, input$objectPath)
-                if(makeFile) {
-                    cat("\n", 
-                        "#Save Object:",
-                        "saveRDS(sE, '", input$objectPath,
-                        "')", 
-                        sep = "\n", file = filePath, append = TRUE)
-                }
-            }
             
+            #saves object
+            if(input$autoCreateObject) saveObjects(path=input$objectPath,type=c("sE"),recordCode=makeFile)
+            
+
             #Creating which clusters options in various later tabs, only if object is type cluster experiment
             if(class(sE)[1] == "ClusterExperiment") {
                 cE<-assignGlobal("cE",sE) 
@@ -194,16 +187,8 @@ shinyServer(function(input, output, session) {
                 return(HTML(paste("Error, need to upload data file")))
             }
             
-            if(input$autoCreateObject) {
-                saveRDS(sE, input$objectPath)
-                if(makeFile) {
-                    cat("\n", 
-                        "#Save Object:",
-                        "saveRDS(cE, '", input$objectPath,
-                        "')", 
-                        sep = "\n", file = filePath, append = TRUE)
-                }
-            }
+            if(input$autoCreateObject) saveObjects(path=input$objectPath,type=c("cE"),recordCode=makeFile)
+            
             return(HTML(paste(capture.output(show(sE)), collapse = "<br/>")))
         })
         
@@ -301,17 +286,8 @@ shinyServer(function(input, output, session) {
 #                                  val = "whichClusters", help = "an integer index or character string that identifies which
 #                                  cluster should be used to plotCluster.")
 #         })
-#         
-#         if(input$autoCreateObject) {
-#             saveRDS(cE, input$objectPath)
-#             if(makeFile) {
-#                 cat("\n", 
-#                     "#Save Object:",
-#                     "saveRDS(cE, '", input$objectPath,
-#                     "')", 
-#                     sep = "\n", file = filePath, append = TRUE)
-#             }
-#         }
+         if(input$autoCreateObject) saveObjects(path=input$objectPath,type=c("cE"),recordCode=makeFile)
+
          })
 #     
 #default plotClusters output from RSEC
@@ -370,17 +346,9 @@ shinyServer(function(input, output, session) {
                                  val = "whichClusters", functionName="plotClusters",help = "an integer index or character string that identifies which
                            cluster should be used to plotCluster.")
         })
+        if(input$autoCreateObject) saveObjects(path=input$objectPath,type=c("cE"),recordCode=makeFile)
         
-        if(input$autoCreateObject) {
-            saveRDS(cE, input$objectPath)
-            if(makeFile) {
-                cat("\n", 
-                    "#Save Object:",
-                    "saveRDS(cE, '", input$objectPath,
-                    "')", 
-                    sep = "\n", file = filePath, append = TRUE)
-            }
-        }
+        
     })
     output$downloadDefaultPlotPCCM <- downloadHandler(
                  filename = "DefaultPlotClustersFromClusterMany.png",
@@ -437,17 +405,9 @@ shinyServer(function(input, output, session) {
                                  val = "whichClusters", help = "an integer index or character string that identifies which
                          cluster should be used to plotCluster.")
         })
+        if(input$autoCreateObject) saveObjects(path=input$objectPath,type=c("cE"),recordCode=makeFile)
         
-        if(input$autoCreateObject) {
-            saveRDS(cE, input$objectPath)
-            if(makeFile) {
-                cat("\n", 
-                    "#Save Object:",
-                    "saveRDS(cE, '", input$objectPath,
-                    "')", 
-                    sep = "\n", file = filePath, append = TRUE)
-            }
-        }
+       
         
     })
     
@@ -498,16 +458,8 @@ shinyServer(function(input, output, session) {
             mergeClusters(cE)
         })
         
-        if(input$autoCreateObject) {
-            saveRDS(cE, input$objectPath)
-            if(makeFile) {
-                cat("\n", 
-                    "#Save Object:",
-                    "saveRDS(cE, '", input$objectPath,
-                    "')", 
-                    sep = "\n", file = filePath, append = TRUE)
-            }
-        }
+        if(input$autoCreateObject) saveObjects(path=input$objectPath,type=c("cE"),recordCode=makeFile)
+        
         
     })
     ###Save the default plots at user's request
@@ -555,16 +507,8 @@ shinyServer(function(input, output, session) {
                            cluster should be used to plotCluster.")
         })
         
-        if(input$autoCreateObject) {
-            saveRDS(cE, input$objectPath)
-            if(makeFile) {
-                cat("\n", 
-                    "#Save Object:",
-                    "saveRDS(cE, '", input$objectPath,
-                    "')", 
-                    sep = "\n", file = filePath, append = TRUE)
-            }
-        }
+        if(input$autoCreateObject) saveObjects(path=input$objectPath,type=c("cE"),recordCode=makeFile)
+        
         
     })
     ###Save the default plots at user's request
