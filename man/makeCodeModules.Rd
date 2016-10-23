@@ -9,18 +9,17 @@
 \alias{makeMergeClustersCode}
 \alias{makePlotClustersCode}
 \usage{
-makeClusterManyCode(input, output, session, stringsAsFactors, isRSEC = FALSE,
-  countModule)
+makeClusterManyCode(input, output, session, isRSEC = FALSE, countModule)
 
 getIterations(codeText, isRSEC = FALSE, countIterations = TRUE)
 
-makeMakeDendrogramCode(input, output, session, stringsAsFactors)
+makeMakeDendrogramCode(input, output, session)
 
-makeCombineManyCode(input, output, session, stringsAsFactors)
+makeCombineManyCode(input, output, session)
 
-makeMergeClustersCode(input, output, session, stringsAsFactors)
+makeMergeClustersCode(input, output, session)
 
-makePlotClustersCode(input, output, session, stringsAsFactors,
-  setParameters = TRUE, whichClusters)
+makePlotClustersCode(input, output, session, setParameters = TRUE,
+  whichClusters)
 }
 

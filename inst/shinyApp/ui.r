@@ -3,41 +3,36 @@ shinyUI(navbarPage("Cluster Experiment",
                             startPageMessage("startMessage", "")),
                    tabPanel("Getting Started",
                             tabsetPanel(
-                                tabPanel( "Setup Working Directory",
-                                          setWD("fileInput", ""),
-                                          actionButton("createWD", "Choose Working Directory"),
+                                tabPanel("Setup",
+                                          h4("Set working directory"),            
+                                          p("Enter a working directory for this Cluster Experiment session and click on 'Choose Working Directory' to set it"),
                                           fluidRow(
-                                              column(4,
-                                                     h4("Would you like to create a reproducible R script from this work session?")
-                                              ),
-                                              column(4,
-                                                     checkboxInput("makeScript", label = "create script", value = FALSE)
+                                              column(6,
+                                                     textInput("workingDirectory", label = "eg: 'homeDirectory/subdirectory/filename.r", 
+                                                    value = path.expand("~"), width = '100%')
                                               )
                                           ),
+                                          actionButton("createWD", "Choose Working Directory"),
+                                          tags$hr(),
+                                          checkboxInput("makeScript", label = "Would you like to create a reproducible R script from this work session?", value = FALSE),
                                           conditionalPanel(condition = "input.makeScript",
                                                            fluidRow(
                                                                column(6, 
-                                                                      h4("Please enter file path and name (of type .r) in order to create a R file of this session's work:"),
+                                                                      p("Enter file path and name of file to store script"),
                                                                       uiOutput("createScriptInputs")
                                                                ),
                                                                column(6, 
-                                                                      h4("Please enter any descriptive comments for the beginning of the R file:"),
+                                                                      p("Enter any descriptive comments for the beginning of the R file:"),
                                                                       textInput("fileComments", label = "eg: Name, date, experiment", value = "")
                                                                )
                                                            ),
+                                                           p("Click below on 'Create File' to create the R script. If file already exists, any code will be appended to the end of existing file"),
                                                            actionButton("createReproducibleFile", label = "Create File")
                                           ),
-                                          fluidRow(
-                                              column(4,
-                                                     h4("Would you like to automatically save the internal cluster experiment
-                                            object every time it is updated?")
-                                              ),
-                                              column(4,
-                                                     checkboxInput("autoCreateObject", label = "Automatically save object", value = FALSE)
-                                              )
-                                          ),
+                                          tags$hr(),
+                                          checkboxInput("autoCreateObject", label = "Would you like to automatically save the internal cluster experiment object every time it is updated?", value = FALSE),
                                           conditionalPanel(condition = "input.autoCreateObject",
-                                                           h4("Please enter file path and name (with extension .rds, see 'saveRDS') in order to create a continuously updated R object:"),
+                                                           p("Enter file path and name (with extension .rds, see 'saveRDS') in order to create a continuously updated R object:"),
                                                            uiOutput("createObjectInputs")
                                           )
                                 ),

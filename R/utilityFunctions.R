@@ -10,19 +10,18 @@
 ###########
 #' @name InternalModules
 #' @export
-assignGlobal<-function(name,value,recordCode=FALSE){
+assignGlobal<-function(name,value){
     assign(name,value=value,envir=appGlobal)
     return(value)
 }
 #' @rdname InternalModules
 #' @export
+# only works if doesn't need local variables...only global 
 runCodeAssignGlobal<-function(codeText,recordCode,recordTag){
     #####
     #make sure updated values
     sE<-get("sE",envir=appGlobal)
     cE<-get("cE",envir=appGlobal)
-    filePath<-get("filePath",envir=appGlobal)
-    makeFile<-get("makeFile",envir=appGlobal)
     ######
     divString<-strsplit(codeText,"<-")
     nam<-divString[[1]][1] #may need to make sure remove white space
@@ -37,9 +36,17 @@ runCodeAssignGlobal<-function(codeText,recordCode,recordTag){
     assign(nam,value=eval(parse(text = command)),envir=appGlobal)
     invisible(get(nam,appGlobal))
     if(recordCode){
-        filePath<-get("filePath",envir=appGlobal)
-        cat("\n", "#############",paste("##",recordTag),"#############",codeText, sep="\n", file = filePath, append = TRUE)
+        recordCodeFun(code=codeText,tag=recordTag,section=TRUE)
     }
+}
+
+#' @rdname InternalModules
+#' @export
+recordCodeFun<-function(code,tag,section=FALSE){
+    file<-get("filePath",envir=appGlobal)
+    if(section) startText<-sprintf("\n###########\n### %s: \n###########",tag)
+    else startText<-sprintf("#--- %s: ---#",tag)
+    cat(startText,code, sep="\n", file = file, append = TRUE)
 }
 
 ##########

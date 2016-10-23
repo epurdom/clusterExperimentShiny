@@ -1,11 +1,6 @@
 
 #' @rdname InternalModules
 #' @export
-loadHelpText<-function(){
-    p("This tab concerns important utilities, such as loading data, controling your default working directory, etc. ")
-}
-#' @rdname InternalModules
-#' @export
 countInfo<-function(id, label = "count and transformation decisions") {
     ns <- NS(id)
     tagList(
@@ -22,24 +17,6 @@ countInfo<-function(id, label = "count and transformation decisions") {
         
     )
 }
-
-
-#Function that sets working directory
-#' @rdname InternalModules
-#' @export
-setWD <- function(id, label = "start message") {
-  ns <- NS(id)
-  tagList(
-      fluidRow(
-        column(6,
-            h3("Please enter a working directory for this Cluster Experiment session"),
-            textInput(ns("workingDirectory"), label = "eg: 'homeDirectory/subdirectory/filename.r", 
-                      value = path.expand("~"), width = '100%')
-        )
-      )
-  )
-}
-
 
 #functions that uploads a rda file
 #' @rdname InternalModules

@@ -27,9 +27,7 @@ saveObjects<-function(path,type=c("sE","cE"),recordCode=FALSE){
     if(type=="sE") saveRDS(sE, path)
     if(type=="cE") saveRDS(cE, path)
     if(recordCode) {
-        cat("\n", 
-            "#Save Object:",
-            paste("saveRDS(",type,", '",path,"')",sep=""), 
-            sep = "\n", file = filePath, append = TRUE)
+        code<-paste("saveRDS(",type,", '",path,"')",sep="")
+        recordCodeFun(code=code,tag="Save Object")
     }
 }

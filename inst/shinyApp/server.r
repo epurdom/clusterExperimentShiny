@@ -14,16 +14,21 @@ shinyServer(function(input, output, session) {
     #When the create workign directory button is clicked, WD is set and the defalt inputs for the save
     #script and save object widgets are created
     observeEvent(input$createWD, {
-        setWD(input[["fileInput-workingDirectory"]])
+        setwd(input[["workingDirectory"]])
+    })
+    
+    observeEvent(input$autoCreateObject, {
         output$createObjectInputs <- renderUI({
+            defaultValue<-if(!is.null(input[["workingDirectory"]])) input[["workingDirectory"]] else ""
             textInput("objectPath", label = "eg: 'homeDirectory/subdirectory/objectName.rds", 
-                      value = input[["fileInput-workingDirectory"]], width = '50%')
+                      value = defaultValue, width = '50%')
         })
     })
+    
     observeEvent(input$makeScript, {
         output$createScriptInputs <- renderUI({
-            defaultValue<-if(!is.null(input[["fileInput-workingDirectory"]])) input[["fileInput-workingDirectory"]] else ""
-            textInput("filePath", label = "eg: 'homeDirectory/subdirectory/fileName.r", 
+            defaultValue<-if(!is.null(input[["workingDirectory"]])) input[["workingDirectory"]] else ""
+            textInput("filePath", label = "eg: homeDirectory/subdirectory/fileName.r", 
                       value = defaultValue, width = '100%')
         })
     })
@@ -34,43 +39,30 @@ shinyServer(function(input, output, session) {
         if(!file.exists(filePath)) {
             file.create(filePath)
         }
+        append<-TRUE #maybe should add option?
         #initial comments for start of file 
-        cat(paste("\n#Beginning of Shiny script session"), file = filePath, append = TRUE)
-        
+        cat("\n##########\n#Beginning of Shiny script session\n########", file = filePath, append = append)
         cat(paste("\n#Date and time: ", date()), file = filePath, append = TRUE)
-        
         cat(paste("\n#", input$fileComments), file = filePath, append = TRUE)
+        if(!is.null(input[["workingDirectory"]])){
+            cat(sprintf("\nsetwd(%s)",input[["workingDirectory"]]), file = filePath, append = TRUE)
+        }
+        cat(paste("\nrequire(clusterExperiment)"), file = filePath, append = TRUE)
+        
     })
     
     #calling functions from namespaces for uploading files and writing scripts
-    rdaFile <- callModule(rdaFile, "fileInput",stringsAsFactors = FALSE)
-    datafile <- callModule(dataFile, "fileInput",stringsAsFactors = FALSE)
-    csvAssayCode <- callModule(csvAssayCode, "fileInput", stringsAsFactors = FALSE)
-    colDataFile <- callModule(colDataFile, "fileInput",stringsAsFactors = FALSE)
-    csvColCode <- callModule(csvColCode, "fileInput", stringsAsFactors = FALSE)
-    rowDataFile <- callModule(rowDataFile, "fileInput",stringsAsFactors = FALSE)  
-    csvRowCode <- callModule(csvRowCode, "fileInput", stringsAsFactors = FALSE)
-    
-    #This outputs a summary of sE created from the uploaded rda file 
+    #This outputs a summary of sE created from the uploaded rds file and saves it as sE
+    rdaFile <- callModule(rdaFile, "fileInput",stringsAsFactors = FALSE,recordCode=get("makeFile",envir=appGlobal),recordFile=get("filePath",envir=appGlobal))
     output$isRda <- renderUI({
         holder <- rdaFile()
         if (is.null(holder))
             return("No data uploaded yet!")
-        else {
+        else { #could move this to the rdaFile() command... but probably complicated...
             #writing code to script
-            if(makeFile) {
-                cat("\n", 
-                    "#loading data:",
-                    "sE <- readRDS('InsertFileName')", 
-                    sep = "\n",
-                    file = filePath, append = TRUE)
-            }
             sE <- assignGlobal("sE",holder) 
-            
             #saves object
-            if(input$autoCreateObject) saveObjects(path=input$objectPath,type=c("sE"),recordCode=makeFile)
-            
-
+            if(input$autoCreateObject) saveObjects(path=input$objectPath,type=c("sE"),recordCode=get("makeFile",envir=appGlobal))
             #Creating which clusters options in various later tabs, only if object is type cluster experiment
             if(class(sE)[1] == "ClusterExperiment") {
                 cE<-assignGlobal("cE",sE) 
@@ -108,106 +100,30 @@ shinyServer(function(input, output, session) {
     observeEvent(input$makeObject, {
         #####
         #make sure updated values
-        sE<-get("sE",envir=appGlobal)
-        cE<-get("cE",envir=appGlobal)
         filePath<-get("filePath",envir=appGlobal)
         makeFile<-get("makeFile",envir=appGlobal)
         ######
-        
         output$isAssay <- renderUI({
-            assay <- datafile()
-            colData <- colDataFile()
-            rowData <- rowDataFile()
-            #appending script:
-            if(makeFile && !is.null(assay)) {
-                cat("\n", 
-                    "#loading assay data:",
-                    "\n",
-                    "assay <- ",
-                    csvAssayCode(),
-                    file = filePath, append = TRUE)
-            }
-            if(makeFile && !is.null(colData)) {
-                cat("\n", 
-                    "#loading column data:",
-                    "\n",
-                    "colData <- ",
-                    csvColCode(),
-                    file = filePath, append = TRUE)
-            }
-            if(makeFile && !is.null(rowData)) {
-                cat("\n", 
-                    "#loading row data:",
-                    "\n",
-                    "rowData <- ",
-                    csvRowCode(),
-                    file = filePath, append = TRUE)
-            }
-            #if statements to add the correct, non-null data frames to sE
-            if(!is.null(assay) && !is.null(colData) && !is.null(rowData)) {
-                sE <-assignGlobal("sE",SummarizedExperiment(assays = data.matrix(assay), colData = data.matrix(colData),
-                                                            rowData = data.matrix(rowData)))
-                if(makeFile) {
-                    cat("\n", 
-                        "#creating sE:",
-                        "sE <- SummarizedExperiment(assays = data.matrix(assay), colData = data.matrix(colData),
-                                    rowData = data.matrix(rowData))",
-                        sep = "\n",
-                        file = filePath, append = TRUE)
-                }
-            } else if (!is.null(assay) && !is.null(colData) && is.null(rowData)) {
-                sE <-assignGlobal("sE", SummarizedExperiment(assays = data.matrix(assay), colData = data.matrix(colData)))
-                #<<- SummarizedExperiment(assays = data.matrix(assay), colData = data.matrix(colData))
-                if(makeFile) {
-                    cat("\n", 
-                        "#creating sE:",
-                        "sE <- SummarizedExperiment(assays = data.matrix(assay), colData = data.matrix(colData))",
-                        sep = "\n",
-                        file = filePath, append = TRUE)
-                }
-            } else if(!is.null(assay) && is.null(colData) && !is.null(rowData)) {
-                sE <-assignGlobal("sE",SummarizedExperiment(assays = data.matrix(assay), rowData = data.matrix(rowData))) #<<- SummarizedExperiment(assays = data.matrix(assay), rowData = data.matrix(rowData))
-                if(makeFile) {
-                    cat("\n", 
-                        "#creating sE:",
-                        "sE <- SummarizedExperiment(assays = data.matrix(assay), rowData = data.matrix(rowData))",
-                        sep = "\n",
-                        file = filePath, append = TRUE)
-                }
-            } else if(!is.null(assay) && is.null(colData) && is.null(rowData)) {
-                sE <-assignGlobal("sE", SummarizedExperiment(assays = data.matrix(assay))) #<<- SummarizedExperiment(assays = data.matrix(assay))
-                if(makeFile) {
-                    cat("\n", 
-                        "#creating sE:",
-                        "sE <- SummarizedExperiment(assays = data.matrix(assay))",
-                        sep = "\n",
-                        file = filePath, append = TRUE)
-                }
-            } else {
-                return(HTML(paste("Error, need to upload data file")))
-            }
-            
-            if(input$autoCreateObject) saveObjects(path=input$objectPath,type=c("cE"),recordCode=makeFile)
-            
+            assay<-callModule(readCSVInput,"fileInput", recordCode=get("makeFile",envir=appGlobal),recordFile=filePath,whichData="file",recordSection=TRUE)()
+            colData <- callModule(readCSVInput,"fileInput", recordCode=get("makeFile",envir=appGlobal),recordFile=filePath,whichData="colData")()
+            rowData <- callModule(readCSVInput,"fileInput", recordCode=get("makeFile",envir=appGlobal),recordFile=filePath,whichData="rowData")()
+            sE<-createSummarizedExp(assay,colData,rowData,recordCode=get("makeFile",envir=appGlobal),recordFile=filePath,recordTag="Combine input data into SummarizedExperiment")
+            assignGlobal("sE",value=sE)
+            if(input$autoCreateObject) saveObjects(path=input$objectPath,type=c("cE"),recordCode=get("makeFile",envir=appGlobal))
             return(HTML(paste(capture.output(show(sE)), collapse = "<br/>")))
         })
-        
     })
     
     #Outputs to confirm correct uploading of data
     output$csvAssayContents <- renderTable({
-        datafile()[1:4, 1:4]
+        callModule(readCSVInput,"fileInput", recordCode=FALSE,whichData="file",nrows=4)()[, 1:4]
     })
-    
     output$csvColContents <- renderTable({
-        colDataFile()[1:4, 1:4]
+        callModule(readCSVInput,"fileInput", recordCode=FALSE,whichData="colData",nrows=4)()[, 1:4]
     })
-    
     output$csvRowContents <- renderTable({
-        rowDataFile()[1:4, 1:4]
+        callModule(readCSVInput,"fileInput", recordCode=FALSE,whichData="rowData",nrows=4)()[, 1:4]
     })
-    
-    
     #---------------End read File inputs-----------------
     
     
@@ -216,6 +132,13 @@ shinyServer(function(input, output, session) {
     #####################################################
     #If clicked, object is saved
     observeEvent(input[["saveObject-createObject"]], {
+        ##########
+        #make sure updated values
+        sE<-get("sE",envir=appGlobal)
+        cE<-get("cE",envir=appGlobal)
+        filePath<-get("filePath",envir=appGlobal)
+        makeFile<-get("makeFile",envir=appGlobal)
+        ##########
         objectPath <- input[["saveObject-filePath"]]
         
         output$saveObjectMessage <- renderText({
@@ -224,11 +147,8 @@ shinyServer(function(input, output, session) {
             }
             saveRDS(cE, file = objectPath)
             if(makeFile) {
-                cat("\n", 
-                    "#Save Object:",
-                    "saveRDS(cE, '", input$objectPath,
-                    "')", 
-                    sep = "\n", file = filePath, append = TRUE)
+                code<-paste("saveRDS(cE, '", input$objectPath,"')",sep="")
+                recordCodeFun(code=code,tag="Save Object")
             }
             return(paste("successfully saved internal clusterExperiment object in ", 
                          objectPath, " via function saveRDS()"))
@@ -257,36 +177,38 @@ shinyServer(function(input, output, session) {
     })
     
     observeEvent(input$runRSEC, {
+        ##########
         #make sure updated values
         sE<-get("sE",envir=appGlobal)
         cE<-get("cE",envir=appGlobal)
         filePath<-get("filePath",envir=appGlobal)
         makeFile<-get("makeFile",envir=appGlobal)
+        ##########
         codeList <- getIterations(codeText=RSECCode(),isRSEC=TRUE,countIterations=FALSE)
-        cE<-runCodeAssignGlobal(codeList$fullCodeSE,recordCode=makeFile,recordTag="RSEC:")
+        cE<-runCodeAssignGlobal(codeList$fullCodeSE,recordCode=get("makeFile",envir=appGlobal),recordTag="RSEC:")
         #default plotClusters output from clusterMany
-        output$imgCE <-plotClustersServer(RSECPCCode,fileName=NULL,recordCode=makeFile)
+        output$imgCE <-plotClustersServer(RSECPCCode,fileName=NULL,recordCode=get("makeFile",envir=appGlobal))
     
-#         
-#         #outfitting proper whichClusters options for futrue widgets
-#         output$combineManyWhichClusters <- renderUI({
-#             multipleOptionsInput("cMInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
-#                                  val = "whichClusters", help = "a numeric or character vector that specifies
-#                                  which clusters to compare")
-#         })
-#         
-#         output$makeDendrogramWhichClusters <- renderUI({
-#             singleOptionsInput("mDInputs", sidelabel = "Add detailed whichCluster?", options = unique(clusterTypes(cE)),
-#                                val = "whichCluster", help = "an integer index or character string that identifies which
-#                                cluster should be used to make the dendrogram. Default is primaryCluster.")
-#         })
-#         
-#         output$plotClustersWhichClusters <- renderUI({
-#             multipleOptionsInput("pCInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
-#                                  val = "whichClusters", help = "an integer index or character string that identifies which
-#                                  cluster should be used to plotCluster.")
-#         })
-         if(input$autoCreateObject) saveObjects(path=input$objectPath,type=c("cE"),recordCode=makeFile)
+        
+        #outfitting proper whichClusters options for futrue widgets
+        output$combineManyWhichClusters <- renderUI({
+            multipleOptionsInput("cMInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
+                                 val = "whichClusters", help = "a numeric or character vector that specifies
+                                 which clusters to compare")
+        })
+        
+        output$makeDendrogramWhichClusters <- renderUI({
+            singleOptionsInput("mDInputs", sidelabel = "Add detailed whichCluster?", options = unique(clusterTypes(cE)),
+                               val = "whichCluster", help = "an integer index or character string that identifies which
+                               cluster should be used to make the dendrogram. Default is primaryCluster.")
+        })
+        
+        output$plotClustersWhichClusters <- renderUI({
+            multipleOptionsInput("pCInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
+                                 val = "whichClusters", help = "an integer index or character string that identifies which
+                                 cluster should be used to plotCluster.")
+        })
+         if(input$autoCreateObject) saveObjects(path=input$objectPath,type=c("cE"),recordCode=get("makeFile",envir=appGlobal))
 
          })
 #     
@@ -318,15 +240,17 @@ shinyServer(function(input, output, session) {
         paste(codeList$nIter, " cluster iterations given these choices.")
     })
     observeEvent(input$runCM, {
+        ##########
         #make sure updated values
         sE<-get("sE",envir=appGlobal)
         cE<-get("cE",envir=appGlobal)
         filePath<-get("filePath",envir=appGlobal)
         makeFile<-get("makeFile",envir=appGlobal)
+        ##########
         codeList <- getIterations(codeText=clusterManyCode(),isRSEC=FALSE,countIterations=FALSE)
-        cE<-runCodeAssignGlobal(codeList$fullCodeSE,recordCode=makeFile,recordTag="Cluster Many:")
+        cE<-runCodeAssignGlobal(codeList$fullCodeSE,recordCode=get("makeFile",envir=appGlobal),recordTag="Cluster Many")
         #default plotClusters output from clusterMany
-        output$imgCE <-plotClustersServer(CMPCCode(),fileName=NULL,recordCode=makeFile)
+        output$imgCE <-plotClustersServer(CMPCCode(),fileName=NULL,recordCode=get("makeFile",envir=appGlobal))
 
         #outfitting proper whichClusters options for future widgets
         output$combineManyWhichClusters <- renderUI({
@@ -346,7 +270,7 @@ shinyServer(function(input, output, session) {
                                  val = "whichClusters", functionName="plotClusters",help = "an integer index or character string that identifies which
                            cluster should be used to plotCluster.")
         })
-        if(input$autoCreateObject) saveObjects(path=input$objectPath,type=c("cE"),recordCode=makeFile)
+        if(input$autoCreateObject) saveObjects(path=input$objectPath,type=c("cE"),recordCode=get("makeFile",envir=appGlobal))
         
         
     })
@@ -354,24 +278,7 @@ shinyServer(function(input, output, session) {
                  filename = "DefaultPlotClustersFromClusterMany.png",
                  content=function(file){plotClustersServer(code= CMPCCode(),fileName=file)}
     )
-        
-#     output$downloadDefaultPlotPCCM <- downloadHandler(
-#         filename = function(){ paste("DefaultPlotFromClusterMany.png")},
-#         content = function(file){ 
-#             #make sure updated values
-#             sE<-get("sE",envir=appGlobal)
-#             cE<-get("cE",envir=appGlobal)
-#             filePath<-get("filePath",envir=appGlobal)
-#             makeFile<-get("makeFile",envir=appGlobal)
-#             png(file, height = max((40/3) * nClusters(cE), 480), width = 2*480)
-#             defaultMar<-par("mar")
-#             plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-#             par(mar=plotCMar)
-#             CMPCCode()
-#             dev.off()
-#         }
-#     )
-    
+
     #---------------End cluster Many tab-----------------
     
     #####################################################
@@ -390,9 +297,9 @@ shinyServer(function(input, output, session) {
         cE<-get("cE",envir=appGlobal)
         filePath<-get("filePath",envir=appGlobal)
         makeFile<-get("makeFile",envir=appGlobal)
-        cE<-runCodeAssignGlobal(combineManyCode(),recordCode=makeFile,recordTag="Combine Many Code")
-        output$imgCombineManyPC <-plotClustersServer(combineManyPCCode(),fileName=NULL,recordCode=makeFile)
-        output$imgCombineManyPCC <-plotClustersServer(combineManyCCCode(),fileName=NULL,recordCode=makeFile,type="plotCoClustering")
+        cE<-runCodeAssignGlobal(combineManyCode(),recordCode=get("makeFile",envir=appGlobal),recordTag="Combine Many Code")
+        output$imgCombineManyPC <-plotClustersServer(combineManyPCCode(),fileName=NULL,recordCode=get("makeFile",envir=appGlobal))
+        output$imgCombineManyPCC <-plotClustersServer(combineManyCCCode(),fileName=NULL,recordCode=get("makeFile",envir=appGlobal),type="plotCoClustering")
         
 #         output$makeDendrogramWhichClusters <- renderUI({
 #             singleOptionsInput("mDInputs", sidelabel = "Add detailed whichCluster?", options = unique(clusterTypes(cE)),
@@ -405,7 +312,7 @@ shinyServer(function(input, output, session) {
                                  val = "whichClusters", help = "an integer index or character string that identifies which
                          cluster should be used to plotCluster.")
         })
-        if(input$autoCreateObject) saveObjects(path=input$objectPath,type=c("cE"),recordCode=makeFile)
+        if(input$autoCreateObject) saveObjects(path=input$objectPath,type=c("cE"),recordCode=get("makeFile",envir=appGlobal))
         
        
         
@@ -443,9 +350,9 @@ shinyServer(function(input, output, session) {
         filePath<-get("filePath",envir=appGlobal)
         makeFile<-get("makeFile",envir=appGlobal)
         ######
-        cE<-runCodeAssignGlobal(makeDendrogramCode(),recordCode=makeFile,recordTag="Make Dendrogram")
-        output$imgPlotDendrogram <-plotClustersServer(makeDendrogramPDCode(),fileName=NULL,recordCode=makeFile,type="plotDendrogram")
-        output$imgPlotHeatmapMD <-plotClustersServer(makeDendrogramPHCode(),fileName=NULL,recordCode=makeFile,type="plotHeatmap")
+        cE<-runCodeAssignGlobal(makeDendrogramCode(),recordCode=get("makeFile",envir=appGlobal),recordTag="Make Dendrogram")
+        output$imgPlotDendrogram <-plotClustersServer(makeDendrogramPDCode(),fileName=NULL,recordCode=get("makeFile",envir=appGlobal),type="plotDendrogram")
+        output$imgPlotHeatmapMD <-plotClustersServer(makeDendrogramPHCode(),fileName=NULL,recordCode=get("makeFile",envir=appGlobal),type="plotHeatmap")
         
         
         #**************************************************
@@ -458,7 +365,7 @@ shinyServer(function(input, output, session) {
             mergeClusters(cE)
         })
         
-        if(input$autoCreateObject) saveObjects(path=input$objectPath,type=c("cE"),recordCode=makeFile)
+        if(input$autoCreateObject) saveObjects(path=input$objectPath,type=c("cE"),recordCode=get("makeFile",envir=appGlobal))
         
         
     })
@@ -497,9 +404,9 @@ shinyServer(function(input, output, session) {
         filePath<-get("filePath",envir=appGlobal)
         makeFile<-get("makeFile",envir=appGlobal)
         ######
-        cE<-runCodeAssignGlobal(mergeClustersCode(),recordCode=makeFile,recordTag="Merge Clusters based on dendrogram")
-        output$imgPlotClustersMergeClusters <-plotClustersServer(mergeClustersPCCode(),fileName=NULL,recordCode=makeFile,type="plotClusters")
-        output$imgPlotHeatmapMergeClusters <-plotClustersServer(mergeClustersPHCode(),fileName=NULL,recordCode=makeFile,type="plotHeatmap")
+        cE<-runCodeAssignGlobal(mergeClustersCode(),recordCode=get("makeFile",envir=appGlobal),recordTag="Merge Clusters based on dendrogram")
+        output$imgPlotClustersMergeClusters <-plotClustersServer(mergeClustersPCCode(),fileName=NULL,recordCode=get("makeFile",envir=appGlobal),type="plotClusters")
+        output$imgPlotHeatmapMergeClusters <-plotClustersServer(mergeClustersPHCode(),fileName=NULL,recordCode=get("makeFile",envir=appGlobal),type="plotHeatmap")
         
         output$plotClustersWhichClusters <- renderUI({
             multipleOptionsInput("pCInputs", sidelabel = "Add detailed whichClusters?", options = unique(clusterTypes(cE)),
@@ -507,7 +414,7 @@ shinyServer(function(input, output, session) {
                            cluster should be used to plotCluster.")
         })
         
-        if(input$autoCreateObject) saveObjects(path=input$objectPath,type=c("cE"),recordCode=makeFile)
+        if(input$autoCreateObject) saveObjects(path=input$objectPath,type=c("cE"),recordCode=get("makeFile",envir=appGlobal))
         
         
     })
@@ -536,7 +443,7 @@ shinyServer(function(input, output, session) {
     observeEvent(input$runPCCM, {
         #make sure updated values
         makeFile<-get("makeFile",envir=appGlobal)
-        output$imgPC <- plotClustersServer(plotClustersCode(),fileName=NULL,recordCode=makeFile,type="plotClusters")
+        output$imgPC <- plotClustersServer(plotClustersCode(),fileName=NULL,recordCode=get("makeFile",envir=appGlobal),type="plotClusters")
     })
     
     output$downloadSpecializedPlotPCCM <- downloadHandler(
@@ -560,7 +467,7 @@ shinyServer(function(input, output, session) {
         #####
         #make sure updated values
         makeFile<-get("makeFile",envir=appGlobal)
-        output$imgSpecializedPlotDendrogram <- plotClustersServer(plotDendrogramCode(),fileName=NULL,recordCode=makeFile,type="plotDendrogram")
+        output$imgSpecializedPlotDendrogram <- plotClustersServer(plotDendrogramCode(),fileName=NULL,recordCode=get("makeFile",envir=appGlobal),type="plotDendrogram")
     })
     output$downloadSpecializedPlotDendrogram <- downloadHandler(
         filename = function(){ paste("specializedDendrogramPlot.png")},
@@ -583,7 +490,7 @@ shinyServer(function(input, output, session) {
         #####
         #make sure updated values
         makeFile<-get("makeFile",envir=appGlobal)
-        output$imgSpecializedPlotHeatmap <- plotClustersServer(plotHeatmapCode(),fileName=NULL,recordCode=makeFile,type="plotHeatmap")
+        output$imgSpecializedPlotHeatmap <- plotClustersServer(plotHeatmapCode(),fileName=NULL,recordCode=get("makeFile",envir=appGlobal),type="plotHeatmap")
     })
     output$downloadSpecializedPlotHeatmap <- downloadHandler(
         filename = function(){ paste("specializedHeatmapPlot.png")},
@@ -606,7 +513,7 @@ shinyServer(function(input, output, session) {
         #####
         #make sure updated values
         makeFile<-get("makeFile",envir=appGlobal)
-        output$imgSpecializedPlotCoClustering <- plotClustersServer(plotCoClusteringCode(),fileName=NULL,recordCode=makeFile,type="plotCoClustering")
+        output$imgSpecializedPlotCoClustering <- plotClustersServer(plotCoClusteringCode(),fileName=NULL,recordCode=get("makeFile",envir=appGlobal),type="plotCoClustering")
 
         output$imgSpecializedPlotCoClustering <- renderPlot({
             defaultMar<-par("mar")
