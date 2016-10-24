@@ -151,14 +151,21 @@ makeCombineManyCode <- function(input, output, session) {
 #make code
 #' @rdname makeCodeModules
 #' @export
-makeMergeClustersCode <- function(input, output, session) {
+makeMergeClustersCode <- function(input, output, session,plot=FALSE) {
     code <- reactive({
-        code <- paste("cE <- mergeClusters(cE")
+        if(!plot) code <- "cE <- mergeClusters(cE"
+        else code<-"mergeClusters(cE"
         code<-combineArgs(input, code,"mergeMethod",isCharacter=TRUE)
         code<-combineArgs(input, code,"cutoff",isCharacter=FALSE)
         code<-combineArgs(input, code,"isCount",isCharacter=FALSE)
         code<-combineArgs(input,code,"clusterLabel",isCharacter=TRUE)
         code<-combineArgs(input,code,"whichClusters",isCharacter=TRUE)
+        if(plot){
+            code<-paste(code,", plotType='all'")
+        }
+        else{
+            code<-paste(code,", plotType='none'")
+        }
         code <- paste(code, ")", sep = "")
     })
     
@@ -245,7 +252,6 @@ makePlotDendrogramCode <- function(input, output, session, setParameters=TRUE) {
 makePlotHeatmapCode <- function(input, output, session, setParameters=TRUE) {
     code <- reactive({
         code <- paste("plotHeatmap(cE")
-        
         code <- paste(code, ")")
     })
     return(code)

@@ -338,6 +338,10 @@ shinyServer(function(input, output, session) {
     makeDendrogramCode <- callModule(makeMakeDendrogramCode, "mDInputs")
     makeDendrogramPDCode <- callModule(makePlotDendrogramCode, "mDInputs",setParameters=FALSE) #function to update code based on users choices.
     makeDendrogramPHCode <- callModule(makePlotHeatmapCode, "mDInputs",setParameters=FALSE) #function to update code based on users choices.
+
+    #merge clusters code -- put here so available to
+    mergeClustersPDCode <- callModule(makeMergeClustersCode, "mergeCInputs",plot=TRUE)
+
     output$makeDendrogramCode <- renderText({
         makeDendrogramCode()
     })
@@ -356,15 +360,9 @@ shinyServer(function(input, output, session) {
         
         
         #**************************************************
-        ##This image is output in Merge Clusters Input Page:
+        ##This image is output in Merge Clusters Input Page (do here, once dendrogram created):
         #**************************************************
-        output$imgInitalMergeClusters <- renderPlot({
-            defaultMar<-par("mar")
-            plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-            par(mar=plotCMar)
-            mergeClusters(cE)
-        })
-        
+        output$imgInitalMergeClusters <- plotClustersServer("mergeClusters(cE,mergeMethod='none',plotType='all')",fileName=NULL,recordCode=get("makeFile",envir=appGlobal),type="mergeClusters")
         if(input$autoCreateObject) saveObjects(path=input$objectPath,type=c("cE"),recordCode=get("makeFile",envir=appGlobal))
         
         
@@ -385,16 +383,20 @@ shinyServer(function(input, output, session) {
     #####################################################
     # Start mergeClusters
     #####################################################
-    
-    #merge clusters code
     mergeClustersCode <- callModule(makeMergeClustersCode, "mergeCInputs")
     mergeClustersPCCode <- callModule(makePlotClustersCode, "mergeCInputs",setParameters=FALSE,whichClusters=c("mergeClusters","combineMany","clusterMany")) #function to update code based on users choices.
     mergeClustersPHCode <- callModule(makePlotHeatmapCode, "mergeCInputs",setParameters=FALSE) #function to update code based on users choices.
+    
     
     output$mergeClustersCode <- renderText({
         mergeClustersCode()
     })
     
+    mergeClustersPDCode <- callModule(makeMergeClustersCode, "mergeCInputs",plot=TRUE)
+    #When clicked updates dendrogram
+    observeEvent(input$updateDendrogram, {
+        output$imgInitalMergeClusters <- plotClustersServer(mergeClustersPDCode(),fileName=NULL,recordCode=get("makeFile",envir=appGlobal),type="mergeClusters")
+    })
     #button runs merge clusters code
     observeEvent(input$runMergeClusters, {
         #####

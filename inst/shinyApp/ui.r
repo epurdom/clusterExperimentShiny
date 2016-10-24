@@ -237,8 +237,12 @@ shinyUI(navbarPage("Cluster Experiment",
                                        #textual output of code that is to be run
                                        h3("Code to be run internally:"),
                                        #Action button that allows one to run above code
-                                       textOutput("mergeClustersCode"),
-                                       actionButton("runMergeClusters", "Run This Code")
+                                       textOutput("mergeClustersCode")
+                                       
+                                ),
+                                fluidRow(
+                                    column(3,actionButton("runMergeClusters", "Run This Code")),
+                                    column(3,actionButton("updateDendrogram", "Update dendrogram"))
                                 )
                             ),
                             navlistPanel(
