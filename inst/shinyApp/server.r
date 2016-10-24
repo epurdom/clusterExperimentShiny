@@ -429,7 +429,10 @@ shinyServer(function(input, output, session) {
         filename = "defaultHeatmapFromMergeClusters.png",
         content=function(file){plotClustersServer(code= mergeClustersPHCode(),fileName=file,type="plotHeatmap")}
     )
-    
+    output$downloadPlotPDMC<-downloadHandler(
+        filename = "defaultDendrogramFromMergeClusters.png",
+        content=function(file){plotClustersServer(code= mergeClustersPDCode(),fileName=file,type="mergeClusters")}
+    )
 
     #---------------End merge clusters tab-----------------
     

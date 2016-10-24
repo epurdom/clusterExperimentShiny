@@ -248,6 +248,7 @@ shinyUI(navbarPage("Cluster Experiment",
                             navlistPanel(
                                 tabPanel("Initial Dendrogram",
                                          p("Informative Dendrogram for merge cluster inputs:"),
+                                         downloadButton("downloadPlotPDMC", label = "DownLoad this Plot"),
                                          plotOutput("imgInitalMergeClusters")
                                 ),
                                 tabPanel("Set Parameters",
