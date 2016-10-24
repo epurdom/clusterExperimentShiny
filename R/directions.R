@@ -51,41 +51,37 @@ mergeClustersHelpText <- function() {
 #helptext
 #' @rdname directionsModules
 #' @export
-plotClustersHelpText <- function(id, label = "help title and text") {
-    ns <- NS(id)
+plotClustersHelpText <- function() {
     tagList(
-        h3("Specialized Inputs for plotClusters()"),
-        helpText("helptext here")
+        h3("Directions"),
+        helpText("plotClusters visualizes the cluster assignments of samples across several clusterings. The samples are ordered so as to align the clusterings from row to row.")
     )
 }
 
 #' @rdname InternalModules
 #' @export
-plotCoClusteringHelpText <- function(id, label = "help title and text") {
-    ns <- NS(id)
+plotCoClusteringHelpText <- function() {
     tagList(
-        h3("Specialized Inputs for plotCoClustering()"),
-        helpText("helptext here")
+        h3("Directions"),
+        helpText("plotCoClustering plots a heatmap of the percentage of times samples co-occur across different clusterings. These proportions are the values used to create unified clusters in the combineMany step. ")
     )
 }
 
 #help text
 #' @rdname InternalModules
 #' @export
-plotDendrogramHelpText <- function(id, label = "help title and text") {
-    ns <- NS(id)
+plotDendrogramHelpText <- function() {
     tagList(
-        h3("Specialized Inputs for plotDendrogram()"),
-        helpText("helptext here")
+        h3("Directions"),
+        helpText("plotDendrogram plots the hierarchical clustering of cluster mediods found by makeDendrogram.")
     )
 }
 
 #' @rdname InternalModules
 #' @export
-plotHeatmapHelpText <- function(id, label = "help title and text") {
-    ns <- NS(id)
+plotHeatmapHelpText <- function() {
     tagList(
-        h3("Specialized Inputs for plotHeatmap()"),
-        helpText("helptext here")
+        h3("Directions"),
+        helpText("plotHeatmap plots a heatmap of the data (after appropriate transformation, if so indicated when uploading data), along with cluster assignments.")
     )
 }

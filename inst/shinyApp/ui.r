@@ -267,11 +267,10 @@ shinyUI(navbarPage("Cluster Experiment",
                             )
                    ),
                    navbarMenu("Personalized Plots",
-                              tabPanel("Plot Clusters",
+                              tabPanel("plotClusters",
                                        fluidRow(
                                            column(6,
-                                                  plotClustersHelpText("pCInputs",
-                                                                       "Help Text for plot Clusters, cM")
+                                                  plotClustersHelpText()
                                            ),
                                            column(6,
                                                   h3("Code to be Run:"),
@@ -292,11 +291,10 @@ shinyUI(navbarPage("Cluster Experiment",
                                                     )
                                        )
                               ),
-                              tabPanel("plot CoClustering",
+                              tabPanel("plotCoClustering",
                                        fluidRow(
                                            column(6,
-                                                  plotCoClusteringHelpText("plotCoClustering",
-                                                                           "Help Text for plotCoClustering")
+                                                  plotCoClusteringHelpText()
                                            ),
                                            column(6,
                                                   h3("Code to be Run:"),
@@ -315,17 +313,10 @@ shinyUI(navbarPage("Cluster Experiment",
                                                     )
                                        )
                               ),
-                              tabPanel("PCA Plot",
-                                       navlistPanel(
-                                           tabPanel("Specialized Inputs"),
-                                           tabPanel("Output Plot")
-                                       )
-                              ),
                               tabPanel("Plot Dendrogram",
                                        fluidRow(
                                            column(6,
-                                                  plotDendrogramHelpText("plotDendrogram",
-                                                                         "Help Text for plotDendrogram")
+                                                  plotDendrogramHelpText()
                                            ),
                                            column(6,
                                                   h3("Code to be Run:"),
@@ -348,8 +339,7 @@ shinyUI(navbarPage("Cluster Experiment",
                               tabPanel("Plot Heatmap",
                                        fluidRow(
                                            column(6,
-                                                  plotHeatmapHelpText("plotHeatmap",
-                                                                      "Help Text for plotHeatmap")
+                                                  plotHeatmapHelpText()
                                            ),
                                            column(6,
                                                   h3("Code to be Run:"),
@@ -368,7 +358,14 @@ shinyUI(navbarPage("Cluster Experiment",
                                                     plotOutput("imgSpecializedPlotHeatmap")
                                            )
                                        )
+                              ),
+                              tabPanel("PCA Plot",
+                                       navlistPanel(
+                                           tabPanel("Specialized Inputs"),
+                                           tabPanel("Output Plot")
+                                       )
                               )
+                             
                    ),
                    tabPanel("Save Object",
                             saveObjectMessage("saveObject", ""),
