@@ -100,3 +100,48 @@ mergeClustersInput <- function(id, label = "cMInputs") {
         singleCharacterInput(id, sidelabel="Give cluster Label?", aboveLabel="e.g. 'myFavorite'", val="clusterLabel", functionName="mergeClusters",help="gives label to resulting cluster to keep track of it, useful if rerun with different parameters many times")
     )
 }
+
+
+#plot clusters input function
+#' @rdname InputModules
+#' @export
+plotClustersInput <- function(id, label = "plotCluster inputs") {
+    ns <- NS(id)
+    tagList(
+        vectorInput(id,sidelabel="Add columns from colData?",val="sampleData",aboveLabel="e.g. c('Batch','BioCluster')",
+                    help="Refers to a column index or column name in the colData slot of the object. Variables will be plotted at bottom of plotClusters plot"),
+        singleCharacterInput(id,sidelabel="Choose color for unassigned samples?",aboveLabel="e.g. 'grey'",val="unassignedColor",defaultValue="white",
+                             help="Unassigned samples (-1) will be given this color"),
+        singleCharacterInput(id,sidelabel="Choose color for missing samples?",aboveLabel="e.g. 'grey'",val="missingColor",defaultValue="grey",
+                             help="Samples missing in clustering (-2) will be given this color"),
+        tags$hr(),
+        logicalInput(id,sidelabel="Reuse colors on each row?",required=TRUE,defaultValue=FALSE,val="reuseColors",help="Whether each row should consist of the same set of colors. By default 
+                     (FALSE) each cluster that the algorithm doesn't identify to the previous
+                     rows clusters gets a new color."),
+        logicalInput(id,sidelabel="Align clusters to first row?",required=TRUE,defaultValue=FALSE,val="matchToTop",help="Logical as to whether all clusters should be aligned to the first row. 
+                     By default (FALSE) each cluster is aligned to the ordered clusters of the
+                     row above it."),
+        logicalInput(id,sidelabel="Restart colors each row?",required=TRUE,val="startNewColors",defaultValue=FALSE,help="logical, indicating whether in aligning colors between rows of clusters,
+                     should the colors restart at beginning of colPalette as long as colors 
+                     are not in immediately proceeding row (some of the colors at the end of 
+                     bigPalette are a bit wonky, and so if you have a large clusters matrix, 
+                     this can be useful)."),
+        tags$hr(),
+        logicalInput(id,sidelabel="Add tick marks for samples?",required=TRUE,val="tick",defaultValue=FALSE,help="logical, indicating whether in aligning colors between rows of clusters,
+                     should the colors restart at beginning of colPalette as long as colors 
+                     are not in immediately proceeding row (some of the colors at the end of 
+                     bigPalette are a bit wonky, and so if you have a large clusters matrix, 
+                     this can be useful)."),
+    singleNumericInput(id,sidelabel="Move labels inward?",aboveLabel="e.g. 2",val="axisLine",
+                         help="The number of lines in the axis labels on y-axis should be (passed to
+                       line = ... in the axis call)"),
+    singleCharacterInput(id,sidelabel="Give y-axis label?",aboveLabel="",val="ylab",
+                         help="Label for y-axis"),
+    singleCharacterInput(id,sidelabel="Give x-axis label?",aboveLabel="",val="xlab",
+                         help="Label for x-axis"),
+    logicalInput(id,sidelabel="Add box around plot?",val="box",required=TRUE,defaultValue=FALSE,help="Logical, whether to draw a box arouns the plot")
+    
+
+    #missing: minRequireColor (proportion)
+  )
+}

@@ -1,9 +1,5 @@
 #' @rdname InternalModules
 #' @export
-plotCMar<-c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1)
-
-#' @rdname InternalModules
-#' @export
 #if fileName=NULL, renders plot; otherwise saves as png based on fileName
 plotClustersServer<-function(code,fileName=NULL,recordCode=FALSE,
                              type=c("plotClusters","plotCoClustering","plotHeatmap","plotDendrogram","mergeClusters")){
@@ -29,6 +25,8 @@ plotClustersServer<-function(code,fileName=NULL,recordCode=FALSE,
 #     heightFixed<-switch(type,"plotCluster"= heightR,
 #                     "plotCoClustering"=480)
 #     widthFixed<-switch(type,"plotCluster"=2*480,"plotCoClustering"=480)
+    plotCMar<-if(type=="plotClusters") c(.25 * 1.1, 3 * 8.1, .25 * 4.1, 3 * 1.1) else c(5.1 ,4.1 ,4.1 ,2.1)
+    
     if(is.null(fileName)){ #not a download code
         if(recordCode){
             recordTag<-switch(type,

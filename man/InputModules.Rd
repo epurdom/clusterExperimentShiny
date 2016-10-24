@@ -35,6 +35,8 @@ makeDendrogramInput(id, label = "cMInputs")
 mergeClustersInput(id, label = "cMInputs")
 
 plotClustersInput(id, label = "plotCluster inputs")
+
+plotClustersInput(id, label = "plotCluster inputs")
 }
 \keyword{datasets}
 

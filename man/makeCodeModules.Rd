@@ -17,7 +17,7 @@ makeMakeDendrogramCode(input, output, session)
 
 makeCombineManyCode(input, output, session)
 
-makeMergeClustersCode(input, output, session)
+makeMergeClustersCode(input, output, session, plot = FALSE)
 
 makePlotClustersCode(input, output, session, setParameters = TRUE,
   whichClusters)
