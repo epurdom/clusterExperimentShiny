@@ -102,7 +102,12 @@ getIterations <- function(codeText,isRSEC=FALSE,countIterations=TRUE){
     codeToBeNotRun <- paste(functionName,"(sE, run = FALSE ", codeText, ")",sep = "")
     codeToBeRunSE <- paste("cE<-",functionName,"(sE", codeText, ")",sep = "")
 #    codeToBeRunCE <- paste("cE<-",functionName,"(cE", codeText, ")",sep = "") #not sure any more that really need this!
-    nIter<-if(countIterations) nrow(eval(parse(text = codeToBeNotRun))$paramMatrix) else NULL
+    if(countIterations){
+        testCode<-try(nrow(eval(parse(text = codeToBeNotRun))$paramMatrix),silent=TRUE )
+        if(!inherits(testCode, "try-error")) nIter<-paste(testCode, " cluster iterations given these choices.")
+        else nIter<-paste("Current selections incomplete, returns error:",testCode,sep="\n")
+    }
+    else nIter<-NULL
     return(list(nIter=nIter,fullCodeSE=codeToBeRunSE))#,fullCodeCE=codeToBeRunCE))
     
 }

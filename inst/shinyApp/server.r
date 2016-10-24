@@ -173,7 +173,7 @@ shinyServer(function(input, output, session) {
     output$numRSECIterations <- renderText({
         #codeToBeEvaluated <- paste("clusterMany(sE, run = FALSE ", clusterManyCode(),")", sep = "")
         codeList <- getIterations(codeText=RSECCode(),isRSEC=TRUE)
-        paste(codeList$nIter, " cluster iterations given these choices.")
+        codeList$nIter
     })
     
     observeEvent(input$runRSEC, {
@@ -237,7 +237,7 @@ shinyServer(function(input, output, session) {
         })
     output$numClusterIterations <- renderText({
         codeList <- getIterations(codeText=clusterManyCode(),isRSEC=FALSE)
-        paste(codeList$nIter, " cluster iterations given these choices.")
+        codeList$nIter
     })
     observeEvent(input$runCM, {
         ##########
