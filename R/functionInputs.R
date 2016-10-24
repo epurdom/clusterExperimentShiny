@@ -108,40 +108,102 @@ mergeClustersInput <- function(id, label = "cMInputs") {
 plotClustersInput <- function(id, label = "plotCluster inputs") {
     ns <- NS(id)
     tagList(
-        vectorInput(id,sidelabel="Add columns from colData?",val="sampleData",aboveLabel="e.g. c('Batch','BioCluster')",
+        vectorInput(id,sidelabel="Add columns from colData?",val="sampleData",aboveLabel="e.g. c('Batch','BioCluster')",functionName="plotClusters",
                     help="Refers to a column index or column name in the colData slot of the object. Variables will be plotted at bottom of plotClusters plot"),
-        singleCharacterInput(id,sidelabel="Choose color for unassigned samples?",aboveLabel="e.g. 'grey'",val="unassignedColor",defaultValue="white",
+        singleCharacterInput(id,sidelabel="Choose color for unassigned samples?",aboveLabel="e.g. 'grey'",val="unassignedColor",defaultValue="white",functionName="plotClusters",
                              help="Unassigned samples (-1) will be given this color"),
-        singleCharacterInput(id,sidelabel="Choose color for missing samples?",aboveLabel="e.g. 'grey'",val="missingColor",defaultValue="grey",
+        singleCharacterInput(id,sidelabel="Choose color for missing samples?",aboveLabel="e.g. 'grey'",val="missingColor",defaultValue="grey",functionName="plotClusters",
                              help="Samples missing in clustering (-2) will be given this color"),
         tags$hr(),
-        logicalInput(id,sidelabel="Reuse colors on each row?",required=TRUE,defaultValue=FALSE,val="reuseColors",help="Whether each row should consist of the same set of colors. By default 
+        logicalInput(id,sidelabel="Reuse colors on each row?",required=TRUE,multipleAllowed=FALSE,defaultValue=FALSE,val="reuseColors",functionName="plotClusters",
+            help="Whether each row should consist of the same set of colors. By default 
                      (FALSE) each cluster that the algorithm doesn't identify to the previous
                      rows clusters gets a new color."),
-        logicalInput(id,sidelabel="Align clusters to first row?",required=TRUE,defaultValue=FALSE,val="matchToTop",help="Logical as to whether all clusters should be aligned to the first row. 
+        logicalInput(id,sidelabel="Align clusters to first row?",required=TRUE,multipleAllowed=FALSE,defaultValue=FALSE,functionName="plotClusters",val="matchToTop",help="Logical as to whether all clusters should be aligned to the first row. 
                      By default (FALSE) each cluster is aligned to the ordered clusters of the
                      row above it."),
-        logicalInput(id,sidelabel="Restart colors each row?",required=TRUE,val="startNewColors",defaultValue=FALSE,help="logical, indicating whether in aligning colors between rows of clusters,
+        logicalInput(id,sidelabel="Restart colors each row?",required=TRUE,multipleAllowed=FALSE,val="startNewColors",defaultValue=FALSE,functionName="plotClusters",help="logical, indicating whether in aligning colors between rows of clusters,
                      should the colors restart at beginning of colPalette as long as colors 
                      are not in immediately proceeding row (some of the colors at the end of 
                      bigPalette are a bit wonky, and so if you have a large clusters matrix, 
                      this can be useful)."),
         tags$hr(),
-        logicalInput(id,sidelabel="Add tick marks for samples?",required=TRUE,val="tick",defaultValue=FALSE,help="logical, indicating whether in aligning colors between rows of clusters,
+        logicalInput(id,sidelabel="Add tick marks for samples?",required=TRUE,multipleAllowed=FALSE,val="tick",defaultValue=FALSE,functionName="plotClusters",help="logical, indicating whether in aligning colors between rows of clusters,
                      should the colors restart at beginning of colPalette as long as colors 
                      are not in immediately proceeding row (some of the colors at the end of 
                      bigPalette are a bit wonky, and so if you have a large clusters matrix, 
                      this can be useful)."),
-    singleNumericInput(id,sidelabel="Move labels inward?",aboveLabel="e.g. 2",val="axisLine",
+    singleNumericInput(id,sidelabel="Move labels inward?",aboveLabel="e.g. 2",val="axisLine",functionName="plotClusters",
                          help="The number of lines in the axis labels on y-axis should be (passed to
                        line = ... in the axis call)"),
-    singleCharacterInput(id,sidelabel="Give y-axis label?",aboveLabel="",val="ylab",
+    singleCharacterInput(id,sidelabel="Give y-axis label?",aboveLabel="",val="ylab",functionName="plotClusters",
                          help="Label for y-axis"),
-    singleCharacterInput(id,sidelabel="Give x-axis label?",aboveLabel="",val="xlab",
+    singleCharacterInput(id,sidelabel="Give x-axis label?",aboveLabel="",val="xlab",functionName="plotClusters",
                          help="Label for x-axis"),
-    logicalInput(id,sidelabel="Add box around plot?",val="box",required=TRUE,defaultValue=FALSE,help="Logical, whether to draw a box arouns the plot")
+    logicalInput(id,sidelabel="Add box around plot?",val="box",required=TRUE,multipleAllowed=FALSE,defaultValue=FALSE,functionName="plotClusters",help="Logical, whether to draw a box arouns the plot")
     
 
     #missing: minRequireColor (proportion)
   )
+}
+
+#plotCoClustering skeleton
+#' @rdname InternalModules
+#' @export
+plotCoClusteringInput <- function(id, label = "plotCluster inputs") {
+    ns <- NS(id)
+    tagList(
+    )
+}
+
+#plot Dendrogram module
+
+#' @rdname InternalModules
+#' @export
+plotDendrogramInput <- function(id, label = "plotDendrogram inputs") {
+    ns <- NS(id)
+    tagList(
+        tags$hr(),
+        fluidRow(
+            column(3, checkboxInput(ns("aLeaves"), value = FALSE, label = "Add leaves?")),
+            conditionalPanel(condition = paste0("input['", ns("aLeaves"), "']"),
+                             column(3, radioButtons(ns("leaves"), choices = c("clusters", "samples"), label = NULL))
+            ),
+            column(2, checkboxInput(ns("hLeaves"), value = FALSE, label = "Help Text and Instructions")),
+            conditionalPanel(condition = paste0("input['", ns("hLeaves"), "']"),
+                             column(4, helpText("if 'samples' the dendrogram has one leaf per sample, otherwise it has
+                                                one per cluster.")
+                             )
+                             )
+            ),
+        
+        tags$hr(),
+        fluidRow(
+            column(3, checkboxInput(ns("aClusterNames"), value = FALSE, label = "Add clusterNames?")),
+            conditionalPanel(condition = paste0("input['", ns("aClusterNames"), "']"),
+                             column(3, checkboxInput(ns("clusterNames"), value = FALSE, label = "TRUE"))
+            ),
+            column(2, checkboxInput(ns("hClusterNames"), value = FALSE, label = "Help Text and Instructions")),
+            conditionalPanel(condition = paste0("input['", ns("hClusterNames"), "']"),
+                             column(4, helpText("logical. If leaves='clusters', then clusters will be identified with 
+                             their 'name' value in legend; otherwise the 'clusterIds' value will be
+                             used.")
+                             )
+            )
+        ),
+        tags$hr(),
+        h4("main"),
+        helpText("need clarity"),
+        tags$hr(),
+        h4("sub"),
+        helpText("need clarity")
+        )
+}
+
+#' @rdname InternalModules
+#' @export
+plotHeatmapInput <- function(id, label = "plotCluster inputs") {
+    ns <- NS(id)
+    tagList(
+    )
 }

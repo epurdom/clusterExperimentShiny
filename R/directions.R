@@ -59,3 +59,34 @@ plotClustersHelpText <- function(id, label = "help title and text") {
         helpText("helptext here")
     )
 }
+
+#' @rdname InternalModules
+#' @export
+plotCoClusteringHelpText <- function(id, label = "help title and text") {
+    ns <- NS(id)
+    tagList(
+        h3("Specialized Inputs for plotCoClustering()"),
+        helpText("helptext here")
+    )
+}
+
+#help text
+#' @rdname InternalModules
+#' @export
+plotDendrogramHelpText <- function(id, label = "help title and text") {
+    ns <- NS(id)
+    tagList(
+        h3("Specialized Inputs for plotDendrogram()"),
+        helpText("helptext here")
+    )
+}
+
+#' @rdname InternalModules
+#' @export
+plotHeatmapHelpText <- function(id, label = "help title and text") {
+    ns <- NS(id)
+    tagList(
+        h3("Specialized Inputs for plotHeatmap()"),
+        helpText("helptext here")
+    )
+}
