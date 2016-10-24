@@ -11,41 +11,40 @@ RSECHelpText<-function(){ "This is RSEC... more to come"}
 #' @rdname directionsModules
 #' @export
 clusterManyHelpText <- function() {
-    paste(
-        # "Summary: The clusterMany function runs many clusterings at once. The user picks options that should be tried, and the clusterMany function will take all combinations of these options, and run the corresponding clustering for each. No clusterings will be calculated until you press 'Run This Code' to the right.",
-        "Directions: The user should first set the the core imputs on the starting page. After this, the user can choose to navigate to other tabs to find different options to vary. For all these inputs choosing multiple values means that clusterings with all these values will be tried in combination with all of the other values also already chosen (except some global, esoteric ones under 'Specialized options'). If you do not choose the option, the (single) default will be run. No clusterings will be calculated until you press 'Run This Code' to the right. Under the 'Run This Code' button , you can see how many clusterings will be run based on the options you have chosen so far. "
+    tagList(
+        h4("Directions:"),
+        p("The user should first set the the core imputs. After this, the user can choose to navigate to other tabs to find different options to vary. Different options will appear depending on the core inputs you choose, so choose these first."),
+        p("For all these inputs choosing multiple values means that clusterings with all these values will be tried in combination with all of the other values also already chosen (except some global, esoteric ones under 'Specialized options'). If you do not choose the option, the (single) default will be run. "),
+        p("No clusterings will be calculated until you press 'Run This Code' to the right. Under the 'Run This Code' button , you can see how many clusterings will be run based on the options you have chosen so far. ")
     )
 }
 
 #' @rdname directionsModules
 #' @export
-combineManyHelpText <- function(id, label = "help title and text") {
-    ns <- NS(id)
+combineManyHelpText <- function() {
     tagList(
         h3("Directions"),
-        helpText("helptext here")
+        p("combineMany will combine the clusters found by clusterMany into a single clustering. This will be done by comparing how frequently the samples co-cluster, across the clusterings found in clusterMany.")
     )
 }
 
 #help text
 #' @rdname directionsModules
 #' @export
-makeDendrogramHelpText <- function(id, label = "help title and text") {
-    ns <- NS(id)
-    tagList(
-        h3("Specialized Inputs for makeDendrogram()"),
-        helpText("helptext here")
+makeDendrogramHelpText <- function() {
+     tagList(
+        h3("Directions"),
+        p("makeDendrogram will create a hiearchical clustering of the clusters found by combineMany, based on performing hiearchical clustering on the mediod of the cluster.")
     )
 }
 
 #helptext
 #' @rdname directionsModules
 #' @export
-mergeClustersHelpText <- function(id, label = "help title and text") {
-    ns <- NS(id)
+mergeClustersHelpText <- function() {
     tagList(
         h3("Directions"),
-        helpText("helptext here")
+        p("mergeClusters will merge sister clusters on the dendrogram based on the percentage of differentially expressed genes found between the two clusters. It will continue up the tree, merging resulting groups, until reaching two clusterings that have more that the desired cutoff of DE genes.")
     )
 }
 

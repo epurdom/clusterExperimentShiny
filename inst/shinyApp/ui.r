@@ -124,11 +124,12 @@ shinyUI(navbarPage("Cluster Experiment",
                         )
                    ),
                    tabPanel("Cluster Many",
+                            conditionalPanel(condition = paste0("!input['showCMDir']"),
+                                             column(12,clusterManyHelpText())
+                                             ),
                             fluidRow(
-                                column(6,
-                                       #Displays basic help text for Shiny App and clusterMany
-                                       clusterManyHelpText()
-                                ),
+                                column(6, checkboxInput("showCMDir", value = FALSE, label = "Hide Directions?")),
+                                
                                 column(6,
                                        #textual output of code that is to be run
                                        h3("Code to be run internally:"),
@@ -167,11 +168,11 @@ shinyUI(navbarPage("Cluster Experiment",
                             )
                    ),
                    tabPanel("Combine Many",
+#                             conditionalPanel(condition = paste0("!input['showCombManyDir']"),
+#                                              column(12,combineManyHelpText())
+#                             ),
                             fluidRow(
-                                column(6,
-                                       #Displays basic help text for Shiny App and clusterMany
-                                       combineManyHelpText("cMInputs")
-                                ),
+                                column(6, combineManyHelpText()),
                                 column(6,
                                        #textual output of code that is to be run
                                        h3("Code to be run internally:"),
@@ -200,7 +201,7 @@ shinyUI(navbarPage("Cluster Experiment",
                             fluidRow(
                                 column(6,
                                        #Displays basic help text for Shiny App and clusterMany
-                                       makeDendrogramHelpText("cMInputs")
+                                       makeDendrogramHelpText()
                                 ),
                                 column(6,
                                        #textual output of code that is to be run
@@ -229,8 +230,6 @@ shinyUI(navbarPage("Cluster Experiment",
                    tabPanel("Merge Clusters",
                             fluidRow(
                                 column(6,
-                                       h3("Merge Clusters Function "),
-                                       #Displays basic help text for Shiny App and clusterMany
                                        mergeClustersHelpText()
                                 ),
                                 column(6,
@@ -246,8 +245,8 @@ shinyUI(navbarPage("Cluster Experiment",
                                 )
                             ),
                             navlistPanel(
-                                tabPanel("Initial Dendrogram",
-                                         p("Informative Dendrogram for merge cluster inputs:"),
+                                tabPanel("Dendrogram used for merging",
+                                         p("Informative Dendrogram for choosing how to merge cluster inputs:"),
                                          downloadButton("downloadPlotPDMC", label = "DownLoad this Plot"),
                                          plotOutput("imgInitalMergeClusters")
                                 ),
